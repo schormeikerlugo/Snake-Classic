@@ -1,0 +1,58 @@
+/*
+  Animaciones para los elementos interactivos.
+*/
+button {
+  cursor: pointer;
+  font-family: 'Pixelify Sans', system-ui, sans-serif;
+  /* Estilo base naranja por defecto */
+  border: 1px solid #ffb86c;
+  color: var(--text);
+  background: linear-gradient(180deg, rgba(255,184,108,0.18), rgba(255,184,108,0.08));
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: all 0.2s ease-in-out;
+}
+
+/* Animación general de brillo */
+button:hover,
+button:focus {
+    transform: none;
+    filter: brightness(1.2);
+    outline: none;
+    /* Brillo naranja por defecto */
+    box-shadow: 0 0 12px rgba(255, 184, 108, 0.3);
+}
+
+button:active {
+    transform: translateY(1px);
+    filter: brightness(1);
+}
+
+/* --- Sobrescrituras de Estilo --- */
+
+/* Botones que deben ser verdes */
+#start {
+    background: linear-gradient(180deg, rgba(67,217,173,0.18), rgba(67,217,173,0.08));
+    border-color: var(--snake);
+}
+
+#start:hover, 
+#start:focus {
+    box-shadow: 0 0 12px rgba(67, 217, 173, 0.3);
+}
+
+
+/* Animación para el botón de cerrar modal (sin brillo) */
+.modal-close-btn {
+    background: transparent;
+    border-color: transparent;
+}
+
+.modal-close-btn:hover,
+.modal-close-btn:focus {
+    transform: scale(1.1);
+    background: transparent;
+    box-shadow: none;
+    filter: brightness(1);
+}

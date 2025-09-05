@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>🐍Snake🐍</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1a1f3a">
+  <link rel="apple-touch-icon" href="assets/image/icon/icon-192x192.png">
+
+  <link rel="stylesheet" href="./styles/styles.css">
+</head>
+<body>
+
+  <div id="splash-screen">
+    <img src="assets/image/logo/logo.png" alt="Snake Game Logo" id="splash-logo">
+    <button id="enter-btn">Iniciar</button>
+  </div>
+
+  <div id="menu-view" class="hidden">
+    <img src="assets/image/logo/logo.png" alt="Snake Game Logo" id="menu-logo">
+    <div class="menu-buttons">
+      <button id="menu-start">Iniciar Juego</button>
+      <button id="menu-how-to-play">Cómo Jugar</button>
+      <button id="menu-settings">Configuración</button>
+      <button id="menu-credits">Créditos</button>
+    </div>
+  </div>
+
+  <div id="game-view" class="hidden">
+    <button id="mobile-pause-btn">II</button>
+    <div class="wrap">
+      <div class="hud">
+        <div class="stat">
+          <label>Puntos</label>
+          <span id="score" class="value">0</span>
+        </div>
+        <div class="hud-buttons">
+            <button id="back-to-menu-btn">Menú</button>
+            <button id="start">Reiniciar</button>
+        </div>
+        <div class="stat" style="justify-self: end;">
+          <label>Mejor</label>
+          <span id="best" class="value">0</span>
+        </div>
+      </div>
+      <div class="board">
+        <div class="badge">Flechas/WASD · Espacio: Pausa</div>
+        <canvas id="game"></canvas>
+        <canvas id="fx"></canvas>
+        <div id="paused" class="paused">PAUSA</div>
+      </div>
+    </div>
+
+    <div class="mobile-controls">
+        <button id="ctrl-up">▲</button>
+        <div class="middle-row">
+            <button id="ctrl-left">◄</button>
+            <button id="ctrl-right">►</button>
+        </div>
+        <button id="ctrl-down">▼</button>
+    </div>
+  </div>
+
+  <!-- Modal Structure -->
+  <div id="modal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <button id="modal-close" class="modal-close-btn">&times;</button>
+      <h2 id="modal-title"></h2>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <script type="module" src="./js/main.js"></script>
+  <script>
+      if ('serviceWorker' in navigator) {
+          window.addEventListener('load', () => {
+              navigator.serviceWorker.register('/sw.js').then(registration => {
+                  console.log('ServiceWorker registrado con éxito:', registration.scope);
+              }, err => {
+                  console.log('Fallo en el registro del ServiceWorker:', err);
+              });
+          });
+      }
+  </script>
+</body>
+</html>

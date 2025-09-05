@@ -1,0 +1,36 @@
+/*
+  Estilos base para la página, como la tipografía, el fondo
+  y el reseteo de estilos por defecto.
+*/
+
+@font-face {
+  font-family: 'Pixelify Sans';
+  src: url('../assets/font/PixelifySans-VariableFont_wght.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+* { 
+  box-sizing: border-box; 
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  color: var(--text);
+  font-family: 'Pixelify Sans', system-ui, sans-serif;
+  background: radial-gradient(1200px 800px at 30% 20%, var(--bg2), var(--bg1) 60%) fixed;
+  overflow: hidden;
+}
+
+h1 {
+  margin: 8px 0 4px;
+  font-weight: 700;
+  font-size: clamp(22px, 3.6vw, 28px);
+  text-shadow: 0 2px 10px rgba(110,231,200,0.15);
+}
+
+/* Clase de utilidad general */
+.hidden {
+  display: none !important;
+}

@@ -1,0 +1,159 @@
+/*
+  Estilos específicos para los elementos de la vista del juego.
+*/
+#game-view {
+    position: relative;
+}
+
+.wrap {
+  width: 100%;
+  max-width: 640px;
+  margin: 3vh auto;
+  padding: 0 16px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.hud {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(138,161,255,0.08), rgba(18,22,44,0.6));
+  border-radius: 12px;
+}
+
+.hud-buttons {
+    display: flex;
+    gap: 8px;
+    justify-self: center;
+}
+
+#back-to-menu-btn {
+    background: linear-gradient(180deg, rgba(255,184,108,0.18), rgba(255,184,108,0.08));
+    border-color: #ffb86c;
+}
+
+.stat {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.stat label { color: #b8c0ff; }
+
+.stat .value {
+  font-size: 18px;
+  text-shadow: 0 0 8px rgba(67,217,173,0.35);
+  min-width: 24px;
+  text-align: right;
+}
+
+.board {
+  width: 100%;
+  position: relative;
+  border-radius: 14px;
+  padding: 10px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(0,0,0,0.2));
+  border: 1px solid var(--border);
+}
+
+canvas#game {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: linear-gradient(180deg, #0b0f1f, #121835);
+  border-radius: 10px;
+  image-rendering: pixelated;
+}
+
+canvas#fx {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  pointer-events: none;
+}
+
+.badge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: rgba(0,0,0,0.45);
+  border: 1px solid var(--border);
+  color: #b8c0ff;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+
+.paused {
+  position: absolute;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  color: #cde7ff;
+  background: rgba(10,12,25,0.35);
+  border-radius: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.paused.show { display: flex; }
+
+/* --- Controles Móviles --- */
+#mobile-pause-btn {
+    display: none; /* Oculto por defecto */
+    position: absolute;
+    top: 500px;
+    right: 40px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    font-size: 20px;
+    font-weight: bold;
+    z-index: 10; /* Encima del canvas */
+}
+
+.mobile-controls {
+    display: none; /* Oculto por defecto en escritorio */
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    margin-top: 20px;
+}
+
+.mobile-controls .middle-row {
+    display: flex;
+    gap: 70px; /* Espacio entre izquierda y derecha */
+}
+
+.mobile-controls button {
+    width: 65px;
+    height: 65px;
+    font-size: 24px;
+    border-radius: 50%; /* Botones circulares */
+    line-height: 1;
+    /* Evita la selección de texto al tocar repetidamente */
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* Media Query para mostrar los controles en móviles */
+@media (max-width: 768px) {
+    #mobile-pause-btn {
+        display: block;
+    }
+    .mobile-controls {
+        display: flex;
+    }
+    /* Oculta la ayuda de teclado en móvil para ahorrar espacio */
+    .badge {
+        display: none;
+    }
+}
