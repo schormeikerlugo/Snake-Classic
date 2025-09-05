@@ -2,19 +2,14 @@
   "name": "Snake Game",
   "short_name": "Snake",
   "description": "Un juego clásico de Snake con un toque moderno.",
-  "start_url": "/index.html",
+  "start_url": "./index.html",
   "display": "fullscreen",
   "background_color": "#0f1220",
   "theme_color": "#1a1f3a",
   "icons": [
     {
-      "src": "assets/image/icon/icon-192x192.png",
+      "src": "./assets/image/icon/icon-192x192.png",
       "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "assets/image/icon/icon-512x512.png",
-      "sizes": "512x512",
       "type": "image/png"
     }
   ]
