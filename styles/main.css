@@ -1,0 +1,11 @@
+/*
+  Archivo principal de estilos.
+  Importa todos los módulos de CSS en el orden correcto.
+*/
+
+@import url('./variables.css');
+@import url('./base.css');
+@import url('./animations.css');
+@import url('./game.css');
+@import url('./menu.css');
+@import url('./modal.css');
