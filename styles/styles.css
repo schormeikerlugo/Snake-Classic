@@ -3,7 +3,7 @@
   Importa todos los módulos de CSS en el orden correcto.
 */
 
-@import url('./_variables.css');
+@import '_variables.css';
 @import url('./base.css');
 @import url('./animations.css');
 @import url('./game.css');
