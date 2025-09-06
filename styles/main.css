@@ -5,6 +5,7 @@
 
 @import url('./variables.css');
 @import url('./base.css');
+@import url('./background.css');
 @import url('./animations.css');
 @import url('./game.css');
 @import url('./menu.css');

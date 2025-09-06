@@ -48,10 +48,12 @@
 .stat label { color: #b8c0ff; }
 
 .stat .value {
-  font-size: 18px;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
   text-shadow: 0 0 8px rgba(67,217,173,0.35);
   min-width: 24px;
-  text-align: right;
+  text-align: left;
 }
 
 .board {
@@ -79,18 +81,6 @@ canvas#fx {
   pointer-events: none;
 }
 
-.badge {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  background: rgba(0,0,0,0.45);
-  border: 1px solid var(--border);
-  color: #b8c0ff;
-  padding: 4px 8px;
-  border-radius: 999px;
-  font-size: 12px;
-}
-
 .paused {
   position: absolute;
   inset: 0;
@@ -110,14 +100,31 @@ canvas#fx {
 #mobile-pause-btn {
     display: none; /* Oculto por defecto */
     position: absolute;
-    top: 500px;
-    right: 40px;
+    top: 520px;
+    right: 20px;
     width: 50px;
     height: 50px;
     border-radius: 50%;
     font-size: 20px;
     font-weight: bold;
     z-index: 10; /* Encima del canvas */
+    background: linear-gradient(180deg, rgba(138,161,255,0.18), rgba(138,161,255,0.08));
+    border-color: #8aa1ff;
+}
+
+#mobile-restart-btn {
+    display: none; /* Oculto por defecto */
+    position: absolute;
+    top: 520px;
+    left: 20px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    font-size: 20px;
+    font-weight: bold;
+    z-index: 10; /* Encima del canvas */
+    background: linear-gradient(180deg, rgba(67,217,173,0.18), rgba(67,217,173,0.08));
+    border-color: var(--snake);
 }
 
 .mobile-controls {
@@ -130,13 +137,13 @@ canvas#fx {
 
 .mobile-controls .middle-row {
     display: flex;
-    gap: 70px; /* Espacio entre izquierda y derecha */
+    gap: 70px; /* Reduced gap from 90px to 70px */
 }
 
 .mobile-controls button {
-    width: 65px;
-    height: 65px;
-    font-size: 24px;
+    width: 88px; /* 10% larger */
+    height: 88px; /* 10% larger */
+    font-size: 36px; /* Adjusted font size */
     border-radius: 50%; /* Botones circulares */
     line-height: 1;
     /* Evita la selección de texto al tocar repetidamente */
@@ -144,9 +151,24 @@ canvas#fx {
     -webkit-user-select: none;
 }
 
+#ctrl-down {
+    transform: rotate(180deg);
+}
+
+#ctrl-left {
+    transform: rotate(-90deg);
+}
+
+#ctrl-right {
+    transform: rotate(90deg);
+}
+
 /* Media Query para mostrar los controles en móviles */
 @media (max-width: 768px) {
     #mobile-pause-btn {
+        display: block;
+    }
+    #mobile-restart-btn {
         display: block;
     }
     .mobile-controls {
@@ -154,6 +176,9 @@ canvas#fx {
     }
     /* Oculta la ayuda de teclado en móvil para ahorrar espacio */
     .badge {
+        display: none;
+    }
+    #start {
         display: none;
     }
 }

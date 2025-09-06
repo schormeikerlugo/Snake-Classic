@@ -4,29 +4,104 @@
 button {
   cursor: pointer;
   font-family: 'Pixelify Sans', system-ui, sans-serif;
-  /* Estilo base naranja por defecto */
-  border: 1px solid #ffb86c;
+  /* Estilo base azul */
+  border: 1px solid #00B6DD;
   color: var(--text);
-  background: linear-gradient(180deg, rgba(255,184,108,0.18), rgba(255,184,108,0.08));
+  background: linear-gradient(180deg, rgba(0, 73, 204, 0.25), rgba(0, 73, 204, 0.15));
   padding: 8px 14px;
   border-radius: 10px;
   font-weight: 600;
   transition: all 0.2s ease-in-out;
 }
 
-/* Animación general de brillo */
-button:hover,
-button:focus {
-    transform: none;
-    filter: brightness(1.2);
-    outline: none;
-    /* Brillo naranja por defecto */
-    box-shadow: 0 0 12px rgba(255, 184, 108, 0.3);
+button:hover {
+  background: #00B6DD; /* Bright blue background on hover */
+  color: #050801; /* Dark color for text on hover */
+  box-shadow: 0 0 5px #00B6DD, 0 0 25px #00B6DD, 0 0 50px #00B6DD, 0 0 200px #00B6DD;
 }
 
-button:active {
-    transform: translateY(1px);
-    filter: brightness(1);
+button span {
+  position: absolute;
+  display: block;
+}
+
+button span:nth-child(1) {
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #00B6DD);
+  animation: animate1 1s linear infinite;
+}
+
+@keyframes animate1 {
+  0% {
+    left: -100%;
+  }
+  50%,
+  100% {
+    left: 100%;
+  }
+}
+
+button span:nth-child(2) {
+  top: -100%;
+  right: 0;
+  width: 2px;
+  height: 100%;
+  background: linear-gradient(180deg, transparent, #00B6DD);
+  animation: animate2 1s linear infinite;
+  animation-delay: 0.25s;
+}
+
+@keyframes animate2 {
+  0% {
+    top: -100%;
+  }
+  50%,
+  100% {
+    top: 100%;
+  }
+}
+
+button span:nth-child(3) {
+  bottom: 0;
+  right: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(270deg, transparent, #00B6DD);
+  animation: animate3 1s linear infinite;
+  animation-delay: 0.5s;
+}
+
+@keyframes animate3 {
+  0% {
+    right: -100%;
+  }
+  50%,
+  100% {
+    right: 100%;
+  }
+}
+
+button span:nth-child(4) {
+  bottom: -100%;
+  left: 0;
+  width: 2px;
+  height: 100%;
+  background: linear-gradient(360deg, transparent, #00B6DD);
+  animation: animate4 1s linear infinite;
+  animation-delay: 0.75s;
+}
+
+@keyframes animate4 {
+  0% {
+    bottom: -100%;
+  }
+  50%,
+  100% {
+    bottom: 100%;
+  }
 }
 
 /* --- Sobrescrituras de Estilo --- */
@@ -36,23 +111,42 @@ button:active {
     background: linear-gradient(180deg, rgba(67,217,173,0.18), rgba(67,217,173,0.08));
     border-color: var(--snake);
 }
-
 #start:hover, 
 #start:focus {
     box-shadow: 0 0 12px rgba(67, 217, 173, 0.3);
+    animation: none; /* Disable new animation for this button */
 }
 
+/* Mobile Pause Button */
+#mobile-pause-btn:hover,
+#mobile-pause-btn:focus {
+    background: linear-gradient(180deg, rgba(138,161,255,0.18), rgba(138,161,255,0.08)); /* Original background */
+    border-color: #8aa1ff; /* Original border */
+    filter: brightness(1.2);
+    box-shadow: 0 0 12px rgba(138, 161, 255, 0.3); /* Blue shadow */
+    color: var(--text); /* Ensure text color is not changed */
+    /* Remove any animation from the new button:hover */
+    animation: none;
+}
+
+/* Mobile Restart Button */
+#mobile-restart-btn:hover,
+#mobile-restart-btn:focus {
+    background: linear-gradient(180deg, rgba(67,217,173,0.18), rgba(67,217,173,0.08)); /* Original background */
+    border-color: var(--snake); /* Original border */
+    filter: brightness(1.2);
+    box-shadow: 0 0 12px rgba(67, 217, 173, 0.3); /* Green shadow */
+    color: var(--text); /* Ensure text color is not changed */
+    /* Remove any animation from the new button:hover */
+    animation: none;
+}
 
 /* Animación para el botón de cerrar modal (sin brillo) */
 .modal-close-btn {
     background: transparent;
     border-color: transparent;
 }
-
-.modal-close-btn:hover,
-.modal-close-btn:focus {
-    transform: scale(1.1);
-    background: transparent;
+.modal-close-btn:hover {
     box-shadow: none;
-    filter: brightness(1);
+    animation: none;
 }

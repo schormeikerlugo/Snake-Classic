@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Crea la instancia del juego, pero no la inicia.
   const game = new Game();
+
   // Inicializa los listeners del menú.
   initMenu(game);
 

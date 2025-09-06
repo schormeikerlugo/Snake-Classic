@@ -2,6 +2,13 @@ import * as C from './constants.js';
 import * as U from './utils.js';
 import { settings } from './settings.js';
 
+// Import modularized functions
+import { drawCell, draw, drawFx, drawCountdown } from './game/rendering.js';
+import {
+    placeFood, inSnake, resetGame, updateScore, tick, gameLoop, spawnFx, beep,
+    setDirection, handleKeydown, countdown, startGame, togglePause, stop, gameOver, animateGlow
+} from './game/gameLogic.js';
+
 /**
  * Clase principal que encapsula toda la lógica y el estado del juego Snake.
  */
@@ -15,6 +22,7 @@ export class Game {
         this.cols = 0;
         this.rows = 0;
         this.snake = [];
+        this.prevSnake = []; // Store previous snake positions for interpolation
         this.dir = { x: 1, y: 0 };
         this.nextDir = { x: 1, y: 0 };
         this.food = {};
@@ -31,6 +39,13 @@ export class Game {
         this.effects = [];
         this.lastFxTs = 0;
         this.audioCtx = null;
+
+        this.snakeGlowStrong = false;
+        this.snakeGlowTimer = null;
+        this.foodSpawnTime = 0;
+        this.currentGlowIntensity = 0; // New property for glow animation
+        this.isGameOver = false; // New property to track game over state
+        this.scannerProgress = 0; // New property for scanner animation
 
         C.BEST_EL.textContent = this.best;
         this.init();
@@ -63,10 +78,10 @@ export class Game {
         this.resizeCanvas();
         window.addEventListener('resize', () => this.resizeCanvas());
 
-        C.START_BTN.addEventListener('click', () => this.startGame());
+        C.START_BTN.addEventListener('click', () => startGame(this)); // Pass game instance
         this.initControls();
-        this.draw();
-        requestAnimationFrame(ts => this.drawFx(ts));
+        draw(this); // Pass game instance
+        requestAnimationFrame(ts => drawFx(this, ts)); // Pass game instance
     }
 
     /**
@@ -74,7 +89,7 @@ export class Game {
      */
     initControls() {
         // Teclado
-        document.addEventListener('keydown', e => this.handleKeydown(e));
+        document.addEventListener('keydown', e => handleKeydown(this, e)); // Pass game instance
 
         // Móvil (D-pad)
         const upBtn = document.getElementById('ctrl-up');
@@ -84,7 +99,7 @@ export class Game {
 
         const handleControlClick = (e, newDir) => {
             e.preventDefault();
-            this.setDirection(newDir);
+            setDirection(this, newDir);
         };
 
         upBtn.addEventListener('touchstart', (e) => handleControlClick(e, { x: 0, y: -1 }));
@@ -96,250 +111,35 @@ export class Game {
         const pauseBtn = document.getElementById('mobile-pause-btn');
         const handlePauseClick = (e) => {
             e.preventDefault();
-            this.togglePause();
+            togglePause(this);
         };
         pauseBtn.addEventListener('touchstart', handlePauseClick);
+
+        // Botón de Reiniciar (Móvil)
+        const restartBtn = document.getElementById('mobile-restart-btn');
+        const handleRestartClick = (e) => {
+            e.preventDefault();
+            startGame(this);
+        };
+        restartBtn.addEventListener('touchstart', handleRestartClick);
     }
 
-    placeFood() {
-        let tries = 0;
-        while (true) {
-            const c = { x: U.randInt(0, this.cols - 1), y: U.randInt(0, this.rows - 1) };
-            if (!this.inSnake(c)) {
-                this.food = c;
-                return;
-            }
-            if (++tries > 2000) {
-                this.gameOver(true);
-                return;
-            }
-        }
-    }
-
-    inSnake(pos) {
-        return this.snake.some(seg => U.posEq(seg, pos));
-    }
-
-    resetGame() {
-        this.resizeCanvas();
-        if (this.gameLoopId) {
-            cancelAnimationFrame(this.gameLoopId);
-            this.gameLoopId = null;
-        }
-        const cx = Math.floor(this.cols / 2);
-        const cy = Math.floor(this.rows / 2);
-        this.snake = [{ x: cx, y: cy }];
-        this.dir = { x: 1, y: 0 };
-        this.nextDir = { ...this.dir };
-        this.placeFood();
-        this.score = 0;
-        this.tickMs = C.INITIAL_TICK_MS;
-        this.running = false;
-        this.paused = false;
-        this.updateScore();
-        C.PAUSED_OVERLAY.classList.remove('show');
-        this.draw();
-    }
-
-    updateScore() {
-        C.SCORE_EL.textContent = this.score;
-        if (this.score > this.best) {
-            this.best = this.score;
-            localStorage.setItem('snake_best', this.best);
-            C.BEST_EL.textContent = this.best;
-        }
-    }
-
-    drawCell(x, y, color) {
-        const px = x * this.cellSize;
-        const py = y * this.cellSize;
-        C.ctx.fillStyle = color;
-        C.ctx.fillRect(px, py, this.cellSize, this.cellSize);
-    }
-
-    draw() {
-        C.ctx.clearRect(0, 0, C.canvas.width, C.canvas.height);
-
-        C.ctx.strokeStyle = U.getCssVar('--grid');
-        C.ctx.lineWidth = 1;
-        for (let i = 1; i < this.cols; i++) {
-            C.ctx.beginPath();
-            C.ctx.moveTo(i * this.cellSize, 0);
-            C.ctx.lineTo(i * this.cellSize, C.canvas.height);
-            C.ctx.stroke();
-        }
-        for (let i = 1; i < this.rows; i++) {
-            C.ctx.beginPath();
-            C.ctx.moveTo(0, i * this.cellSize);
-            C.ctx.lineTo(C.canvas.width, i * this.cellSize);
-            C.ctx.stroke();
-        }
-
-        if (this.food.x === undefined) return;
-        this.drawCell(this.food.x, this.food.y, U.getCssVar('--food'));
-        this.snake.forEach((seg, i) => {
-            this.drawCell(seg.x, seg.y, i === 0 ? U.getCssVar('--snake-head') : U.getCssVar('--snake'));
-        });
-    }
-
-    tick() {
-        this.dir = this.nextDir;
-        const head = { x: this.snake[0].x + this.dir.x, y: this.snake[0].y + this.dir.y };
-
-        if (head.x < 0 || head.y < 0 || head.x >= this.cols || head.y >= this.rows || this.inSnake(head)) {
-            this.gameOver();
-            return;
-        }
-
-        this.snake.unshift(head);
-
-        if (U.posEq(head, this.food)) {
-            this.score++;
-            this.updateScore();
-            this.placeFood();
-            this.spawnFx(head.x, head.y);
-            this.beep(660);
-            if (this.tickMs > C.MIN_TICK) this.tickMs -= C.SPEED_STEP;
-        } else {
-            this.snake.pop();
-        }
-
-        this.draw();
-        this.turnLocked = false;
-    }
-
-    gameLoop(currentTime) {
-        this.gameLoopId = requestAnimationFrame(ts => this.gameLoop(ts));
-        if (this.paused || !this.running) return;
-
-        const timeSinceLastTick = currentTime - this.lastTickTime;
-        if (timeSinceLastTick > this.tickMs) {
-            this.lastTickTime = currentTime;
-            this.tick();
-        }
-    }
-
-    spawnFx(x, y) {
-        if (!settings.sound) return;
-        this.effects.push({ x: x * this.cellSize + this.cellSize / 2, y: y * this.cellSize + this.cellSize / 2, r: 0, alpha: 1 });
-    }
-
-    drawFx(ts) {
-        C.fxCtx.clearRect(0, 0, C.fxCanvas.width, C.fxCanvas.height);
-        const dt = (ts - this.lastFxTs) / 1000;
-        this.lastFxTs = ts;
-        for (let i = this.effects.length - 1; i >= 0; i--) {
-            const fx = this.effects[i];
-            fx.r += 60 * dt;
-            fx.alpha -= 1.5 * dt;
-            if (fx.alpha <= 0) {
-                this.effects.splice(i, 1);
-                continue;
-            }
-            C.fxCtx.beginPath();
-            C.fxCtx.arc(fx.x, fx.y, fx.r, 0, Math.PI * 2);
-            C.fxCtx.strokeStyle = `rgba(255,255,255,${fx.alpha})`;
-            C.fxCtx.stroke();
-        }
-        requestAnimationFrame(ts => this.drawFx(ts));
-    }
-
-    beep(freq = 440, dur = 0.05) {
-        if (!settings.sound) return;
-        if (!this.audioCtx) this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = this.audioCtx.createOscillator();
-        const gain = this.audioCtx.createGain();
-        osc.type = 'square';
-        osc.frequency.value = freq;
-        gain.gain.value = 0.05;
-        osc.connect(gain);
-        gain.connect(this.audioCtx.destination);
-        osc.start();
-        osc.stop(this.audioCtx.currentTime + dur);
-    }
-
-    setDirection(newDir) {
-        if (!this.running || this.turnLocked) return;
-        
-        const isOpposite = (d1, d2) => d1.x === -d2.x || d1.y === -d2.y;
-        if (isOpposite(this.dir, newDir)) return;
-
-        this.nextDir = newDir;
-        this.turnLocked = true;
-    }
-
-    handleKeydown(e) {
-        if (e.code === 'Space') {
-            this.togglePause();
-            return;
-        }
-
-        let newDir;
-        if (e.code === 'ArrowUp' || e.code === 'KeyW') newDir = { x: 0, y: -1 };
-        if (e.code === 'ArrowDown' || e.code === 'KeyS') newDir = { x: 0, y: 1 };
-        if (e.code === 'ArrowLeft' || e.code === 'KeyA') newDir = { x: -1, y: 0 };
-        if (e.code === 'ArrowRight' || e.code === 'KeyD') newDir = { x: 1, y: 0 };
-        
-        if (newDir) this.setDirection(newDir);
-    }
-
-    drawCountdown(number) {
-        this.draw();
-        C.ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-        C.ctx.fillRect(0, 0, C.canvas.width, C.canvas.height);
-        C.ctx.fillStyle = '#fff';
-        C.ctx.font = 'bold 96px sans-serif';
-        C.ctx.textAlign = 'center';
-        C.ctx.textBaseline = 'middle';
-        C.ctx.fillText(number, C.canvas.width / 2, C.canvas.height / 2);
-    }
-
-    countdown(seconds) {
-        if (seconds > 0) {
-            this.drawCountdown(seconds);
-            this.beep(440, 0.05);
-            setTimeout(() => this.countdown(seconds - 1), 1000);
-        } else {
-            this.draw();
-            this.running = true;
-            this.gameLoop(0);
-            this.beep(880, 0.05);
-        }
-    }
-
-    startGame() {
-        this.resetGame();
-        this.countdown(3);
-    }
-
-    togglePause() {
-        if (!this.running) return;
-        this.paused = !this.paused;
-        C.PAUSED_OVERLAY.classList.toggle('show', this.paused);
-    }
-
-    stop() {
-        this.running = false;
-        if (this.gameLoopId) {
-            cancelAnimationFrame(this.gameLoopId);
-            this.gameLoopId = null;
-        }
-    }
-
-    gameOver(noDraw) {
-        this.beep(220, 0.1);
-        this.running = false;
-        if (this.gameLoopId) {
-            cancelAnimationFrame(this.gameLoopId);
-            this.gameLoopId = null;
-        }
-        if (!noDraw) {
-            C.ctx.fillStyle = 'rgba(0,0,0,0.5)';
-            C.ctx.fillRect(0, 0, C.canvas.width, C.canvas.height);
-            C.ctx.fillStyle = '#fff';
-            C.ctx.font = '28px sans-serif';
-            C.ctx.textAlign = 'center';
-            C.ctx.fillText('GAME OVER', C.canvas.width / 2, C.canvas.height / 2);
-        }
-    }
+    // Delegated functions
+    placeFood() { return placeFood(this); }
+    inSnake(pos) { return inSnake(this, pos); }
+    resetGame() { return resetGame(this); }
+    updateScore() { return updateScore(this); }
+    tick() { return tick(this); }
+    gameLoop(currentTime) { return gameLoop(this, currentTime); }
+    spawnFx(x, y) { return spawnFx(this, x, y); }
+    beep(freq, dur) { return beep(this, freq, dur); }
+    setDirection(newDir) { return setDirection(this, newDir); }
+    handleKeydown(e) { return handleKeydown(this, e); }
+    drawCountdown(number) { return drawCountdown(this, number); }
+    countdown(seconds) { return countdown(this, seconds); }
+    startGame() { return startGame(this); }
+    togglePause() { return togglePause(this); }
+    stop() { return stop(this); }
+    gameOver(noDraw) { return gameOver(this, noDraw); }
+    animateGlow(targetIntensity, duration) { return animateGlow(this, targetIntensity, duration); }
 }

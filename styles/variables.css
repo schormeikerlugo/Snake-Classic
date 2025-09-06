@@ -10,4 +10,6 @@
   --food: #ff5c8a;
   --text: #e7e9f3;
   --border: #2e3568;
+  --snake-glow-subtle: rgba(67, 217, 173, 0.2);
+  --snake-glow-strong: rgba(67, 217, 173, 0.6);
 }

@@ -1,0 +1,22 @@
+/* Animated Grid Background */
+
+.animated-grid-bg {
+  --grid-color: rgba(0, 182, 221, 0.1); /* #00B6DD with low opacity */
+  --subtle-gradient-color: rgba(0, 0, 0, 0.05); /* Very subtle dark overlay */
+  background-image:
+    linear-gradient(var(--subtle-gradient-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--subtle-gradient-color) 1px, transparent 1px),
+    linear-gradient(var(--grid-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+  background-size: 50px 50px, 50px 50px, 50px 50px, 50px 50px;
+  animation: bg-scrolling 9s infinite linear;
+}
+
+@keyframes bg-scrolling {
+  0% {
+    background-position: 50px 50px;
+  }
+  100% {
+    background-position: 0 0;
+  }
+}

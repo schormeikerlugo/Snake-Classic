@@ -18,8 +18,21 @@
 }
 
 #enter-btn {
-    padding: 14px 40px;
-    font-size: 20px;
+  position: relative;
+  display: inline-block; /* Changed from block to inline-block */
+  padding: 25px 110px;
+  margin: 40px 0;
+  color: #00B6DD; /* Bright blue */
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: 0.5s;
+  letter-spacing: 4px;
+  overflow: hidden;
+  /* margin-right: 50px; Removed as it's not needed for a single button */
+  background: #001f4d; /* Dark blue background */
+  border: none; /* No native border */
+  border-radius: 10px; /* Added border-radius */
+  font-size: large;
 }
 
 
