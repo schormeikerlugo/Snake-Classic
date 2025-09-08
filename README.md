@@ -44,8 +44,6 @@ Retro Snake Classic es una versión moderna del icónico juego **Snake** que muc
 
 ## 🛠️ **EStructura del proyecto**
 
-## 🕹️ Estructura del Proyecto Snake Classic
-
 | 📁 Carpeta / Archivo               | 🧾 Descripción                                                                 |
 |-----------------------------------|--------------------------------------------------------------------------------|
 | `index.html`                      | 🚀 Entrada HTML que carga todo el juego.                                       |
@@ -72,9 +70,9 @@ Retro Snake Classic es una versión moderna del icónico juego **Snake** que muc
 | 🕹️ Acción             | ⌨️ Control                                     |
 |------------------------|-----------------------------------------------|
 | Mover la serpiente     | Flechas ↔️ ↕️ &nbsp; *o* &nbsp; W, A, S, D    |
-| Pausar / Reanudar      | P                                             |
-| Reiniciar              | R *(solo después de Game Over)*               |
-| Volver al menú         | Enter *(en la pantalla de inicio)*            |
+| Pausar / Reanudar      | Barra espaciadora                             |
+| Reiniciar              | Boton de reinicio                             |
+| Volver al menú         | Boton de menu                                 |
 
 ## 📔 Nota
 ¡El juego es completamente responsive, así que el mismo teclado o pantalla táctil funciona en cualquier dispositivo! 
@@ -82,8 +80,6 @@ Retro Snake Classic es una versión moderna del icónico juego **Snake** que muc
 ---
 
 ## 🌟 Características especiales
-
-## ✨ Características Visuales y Funcionales
 
 - 🎞️ **Interpolación**: Movimiento suave de la serpiente con `requestAnimationFrame`.
 - 💡 **Efecto Glow**: Luces suaves y animadas. Personalizable vía `--snake-glow-sound` en `config.js`.
@@ -95,13 +91,18 @@ Retro Snake Classic es una versión moderna del icónico juego **Snake** que muc
 
 ## 🎯 Roadmap – Futuras mejoras
 
-✔️
-Idea
-1️⃣ **Modo Obstáculos** – paredes internas que se vuelven cada vez más difíciles.
-2️⃣ **Nuevos colores de serpiente** – cambiar la paleta de CSS variables.
-3️⃣ **Power‑Ups** – ralentizar a la serpiente, ganar puntos extra, etc.
-4️⃣ **Modo multijugador** – dos serpientes compiten por la misma comida.
-5️⃣ **Leaderboard online** – sincronizar el mejor puntaje global a través de Firebase o un backend
+## 🧠 Roadmap de Features
+
+Cada idea está organizada por estado, tipo de mejora y detalles técnicos. Este formato facilita la colaboración, el seguimiento y la expansión del universo Snake Classic.
+
+| 🧩 Feature                  | 📌 Estado         | 🧪 Tipo de Mejora     | ⚙️ Detalles Técnicos                                                                 |
+|----------------------------|------------------|-----------------------|--------------------------------------------------------------------------------------|
+| Modo Obstáculos            | ✅ Propuesta      | Jugabilidad           | Paredes internas que aumentan la dificultad progresivamente.                        |
+| Nuevos colores de serpiente| 🎨 En diseño      | Estética / UI         | Personalización vía variables CSS (`--snake-color`, `--snake-glow`, etc.).          |
+| Power‑Ups                  | 🧪 En pruebas      | Mecánicas             | Ralentizar, duplicar puntos, invulnerabilidad temporal.                             |
+| Modo multijugador          | 🔄 En prototipo   | Jugabilidad avanzada  | Dos serpientes compiten por la misma comida. Requiere sincronización de inputs.     |
+| Leaderboard online         | 🌐 En exploración | Backend / Persistencia| Integración con Firebase o backend modular para puntajes globales persistentes.     |
+
 
 ## 📔 Nota
 Estas ideas están abiertas para que los implementes o sugieras en Issues! 🎯
@@ -120,10 +121,31 @@ Estas ideas están abiertas para que los implementes o sugieras en Issues! 🎯
 Bitcoin : bc1qngxlgsz3tj6v9kkgumv0fnrf7fsfn9wjesjghr
 USDT (TRON): TL3Vwuyf1iA86nB6vzXiNbtgdYBrWLxEEi
 
-## 📜 Licencia
+## 📜 Términos y Condiciones de Uso – Snake Classic
 
-© 2024 Retro Snake Classic – Licencia MIT.
-Puedes usar este código, modificarlo y redistribuirlo libremente bajo los mismos términos. 
+Al descargar, ejecutar o modificar este juego, aceptas los siguientes términos:
+
+### 1. 📦 Uso Personal y Educativo
+Este proyecto está disponible para fines personales, educativos y de aprendizaje. Puedes jugarlo, estudiarlo y modificarlo para mejorar tus habilidades técnicas o creativas.
+
+### 2. 🚫 Uso Comercial
+No está permitido distribuir, vender o monetizar este juego (ni sus variantes) sin autorización expresa del autor. Si deseas incluirlo en un producto comercial, contáctame previamente.
+
+### 3. 🧠 Propiedad Intelectual
+Todos los assets visuales, efectos de sonido, animaciones y código original están protegidos por derechos de autor. Las contribuciones externas están acreditadas en la sección de colaboradores.
+
+### 4. 🔧 Modificaciones
+Puedes modificar el código para uso personal o educativo. Si publicas una variante, se recomienda incluir créditos al autor original y especificar los cambios realizados.
+
+### 5. 🐞 Responsabilidad
+Este juego se ofrece "tal cual", sin garantías. No me hago responsable por daños, pérdidas o conflictos derivados del uso del software.
+
+### 6. 🤝 Colaboraciones
+Si deseas contribuir con mejoras, assets, traducciones o nuevas mecánicas, eres bienvenido. Revisa el roadmap y abre un issue o pull request con tu propuesta.
+
+© 2024 Retro Snake Classic.
+
+**Gracias por apoyar este proyecto retro-futurista. Tu respeto por estos términos permite que siga creciendo y evolucionando.**
 
 ---
 
