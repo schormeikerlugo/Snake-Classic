@@ -30,12 +30,12 @@ function getHowToPlayContent() {
  * Genera el contenido HTML para la sección "Créditos".
  * @returns {string} - El HTML del contenido.
  */
-function getCreditsContent() {
+function getCreditsContent() { 
     return `
         <div style="text-align: center; margin-bottom: 20px;">
             <img src="assets/image/creditos/avatar.jpeg" alt="Schormeiker Lugo" style="max-width: 150px; border-radius: 50%; margin-bottom: 10px;">
             <p style="font-weight: bold; font-size: 1.2em;">Schormeiker Lugo</p>
-            <p>🎨 UI/UX Designer</p>
+            <p>🎨 UI/UX Dev Designer</p>
         </div>
       <p>Pixel por pixel, trazo por trazo, cada interfaz y sonido de este juego nace de una obsesión: transformar la nostalgia en futuro.</p>
         <p>Con más de seis años diseñando productos digitales en tecnología, Web3 y videojuegos, mi enfoque combina precisión modular, estética retro-futurista y una profunda empatía por el jugador. No solo diseño pantallas: construyo atmósferas, flujos intuitivos y microinteracciones que cuentan historias sin palabras.</p>
