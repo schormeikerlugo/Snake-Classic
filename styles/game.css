@@ -117,10 +117,10 @@ canvas#fx {
     display: none; /* Oculto por defecto en escritorio */
     flex-direction: column;
     align-items: center;
-    gap: 6px;
-    margin-top: 5px;
+    gap: 5px;
+    margin-top: 20px;
     width: 100%;
-    padding: 0 16px; /* Alinea con el padding del .wrap */
+    padding: 0 16px 30px; /* Padding inferior para separar del borde */
 }
 
 /* Estilo base para TODOS los botones de control móvil */

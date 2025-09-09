@@ -27,6 +27,24 @@ document.addEventListener('DOMContentLoaded', () => {
     splashScreen.classList.add('hidden');
     menuView.classList.remove('hidden');
 
+    // --- Solicitud de Pantalla Completa ---
+    // Intenta poner la aplicación en pantalla completa en dispositivos móviles
+    // para una experiencia más inmersiva.
+    const docEl = document.documentElement;
+    if (window.innerWidth <= 768) { // Solo en dispositivos considerados móviles
+        if (docEl.requestFullscreen) {
+            docEl.requestFullscreen().catch(err => {
+                console.log(`No se pudo activar el modo de pantalla completa: ${err.message}`);
+            });
+        } else if (docEl.mozRequestFullScreen) { // Firefox
+            docEl.mozRequestFullScreen();
+        } else if (docEl.webkitRequestFullscreen) { // Chrome, Safari & Opera
+            docEl.webkitRequestFullscreen();
+        } else if (docEl.msRequestFullscreen) { // IE/Edge
+            docEl.msRequestFullscreen();
+        }
+    }
+
     // Inicia la música del menú.
     audioManager.playMenuMusic();
   }, { once: true }); // El listener se ejecuta solo una vez.
