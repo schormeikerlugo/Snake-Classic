@@ -9,10 +9,18 @@ class AudioManager {
         this.gameMusic = new Audio('assets/audio/game/pista-01.mp3');
         this.currentTrack = null;
 
+        this.baseMenuVolume = 0.5;
+        this.baseGameVolume = 0.5;
+
         this.menuMusic.loop = true;
         this.gameMusic.loop = true;
-        this.menuMusic.volume = 0.5;
-        this.gameMusic.volume = 0.5;
+        this.setMasterVolume(settings.masterVolume);
+    }
+
+    setMasterVolume(volume) {
+        settings.masterVolume = volume;
+        this.menuMusic.volume = this.baseMenuVolume * volume;
+        this.gameMusic.volume = this.baseGameVolume * volume;
     }
 
     /**
@@ -52,6 +60,48 @@ class AudioManager {
         this.gameMusic.pause();
         this.gameMusic.currentTime = 0;
         this.currentTrack = null;
+    }
+
+    /**
+     * Reduce el volumen de la música del juego al 10%.
+     */
+    duckGameMusic() {
+        this.gameMusic.volume = (this.baseGameVolume * settings.masterVolume) * 0.1;
+    }
+
+    /**
+     * Restaura el volumen de la música del juego al 100%.
+     */
+    restoreGameMusic() {
+        this.gameMusic.volume = this.baseGameVolume * settings.masterVolume;
+    }
+
+    /**
+     * Transiciona suavemente el volumen de una pista de audio.
+     * @param {HTMLAudioElement} track - La pista de audio cuyo volumen se va a transicionar.
+     * @param {number} targetVolume - El volumen final deseado (0.0 a 1.0).
+     * @param {number} duration - La duración de la transición en milisegundos.
+     * @returns {Promise<void>} - Una promesa que se resuelve cuando la transición ha terminado.
+     */
+    fadeVolume(track, targetVolume, duration) {
+        const startVolume = track.volume;
+        const volumeDiff = targetVolume - startVolume;
+        const startTime = performance.now();
+
+        return new Promise(resolve => {
+            const animate = (currentTime) => {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                track.volume = startVolume + volumeDiff * progress;
+
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    resolve();
+                }
+            };
+            requestAnimationFrame(animate);
+        });
     }
 
     /**

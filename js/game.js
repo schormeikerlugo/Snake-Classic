@@ -5,7 +5,7 @@ import { settings } from './settings.js';
 // Import modularized functions
 import { drawCell, draw, drawFx, drawCountdown } from './game/rendering.js';
 import {
-    placeFood, inSnake, resetGame, updateScore, tick, gameLoop, spawnFx, beep,
+    placeFood, inSnake, resetGame, updateScore, tick, gameLoop, spawnFx,
     setDirection, handleKeydown, countdown, startGame, togglePause, stop, gameOver, animateGlow
 } from './game/gameLogic.js';
 
@@ -138,7 +138,6 @@ export class Game {
     tick() { return tick(this); }
     gameLoop(currentTime) { return gameLoop(this, currentTime); }
     spawnFx(x, y) { return spawnFx(this, x, y); }
-    beep(freq, dur) { return beep(this, freq, dur); }
     setDirection(newDir) { return setDirection(this, newDir); }
     handleKeydown(e) { return handleKeydown(this, e); }
     drawCountdown(number) { return drawCountdown(this, number); }

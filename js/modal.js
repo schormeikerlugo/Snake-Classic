@@ -1,3 +1,5 @@
+import { sfx } from './sfx.js';
+
 const modal = document.getElementById('modal');
 const modalTitle = document.getElementById('modal-title');
 const modalBody = document.getElementById('modal-body');
@@ -7,6 +9,7 @@ const closeModalBtn = document.getElementById('modal-close');
  * Oculta el modal.
  */
 function hideModal() {
+    sfx.play('closeModal');
     modal.classList.add('hidden');
 }
 
@@ -24,6 +27,7 @@ export function showModal(title, content) {
         modalBody.appendChild(content);
     }
     modal.classList.remove('hidden');
+    sfx.play('openModal');
 }
 
 // --- Event Listeners ---

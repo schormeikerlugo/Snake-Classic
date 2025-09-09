@@ -3,6 +3,8 @@ import * as U from '../utils.js';
 import { settings } from '../settings.js';
 import { draw, drawFx, drawCountdown } from './rendering.js'; // Import drawing functions
 import { updateSnakeColor } from '../colors.js';
+import { sfx } from '../sfx.js';
+import { audioManager } from '../audio.js';
 
 export function placeFood(game) {
     let tries = 0;
@@ -44,10 +46,11 @@ export function resetGame(game) {
     game.scannerProgress = 0; // Reset scanner progress
     game.updateScore();
 
-    // Inicializar/restablecer colores cacheados
+    // Inicializar/restablecer colores y música
     updateSnakeColor(game);
     game.gridColor = U.getCssVar('--grid');
     game.foodColor = U.getCssVar('--food');
+    audioManager.restoreGameMusic();
 
     C.PAUSED_OVERLAY.classList.remove('show');
     draw(game);
@@ -80,7 +83,23 @@ export function tick(game) {
         updateSnakeColor(game); // Actualizar el color
         placeFood(game);
         game.spawnFx(head.x, head.y);
-        game.beep(660);
+
+        // Sonido de comer o bonus
+        if (game.score > 0 && game.score % 10 === 0) {
+            // Atenuar música de fondo, reproducir bonus, y restaurar música
+            audioManager.fadeVolume(audioManager.gameMusic, audioManager.baseGameVolume * settings.masterVolume * 0.6, 200) // Bajar a 60% en 200ms
+                .then(() => {
+                    sfx.play('bonus');
+                    // Esperar la duración del sonido de bonus para restaurar la música
+                    // Asumiendo que el sonido de bonus es corto, podemos usar un tiempo fijo o la duración del audio
+                    setTimeout(() => {
+                        audioManager.fadeVolume(audioManager.gameMusic, audioManager.baseGameVolume * settings.masterVolume, 500); // Subir a 100% en 500ms
+                    }, 800); // Ajustar este tiempo según la duración real del bonus.wav
+                });
+        } else {
+            sfx.play('eat');
+        }
+
         if (game.tickMs > C.MIN_TICK) game.tickMs -= C.SPEED_STEP;
 
         // Snake glow effect
@@ -119,20 +138,6 @@ export function spawnFx(game, x, y) {
     game.effects.push({ x: x * game.cellSize + game.cellSize / 2, y: y * game.cellSize + game.cellSize / 2, r: 0, alpha: 1 });
 }
 
-export function beep(game, freq = 440, dur = 0.05) {
-    if (!settings.sound) return;
-    if (!game.audioCtx) game.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const osc = game.audioCtx.createOscillator();
-    const gain = game.audioCtx.createGain();
-    osc.type = 'square';
-    osc.frequency.value = freq;
-    gain.gain.value = 0.05;
-    osc.connect(gain);
-    gain.connect(game.audioCtx.destination);
-    osc.start();
-    osc.stop(game.audioCtx.currentTime + dur);
-}
-
 export function setDirection(game, newDir) {
     console.log('setDirection called. game.running:', game.running, 'game.turnLocked:', game.turnLocked);
     if (!game.running || game.turnLocked) {
@@ -169,13 +174,11 @@ export function handleKeydown(game, e) {
 export function countdown(game, seconds) {
     if (seconds > 0) {
         drawCountdown(game, seconds);
-        game.beep(440, 0.05);
         setTimeout(() => countdown(game, seconds - 1), 1000);
     } else {
         draw(game);
         game.running = true;
         gameLoop(game, 0);
-        game.beep(880, 0.05);
     }
 }
 
@@ -188,6 +191,9 @@ export function togglePause(game) {
     if (!game.running) return;
     game.paused = !game.paused;
     C.PAUSED_OVERLAY.classList.toggle('show', game.paused);
+    if (game.paused) {
+        sfx.play('pause');
+    }
 }
 
 export function stop(game) {
@@ -199,7 +205,8 @@ export function stop(game) {
 }
 
 export function gameOver(game, noDraw) {
-    game.beep(220, 0.1);
+    sfx.play('gameOver');
+    audioManager.duckGameMusic();
     game.running = false;
     game.isGameOver = true; // Set game over flag
     game.scannerProgress = 0; // Reset scanner progress
