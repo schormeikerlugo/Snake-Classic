@@ -1,4 +1,5 @@
 import { settings } from './settings.js';
+import { audioManager } from './audio.js'; // Importar el audioManager para acceder al AudioContext
 
 const SFX_PATHS = {
     openModal: 'assets/audio/game/efectos/abrir-modal.ogg',
@@ -9,16 +10,36 @@ const SFX_PATHS = {
     pause: 'assets/audio/game/efectos/pausa.ogg',
 };
 
-const sounds = {};
+const sounds = {}; // Almacenará los AudioBufferSourceNode
 const baseVolume = 0.6; // Volumen base para todos los efectos
+let sfxMasterGain = null; // Nodo de ganancia maestro para SFX
 
 /**
  * Carga todos los efectos de sonido para que estén listos para reproducirse.
+ * Debe llamarse después de que audioManager.initAudioContext() haya sido llamado.
  */
-function init() {
-    for (const key in SFX_PATHS) {
-        sounds[key] = new Audio(SFX_PATHS[key]);
+async function init() {
+    if (!audioManager.audioContext) {
+        console.error("AudioContext no inicializado en audioManager. Llama a audioManager.initAudioContext() primero.");
+        return;
     }
+
+    sfxMasterGain = audioManager.audioContext.createGain();
+    sfxMasterGain.connect(audioManager.audioContext.destination);
+
+    const promises = [];
+    for (const key in SFX_PATHS) {
+        const path = SFX_PATHS[key];
+        promises.push(fetch(path)
+            .then(response => response.arrayBuffer())
+            .then(arrayBuffer => audioManager.audioContext.decodeAudioData(arrayBuffer))
+            .then(audioBuffer => {
+                sounds[key] = audioBuffer;
+            })
+            .catch(e => console.error(`Error al cargar o decodificar ${path}:`, e))
+        );
+    }
+    await Promise.all(promises);
     setMasterVolume(settings.masterVolume);
 }
 
@@ -28,8 +49,8 @@ function init() {
  */
 function setMasterVolume(volume) {
     settings.masterVolume = volume;
-    for (const key in sounds) {
-        sounds[key].volume = baseVolume * volume;
+    if (sfxMasterGain) {
+        sfxMasterGain.gain.value = baseVolume * volume;
     }
 }
 
@@ -38,14 +59,18 @@ function setMasterVolume(volume) {
  * @param {string} name - El nombre del sonido a reproducir (ej. 'eat', 'gameOver').
  */
 function play(name) {
-    if (!settings.sound || !sounds[name]) return;
+    if (!settings.sound || !sounds[name] || !audioManager.audioContext || !sfxMasterGain) return;
 
-    sounds[name].currentTime = 0;
-    sounds[name].play().catch(e => console.warn(`No se pudo reproducir el sonido ${name}`))
+    const source = audioManager.audioContext.createBufferSource();
+    source.buffer = sounds[name];
+    source.connect(sfxMasterGain);
+    source.start(0);
+
+    // Asegurarse de que el contexto esté corriendo (para iOS)
+    if (audioManager.audioContext.state === 'suspended') {
+        audioManager.audioContext.resume().catch(e => console.warn("Error al reanudar AudioContext durante SFX play:", e));
+    }
 }
 
-// Inicializa los sonidos al cargar el módulo.
-init();
-
 // Exporta las funciones públicas.
-export const sfx = { play, setMasterVolume };
+export const sfx = { init, play, setMasterVolume };

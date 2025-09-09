@@ -1,6 +1,7 @@
 import { Game } from './game.js';
 import { initMenu } from './menu.js';
 import { audioManager } from './audio.js';
+import { sfx } from './sfx.js';
 
 // Se importa modal.js para asegurar que sus event listeners se registren.
 import './modal.js';
@@ -17,12 +18,16 @@ document.addEventListener('DOMContentLoaded', () => {
   initMenu(game);
 
   // Listener para el botón de la pantalla de inicio
-  enterBtn.addEventListener('click', () => {
+  enterBtn.addEventListener('click', async () => {
+    // Inicializa el AudioContext y carga los SFX después de la interacción del usuario
+    audioManager.initAudioContext();
+    await sfx.init(); // Esperar a que los SFX se carguen
+
     // Oculta la pantalla de inicio y muestra el menú
     splashScreen.classList.add('hidden');
     menuView.classList.remove('hidden');
 
-    // Inicia la música del menú. Esto ahora funciona gracias a la interacción del usuario.
+    // Inicia la música del menú.
     audioManager.playMenuMusic();
   }, { once: true }); // El listener se ejecuta solo una vez.
 });
