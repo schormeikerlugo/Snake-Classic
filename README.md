@@ -82,12 +82,49 @@ Retro Snake Classic es una versión moderna del icónico juego **Snake** que muc
 ## 🌟 Características especiales
 
 - 🎞️ **Interpolación**: Movimiento suave de la serpiente con `requestAnimationFrame`.
-- 💡 **Efecto Glow**: Luces suaves y animadas. Personalizable vía `--snake-glow-sound` en `config.js`.
+- 🎨 **Colores Dinámicos de la Serpiente**: La serpiente cambia de color cada 10 puntos, con resplandor adaptativo.
+- 🚀 **Rendimiento Optimizado**: Mejoras significativas en la fluidez del juego en móviles, especialmente al comer.
+- 🕹️ **Controles Móviles Mejorados**: Área táctil circular precisa y posicionamiento responsivo de botones de pausa/reinicio.
+- 🎶 **Sistema de Audio Avanzado**: Nuevos efectos de sonido para eventos clave (comer, bonus, pausa, game over, modales) y control de volumen maestro.
+- 🔊 **Atenuación de Música**: La música de fondo se atenúa suavemente para destacar sonidos importantes como el bonus.
 - 🛑 **Game‑Over Overlay**: Animación tipo *scanner* que se despliega al chocar.
 - 🏆 **Best Score**: Guardado en `localStorage` con persistencia y visualización clara.
-- 🔊 **Audio**: Beep al comer, bite de la serpiente y efectos con la Web Audio API.
 - 📱 **Móvil Friendly**: Gestos táctiles y controles WASD funcionan igual que en PC.
 - 📊 **Pantalla de Puntuaciones**: Interfaz clara con el mejor puntaje y botón `Reset`.
+
+---
+
+## ✨ Novedades y Mejoras Recientes
+
+Aquí un resumen de las últimas actualizaciones que hemos implementado para enriquecer la experiencia de juego:
+
+- **Cambio de Color Dinámico de la Serpiente y Resplandor:**
+    - La serpiente ahora cambia de color cada 10 puntos, ciclando a través de una paleta de colores definida.
+    - El efecto de resplandor (glow) de la serpiente también se adapta al color actual.
+- **Optimización de Rendimiento en Móviles:**
+    - Se refactorizó la lógica de renderizado para cachear los valores de color, evitando lecturas costosas del DOM en cada fotograma y mejorando la fluidez del juego en dispositivos móviles.
+- **Mejoras en los Controles Móviles:**
+    - **Área Táctil Circular:** Se corrigió el problema donde tocar las esquinas de los botones de dirección activaba el hover pero no la acción, haciendo que el área de clic sea perfectamente circular.
+    - **Posicionamiento Responsivo:** Los botones de pausa y reinicio móviles ahora se posicionan de forma responsiva, alineándose correctamente debajo del lienzo del juego y a los lados del botón de dirección "arriba".
+    - **Estilos de Hover Consistentes:** Se restauraron y ajustaron los efectos de hover para los botones de dirección, pausa y reinicio móviles, asegurando que el texto se mantenga blanco y los resplandores sean los correctos (azul brillante para dirección, morado para pausa, verde para reiniciar).
+- **Integración de Nuevos Efectos de Sonido:**
+    - Se implementó un sistema de gestión de efectos de sonido (`sfx.js`) para reproducir sonidos específicos en eventos clave del juego:
+        - `comer.wav`: Al comer comida (excepto cada 10 puntos).
+        - `bonus.wav`: Cada 10 puntos (cuando la serpiente cambia de color).
+        - `pausa.ogg`: Al pausar el juego.
+        - `game-over.wav`: Al perder la partida.
+        - `abrir-modal.ogg` y `cerrar-modal.ogg`: Al abrir y cerrar modales.
+    - Se eliminaron los sonidos de "beep" antiguos.
+- **Control de Volumen Maestro:**
+    - Se añadió un deslizador de volumen en el menú de configuración para controlar el volumen general de la música y los efectos de sonido.
+    - El volumen maestro se guarda en `localStorage`.
+- **Atenuación de Música de Fondo para Sonido de Bonus:**
+    - La música de fondo ahora se atenúa suavemente al 60% cuando se reproduce el sonido de "bonus" (cada 10 puntos), y luego vuelve a su volumen normal de forma gradual.
+- **Actualización de la Sección de Créditos:**
+    - Se actualizó el contenido del modal de créditos con la información detallada proporcionada.
+    - Se añadió una imagen de avatar circular en la parte superior de la sección de créditos.
+
+---
 
 ## 🎯 Roadmap – Futuras mejoras
 
@@ -98,7 +135,6 @@ Cada idea está organizada por estado, tipo de mejora y detalles técnicos. Este
 | 🧩 Feature                  | 📌 Estado         | 🧪 Tipo de Mejora     | ⚙️ Detalles Técnicos                                                                 |
 |----------------------------|------------------|-----------------------|--------------------------------------------------------------------------------------|
 | Modo Obstáculos            | ✅ Propuesta      | Jugabilidad           | Paredes internas que aumentan la dificultad progresivamente.                        |
-| Nuevos colores de serpiente| 🎨 En diseño      | Estética / UI         | Personalización vía variables CSS (`--snake-color`, `--snake-glow`, etc.).          |
 | Power‑Ups                  | 🧪 En pruebas      | Mecánicas             | Ralentizar, duplicar puntos, invulnerabilidad temporal.                             |
 | Modo multijugador          | 🔄 En prototipo   | Jugabilidad avanzada  | Dos serpientes compiten por la misma comida. Requiere sincronización de inputs.     |
 | Leaderboard online         | 🌐 En exploración | Backend / Persistencia| Integración con Firebase o backend modular para puntajes globales persistentes.     |
@@ -156,7 +192,7 @@ Si deseas contribuir con mejoras, assets, traducciones o nuevas mecánicas, eres
 |----------------------|------------------------------------------------------------------------|
 | **Schormeiker Lugo**        | 🧠 Desarrollo principal, 🎨 diseño de UI/UX, 🧩 arquitectura modular.  |
 | **Free Music - Lifeformed.**| 🔊 Audio y efectos de sonido.                                          |
-| **Colaborador Y**           | ⚡ Optimización de la animación y 🧪 pruebas de rendimiento.           |
+| **Gemini CLI**              | 🤖 Asistencia en desarrollo, refactorización y nuevas características. |
 
 ---
 
