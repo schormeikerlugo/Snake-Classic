@@ -98,6 +98,15 @@ Retro Snake Classic es una versión moderna del icónico juego **Snake** que muc
 
 Aquí un resumen de las últimas actualizaciones que hemos implementado para enriquecer la experiencia de juego:
 
+- **Confirmación de Reinicio de Partida:**
+    - Se ha añadido un modal de confirmación que aparece al intentar reiniciar una partida en curso, previniendo la pérdida de progreso por clics accidentales. El juego se pausa mientras el modal está visible.
+- **Mejoras en la Experiencia Móvil:**
+    - **Modal de Créditos:** Corregido el desbordamiento en pantallas pequeñas; ahora es desplazable.
+    - **Área Táctil de Botones:** Ampliada el área de pulsación de los controles de dirección para mejorar la jugabilidad.
+    - **Espaciado de Controles:** Aumentado el espacio vertical entre los botones para evitar toques accidentales.
+- **Compatibilidad PWA (Android):**
+    - Se ha fijado la orientación a vertical en el `manifest.json` para asegurar una correcta visualización en pantalla completa.
+
 - **Cambio de Color Dinámico de la Serpiente y Resplandor:**
     - La serpiente ahora cambia de color cada 10 puntos, ciclando a través de una paleta de colores definida.
     - El efecto de resplandor (glow) de la serpiente también se adapta al color actual.

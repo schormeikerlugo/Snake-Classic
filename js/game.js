@@ -6,7 +6,7 @@ import { settings } from './settings.js';
 import { drawCell, draw, drawFx, drawCountdown } from './game/rendering.js';
 import {
     placeFood, inSnake, resetGame, updateScore, tick, gameLoop, spawnFx,
-    setDirection, handleKeydown, countdown, startGame, togglePause, stop, gameOver, animateGlow
+    setDirection, handleKeydown, countdown, startGame, togglePause, stop, gameOver, animateGlow, requestRestart
 } from './game/gameLogic.js';
 
 /**
@@ -84,7 +84,7 @@ export class Game {
         this.resizeCanvas();
         window.addEventListener('resize', () => this.resizeCanvas());
 
-        C.START_BTN.addEventListener('click', () => startGame(this)); // Pass game instance
+        C.START_BTN.addEventListener('click', () => this.requestRestart()); // Usa la nueva función
         this.initControls();
         draw(this); // Pass game instance
         requestAnimationFrame(ts => drawFx(this, ts)); // Pass game instance
@@ -125,7 +125,7 @@ export class Game {
         const restartBtn = document.getElementById('mobile-restart-btn');
         const handleRestartClick = (e) => {
             e.preventDefault();
-            startGame(this);
+            this.requestRestart(); // Usa la nueva función
         };
         restartBtn.addEventListener('touchstart', handleRestartClick);
     }
@@ -147,4 +147,5 @@ export class Game {
     stop() { return stop(this); }
     gameOver(noDraw) { return gameOver(this, noDraw); }
     animateGlow(targetIntensity, duration) { return animateGlow(this, targetIntensity, duration); }
+    requestRestart() { return requestRestart(this); } // Nueva función delegada
 }

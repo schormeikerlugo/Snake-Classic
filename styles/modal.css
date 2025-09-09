@@ -24,6 +24,7 @@
   max-width: 500px;
   position: relative;
   box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+  max-height: 85vh; /* Asegura que el modal no sea más alto que la pantalla */
 }
 
 .modal-close-btn {
@@ -42,6 +43,17 @@
   margin-bottom: 16px;
   border-bottom: 1px solid var(--border);
   padding-bottom: 8px;
+}
+
+#modal-body {
+  overflow-y: auto; /* Añade scroll si el contenido es muy largo */
+  max-height: calc(85vh - 120px); /* Ajusta la altura máxima del cuerpo */
+  -ms-overflow-style: none;  /* IE y Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+#modal-body::-webkit-scrollbar {
+    display: none; /* Chrome, Safari y Opera */
 }
 
 #modal-body p,

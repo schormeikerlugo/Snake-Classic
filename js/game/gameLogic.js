@@ -5,6 +5,7 @@ import { draw, drawFx, drawCountdown } from './rendering.js'; // Import drawing 
 import { updateSnakeColor } from '../colors.js';
 import { sfx } from '../sfx.js';
 import { audioManager } from '../audio.js';
+import { showConfirmationModal } from '../modal.js';
 
 export function placeFood(game) {
     let tries = 0;
@@ -254,4 +255,29 @@ export function animateScanner(game, duration, callback) {
         }
     };
     requestAnimationFrame(animate);
+}
+
+export function requestRestart(game) {
+    if (game.running && !game.isGameOver) {
+        const wasPaused = game.paused;
+        if (!wasPaused) {
+            game.togglePause(); // Pause the game only if it was running
+        }
+        showConfirmationModal(
+            'Reiniciar Partida',
+            '¿Seguro que quieres reiniciar la partida actual?',
+            () => {
+                // onConfirm: start a new game.
+                game.startGame();
+            },
+            () => {
+                // onCancel: resume game only if we paused it.
+                if (!wasPaused) {
+                    game.togglePause();
+                }
+            }
+        );
+    } else {
+        game.startGame();
+    }
 }

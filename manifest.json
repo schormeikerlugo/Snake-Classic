@@ -4,6 +4,7 @@
   "description": "Un juego clásico de Snake con un toque moderno.",
   "start_url": "./index.html",
   "display": "fullscreen",
+  "orientation": "portrait",
   "background_color": "#0f1220",
   "theme_color": "#1a1f3a",
   "icons": [
