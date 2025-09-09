@@ -35,10 +35,10 @@
     </div>
   </div>
 
+  <!-- 🎮 Vista del Juego -->
   <div id="game-view" class="hidden">
-    <button id="mobile-pause-btn">II</button>
-    <button id="mobile-restart-btn">↻</button>
     <div class="wrap">
+      <!-- 📊 HUD (Puntuación y Botones de Escritorio) -->
       <div class="hud">
         <div class="stat">
           <label>Puntos: 🎖️</label>
@@ -53,6 +53,7 @@
           <span id="best" class="value">0</span>
         </div>
       </div>
+      <!-- 🐍 Tablero de Juego -->
       <div class="board">
         <canvas id="game"></canvas>
         <canvas id="fx"></canvas>
@@ -60,13 +61,21 @@
       </div>
     </div>
 
+    <!--🕹️ Controles Móviles -->
     <div class="mobile-controls">
+      <!-- Fila Superior: Reinicio, Arriba, Pausa -->
+      <div class="mobile-controls-top-row">
+        <button id="mobile-restart-btn">↻</button>
         <button id="ctrl-up">▲</button>
-        <div class="middle-row">
-            <button id="ctrl-left">▲</button>
-            <button id="ctrl-right">▲</button>
-        </div>
-        <button id="ctrl-down">▲</button>
+        <button id="mobile-pause-btn">II</button>
+      </div>
+      <!-- Fila Media: Izquierda, Derecha -->
+      <div class="middle-row">
+        <button id="ctrl-left">▲</button>
+        <button id="ctrl-right">▲</button>
+      </div>
+      <!-- Fila Inferior: Abajo -->
+      <button id="ctrl-down">▲</button>
     </div>
   </div>
 

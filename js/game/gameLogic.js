@@ -2,6 +2,7 @@ import * as C from '../constants.js';
 import * as U from '../utils.js';
 import { settings } from '../settings.js';
 import { draw, drawFx, drawCountdown } from './rendering.js'; // Import drawing functions
+import { updateSnakeColor } from '../colors.js';
 
 export function placeFood(game) {
     let tries = 0;
@@ -42,6 +43,12 @@ export function resetGame(game) {
     game.isGameOver = false; // Reset game over flag
     game.scannerProgress = 0; // Reset scanner progress
     game.updateScore();
+
+    // Inicializar/restablecer colores cacheados
+    updateSnakeColor(game);
+    game.gridColor = U.getCssVar('--grid');
+    game.foodColor = U.getCssVar('--food');
+
     C.PAUSED_OVERLAY.classList.remove('show');
     draw(game);
 }
@@ -70,6 +77,7 @@ export function tick(game) {
     if (U.posEq(head, game.food)) {
         game.score++;
         game.updateScore();
+        updateSnakeColor(game); // Actualizar el color
         placeFood(game);
         game.spawnFx(head.x, head.y);
         game.beep(660);

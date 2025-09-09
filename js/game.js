@@ -44,6 +44,12 @@ export class Game {
         this.snakeGlowTimer = null;
         this.foodSpawnTime = 0;
         this.currentGlowIntensity = 0; // New property for glow animation
+        this.snakeGlowSubtle = ''; // Cache for glow color
+        this.snakeGlowStrongColor = ''; // Cache for glow color
+        this.snakeHeadColor = '';
+        this.snakeBodyColor = '';
+        this.foodColor = '';
+        this.gridColor = '';
         this.isGameOver = false; // New property to track game over state
         this.scannerProgress = 0; // New property for scanner animation
 

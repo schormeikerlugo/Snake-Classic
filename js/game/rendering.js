@@ -7,7 +7,7 @@ export function drawCell(game, x, y, color, isMobile) {
 
     // Food animation
     let scale = 1;
-    if (color === U.getCssVar('--food')) {
+    if (color === game.foodColor) {
         const elapsed = Date.now() - game.foodSpawnTime;
         const duration = 200; // Animation duration in ms (faster)
         let progress = Math.min(1, elapsed / duration);
@@ -29,7 +29,7 @@ export function draw(game, currentTime) {
 
     // Draw game elements only if game is running or paused (not game over)
     if (game.running || game.paused) { // Draw game elements if running or paused
-        C.ctx.strokeStyle = U.getCssVar('--grid');
+        C.ctx.strokeStyle = game.gridColor;
         C.ctx.lineWidth = 1;
         for (let i = 1; i < game.cols; i++) {
             C.ctx.beginPath();
@@ -47,7 +47,7 @@ export function draw(game, currentTime) {
         const isMobile = window.innerWidth <= 768; // Determine isMobile here
 
         if (game.food.x !== undefined) { // Only draw food if defined
-            drawCell(game, game.food.x, game.food.y, U.getCssVar('--food'), isMobile); // Pass isMobile
+            drawCell(game, game.food.x, game.food.y, game.foodColor, isMobile); // Pass isMobile
         }
 
         // Interpolate snake position
@@ -58,7 +58,7 @@ export function draw(game, currentTime) {
         }
 
         // --- Glow and Snake Drawing ---
-        const glowColor = game.currentGlowIntensity > 0.5 ? U.getCssVar('--snake-glow-strong') : U.getCssVar('--snake-glow-subtle');
+        const glowColor = game.currentGlowIntensity > 0.5 ? game.snakeGlowStrongColor : game.snakeGlowSubtle;
         C.ctx.shadowColor = glowColor;
         C.ctx.shadowBlur = 15 + (game.currentGlowIntensity * 10);
 
@@ -71,7 +71,7 @@ export function draw(game, currentTime) {
                 interpolatedY = game.prevSnake[i].y + (seg.y - game.prevSnake[i].y) * alpha;
             }
 
-            drawCell(game, interpolatedX, interpolatedY, i === 0 ? U.getCssVar('--snake-head') : U.getCssVar('--snake'), isMobile); // Pass isMobile
+            drawCell(game, interpolatedX, interpolatedY, i === 0 ? game.snakeHeadColor : game.snakeBodyColor, isMobile); // Pass isMobile
         });
         
         C.ctx.shadowBlur = 0;

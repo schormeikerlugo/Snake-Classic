@@ -39,6 +39,21 @@
     border-color: #ffb86c;
 }
 
+#back-to-menu-btn:hover {
+    color: var(--neon-text-color, #e7e9f3);
+    background: rgba(255, 184, 108, 0.2);
+    box-shadow: 0 0 15px rgba(255, 184, 108, 0.6),
+                0 0 30px rgba(255, 184, 108, 0.4);
+}
+
+/* Estilo para el botón de Reiniciar del HUD de escritorio */
+#start:hover {
+    color: var(--neon-text-color, #e7e9f3) !important; /* Forzar color de texto */
+    border-color: var(--snake);
+    box-shadow: 0 0 15px var(--snake-glow-strong),
+                0 0 30px var(--snake-glow-subtle);
+}
+
 .stat {
   display: flex;
   align-items: baseline;
@@ -97,35 +112,6 @@ canvas#fx {
 .paused.show { display: flex; }
 
 /* --- Controles Móviles --- */
-#mobile-pause-btn {
-    display: none; /* Oculto por defecto */
-    position: absolute;
-    top: 520px;
-    right: 20px;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    font-size: 20px;
-    font-weight: bold;
-    z-index: 10; /* Encima del canvas */
-    background: linear-gradient(180deg, rgba(138,161,255,0.18), rgba(138,161,255,0.08));
-    border-color: #8aa1ff;
-}
-
-#mobile-restart-btn {
-    display: none; /* Oculto por defecto */
-    position: absolute;
-    top: 520px;
-    left: 20px;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    font-size: 20px;
-    font-weight: bold;
-    z-index: 10; /* Encima del canvas */
-    background: linear-gradient(180deg, rgba(67,217,173,0.18), rgba(67,217,173,0.08));
-    border-color: var(--snake);
-}
 
 .mobile-controls {
     display: none; /* Oculto por defecto en escritorio */
@@ -133,44 +119,112 @@ canvas#fx {
     align-items: center;
     gap: 5px;
     margin-top: 20px;
+    width: 100%;
+    padding: 0 16px; /* Alinea con el padding del .wrap */
 }
 
-.mobile-controls .middle-row {
-    display: flex;
-    gap: 70px; /* Reduced gap from 90px to 70px */
-}
-
+/* Estilo base para TODOS los botones de control móvil */
 .mobile-controls button {
-    width: 88px; /* 10% larger */
-    height: 88px; /* 10% larger */
-    font-size: 36px; /* Adjusted font size */
-    border-radius: 50%; /* Botones circulares */
+    border-radius: 50%;
     line-height: 1;
-    /* Evita la selección de texto al tocar repetidamente */
+    color: var(--text);
     user-select: none;
     -webkit-user-select: none;
+    clip-path: circle(50%);
+    font-weight: bold;
+    border: 1px solid;
+    transition: all 0.2s;
 }
 
+.mobile-controls button:active {
+    transform: scale(0.95);
+}
+
+/* Fila superior (Reinicio, Arriba, Pausa) */
+.mobile-controls-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+/* Botones de dirección (D-Pad) */
+#ctrl-up, #ctrl-down, #ctrl-left, #ctrl-right {
+    width: 88px;
+    height: 88px;
+    font-size: 36px;
+    background: linear-gradient(180deg, rgba(138,161,255,0.12), rgba(138,161,255,0.05));
+    border-color: #8aa1ff;
+}
+
+#ctrl-up:hover, #ctrl-down:hover, #ctrl-left:hover, #ctrl-right:hover {
+    background: rgba(0, 182, 221, 0.15);
+    border-color: #00B6DD;
+    box-shadow: 0 0 15px rgba(0, 182, 221, 0.6),
+                0 0 30px rgba(0, 182, 221, 0.4);
+}
+
+/* Fila del medio (Izquierda, Derecha) */
+.mobile-controls .middle-row {
+    display: flex;
+    justify-content: center; /* Centra los botones */
+    gap: 70px; /* Mantiene el espacio entre ellos */
+    width: 100%;
+}
+
+/* Botones de Pausa y Reinicio */
+#mobile-restart-btn, #mobile-pause-btn {
+    width: 60px;
+    height: 60px;
+    font-size: 24px;
+}
+
+#mobile-pause-btn {
+    background: linear-gradient(180deg, rgba(138,161,255,0.18), rgba(138,161,255,0.08));
+    border-color: #8aa1ff;
+}
+
+#mobile-pause-btn:hover {
+    background: rgba(138, 161, 255, 0.2);
+    border-color: #a1b5ff;
+    box-shadow: 0 0 15px rgba(138, 161, 255, 0.6),
+                0 0 30px rgba(138, 161, 255, 0.4);
+}
+
+#mobile-restart-btn {
+    background: linear-gradient(180deg, rgba(67,217,173,0.18), rgba(67,217,173,0.08));
+    border-color: var(--snake);
+}
+
+#mobile-restart-btn:hover {
+    color: var(--neon-text-color, #e7e9f3);
+    background: rgba(67, 217, 173, 0.2);
+    border-color: #43d9ad;
+    box-shadow: 0 0 15px rgba(67, 217, 173, 0.6),
+                0 0 30px rgba(67, 217, 173, 0.4);
+}
+
+
+/* Rotación de iconos de flecha */
 #ctrl-down {
     transform: rotate(180deg);
 }
+#ctrl-down:active { transform: rotate(180deg) scale(0.95); }
 
 #ctrl-left {
     transform: rotate(-90deg);
 }
+#ctrl-left:active { transform: rotate(-90deg) scale(0.95); }
+
 
 #ctrl-right {
     transform: rotate(90deg);
 }
+#ctrl-right:active { transform: rotate(90deg) scale(0.95); }
+
 
 /* Media Query para mostrar los controles en móviles */
 @media (max-width: 768px) {
-    #mobile-pause-btn {
-        display: block;
-    }
-    #mobile-restart-btn {
-        display: block;
-    }
     .mobile-controls {
         display: flex;
     }
