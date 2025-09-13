@@ -1,0 +1,43 @@
+.mobile-view {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background-color: var(--background-dark);
+    z-index: 100;
+    flex-direction: column;
+    padding: 16px;
+}
+
+.mobile-view.active {
+    display: flex;
+}
+
+.mobile-view-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    flex-shrink: 0;
+}
+
+.mobile-view-title {
+    margin: 0;
+    font-size: 1.5em;
+}
+
+.mobile-view-content {
+    flex-grow: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Ajustes específicos para el chat en móvil */
+#mobile-chat-content #chat-messages {
+    flex-direction: column; /* De arriba a abajo en móvil */
+}
+
+#mobile-chat-content #chat-form {
+    margin-top: auto; /* Pega el formulario abajo */
+    padding-top: 10px;
+}

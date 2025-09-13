@@ -112,8 +112,8 @@ export function drawFx(game, ts) {
 }
 
 export function drawCountdown(game, number) {
-    C.ctx.clearRect(0, 0, C.canvas.width, C.canvas.height); // Clear canvas before drawing
-    draw(game); // Draw game state first
+    C.ctx.clearRect(0, 0, C.canvas.width, C.canvas.height);
+    draw(game);
     C.ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
     C.ctx.fillRect(0, 0, C.canvas.width, C.canvas.height);
     C.ctx.fillStyle = '#fff';

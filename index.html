@@ -31,51 +31,98 @@
       <button id="menu-start">Iniciar Juego</button>
       <button id="menu-how-to-play">Cómo Jugar</button>
       <button id="menu-settings">Configuración</button>
-      <button id="menu-credits">Créditos</button>
+      <button id="menu-account">Cuenta</button>
+      <button id="menu-credits">Créditos</n>
     </div>
   </div>
 
   <!-- 🎮 Vista del Juego -->
   <div id="game-view" class="hidden">
-    <div class="wrap">
-      <!-- 📊 HUD (Puntuación y Botones de Escritorio) -->
-      <div class="hud">
+    <!-- 📊 HUD (Puntuación y Botones de Escritorio) -->
+    <div class="hud">
+      <button id="back-to-menu-btn">Menú</button>
+      <button id="start">Reiniciar</button>
+      <div class="scores-group">
         <div class="stat">
           <label>Puntos: 🎖️</label>
           <span id="score" class="value">0</span>
         </div>
-        <div class="hud-buttons">
-            <button id="back-to-menu-btn">Menú</button>
-            <button id="start">Reiniciar</button>
-        </div>
-        <div class="stat" style="justify-self: end;">
+        <div class="stat">
           <label>Record: 🏆</label>
           <span id="best" class="value">0</span>
         </div>
       </div>
-      <!-- 🐍 Tablero de Juego -->
-      <div class="board">
-        <canvas id="game"></canvas>
-        <canvas id="fx"></canvas>
-        <div id="paused" class="paused">Respira un poco y continua...</div>
+    </div>
+
+    <div class="game-main-content">
+      <!-- Columna de Chat (Izquierda) -->
+      <div id="chat-column" class="side-column">
+        <h2 class="column-title">Chat en Vivo</h2>
+        <div id="chat-messages"></div>
+        <form id="chat-form">
+          <input type="text" id="chat-input" placeholder="Escribe un mensaje..." required autocomplete="off">
+          <button type="submit">Enviar</button>
+        </form>
+      </div>
+
+      <!-- Columna Central del Juego -->
+      <div id="game-column">
+        <div class="wrap">
+          <!-- 🐍 Tablero de Juego -->
+          <div class="board">
+            <canvas id="game"></canvas>
+            <canvas id="fx"></canvas>
+            <div id="paused" class="paused">Respira un poco y continua...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Columna de Ranking (Derecha) -->
+      <div id="ranking-column" class="side-column">
+        <h2 class="column-title">Ranking Global 🏆</h2>
+        <div id="ranking-container"></div>
       </div>
     </div>
 
     <!--🕹️ Controles Móviles -->
     <div class="mobile-controls">
-      <!-- Fila Superior: Reinicio, Arriba, Pausa -->
       <div class="mobile-controls-top-row">
         <button id="mobile-restart-btn">↻</button>
         <button id="ctrl-up">▲</button>
         <button id="mobile-pause-btn">II</button>
       </div>
-      <!-- Fila Media: Izquierda, Derecha -->
       <div class="middle-row">
         <button id="ctrl-left">▲</button>
         <button id="ctrl-right">▲</button>
       </div>
-      <!-- Fila Inferior: Abajo -->
-      <button id="ctrl-down">▲</button>
+      <div class="down-row">
+        <button id="ctrl-down">▲</button>
+      </div>
+      <div class="bottom-row">
+        <button id="mobile-chat-btn">💬</button>
+        <button id="mobile-ranking-btn">🏆</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 📱 Vistas Móviles -->
+  <div id="mobile-chat-view" class="mobile-view">
+    <div class="mobile-view-header">
+      <h2 class="mobile-view-title">Chat en Vivo</h2>
+      <button class="mobile-view-back-btn" data-target="chat">Volver</button>
+    </div>
+    <div class="mobile-view-content" id="mobile-chat-content">
+      <!-- El contenido del chat se moverá aquí dinámicamente -->
+    </div>
+  </div>
+
+  <div id="mobile-ranking-view" class="mobile-view">
+    <div class="mobile-view-header">
+      <h2 class="mobile-view-title">Ranking Global 🏆</h2>
+      <button class="mobile-view-back-btn" data-target="ranking">Volver</button>
+    </div>
+    <div class="mobile-view-content" id="mobile-ranking-content">
+      <!-- El contenido del ranking se moverá aquí dinámicamente -->
     </div>
   </div>
 
@@ -88,6 +135,11 @@
     </div>
   </div>
 
+  <script type="module" src="./js/supabaseClient.js"></script>
+  <script type="module" src="./js/auth.js"></script>
+  <script type="module" src="./js/ranking.js"></script>
+  <script type="module" src="./js/chat.js"></script>
+  <script type="module" src="./js/ui.js"></script>
   <script type="module" src="./js/main.js"></script>
   <script>
       if ('serviceWorker' in navigator) {

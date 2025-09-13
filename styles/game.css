@@ -1,57 +1,41 @@
 /*
   Estilos específicos para los elementos de la vista del juego.
 */
+/* Layout principal adaptativo */
 #game-view {
-    position: relative;
-}
-
-.wrap {
-  width: 100%;
-  max-width: 640px;
-  margin: 3vh auto;
-  padding: 0 16px 32px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
+    display: grid;
+    grid-template-columns: 384px 1fr 384px; /* Columnas para chat, juego, ranking */
+    grid-template-rows: auto 1fr; /* Fila para HUD, Fila para contenido principal */
+    height: 100vh;
+    padding: 16px;
+    gap: 16px;
+    box-sizing: border-box;
 }
 
 .hud {
-  width: 100%;
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  border: 1px solid var(--border);
-  background: linear-gradient(180deg, rgba(138,161,255,0.08), rgba(18,22,44,0.6));
-  border-radius: 12px;
-}
-
-.hud-buttons {
-    display: flex;
-    gap: 8px;
-    justify-self: center;
+    grid-column: 1 / -1; /* El HUD ocupa todo el ancho */
+    display: grid;
+    grid-template-columns: 1fr auto 1fr; /* Izquierda, Centro, Derecha */
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(138,161,255,0.08), rgba(18,22,44,0.6));
+    border-radius: 12px;
 }
 
 #back-to-menu-btn {
-    background: linear-gradient(180deg, rgba(255,184,108,0.18), rgba(255,184,108,0.08));
-    border-color: #ffb86c;
+    justify-self: start;
 }
 
-#back-to-menu-btn:hover {
-    color: var(--neon-text-color, #e7e9f3);
-    background: rgba(255, 184, 108, 0.2);
-    box-shadow: 0 0 15px rgba(255, 184, 108, 0.6),
-                0 0 30px rgba(255, 184, 108, 0.4);
+#start {
+    justify-self: center;
 }
 
-/* Estilo para el botón de Reiniciar del HUD de escritorio */
-#start:hover {
-    color: var(--neon-text-color, #e7e9f3) !important; /* Forzar color de texto */
-    border-color: var(--snake);
-    box-shadow: 0 0 15px var(--snake-glow-strong),
-                0 0 30px var(--snake-glow-subtle);
+.scores-group {
+    display: flex;
+    gap: 20px;
+    justify-self: end;
 }
 
 .stat {
@@ -69,6 +53,44 @@
   text-shadow: 0 0 8px rgba(67,217,173,0.35);
   min-width: 24px;
   text-align: left;
+}
+
+.game-main-content {
+    grid-column: 1 / -1;
+    grid-row: 2 / 3;
+    display: grid;
+    grid-template-columns: subgrid;
+    gap: 16px;
+    overflow: hidden;
+    height: 100%;
+}
+
+#chat-column, #game-column, #ranking-column {
+    display: flex;
+    flex-direction: column;
+    background: rgba(18, 22, 44, 0.5);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 15px;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+#game-column {
+    min-width: 0;
+    padding: 10px;
+    /* Centra el contenido del juego verticalmente */
+    justify-content: center;
+}
+
+.wrap {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
 }
 
 .board {
@@ -111,141 +133,169 @@ canvas#fx {
 
 .paused.show { display: flex; }
 
-/* --- Controles Móviles --- */
+/* --- Estilos del Chat --- */
+#chat-messages {
+    flex-grow: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column-reverse; /* Mensajes nuevos abajo */
+    gap: 16px; /* Aumentado para más espacio */
+    padding-right: 5px; /* Espacio para la barra de scroll */
+    padding-bottom: 10px;
+    scrollbar-width: none; /* Firefox */
+}
 
-.mobile-controls {
-    display: none; /* Oculto por defecto en escritorio */
+#chat-messages::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+}
+
+.chat-message {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 8px;
+    background-color: rgba(255,255,255,0.03);
+    border-radius: 6px;
+}
+
+.chat-message.own-message {
+    flex-direction: row-reverse;
+    background-color: rgba(67, 217, 173, 0.1);
+}
+
+.own-message .message-content {
+    align-items: flex-end;
+}
+
+.chat-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    object-fit: cover;
+}
+
+.message-content {
+    display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 5px;
-    margin-top: 20px;
-    width: 100%;
-    padding: 0 16px 30px; /* Padding inferior para separar del borde */
 }
 
-/* Estilo base para TODOS los botones de control móvil */
-.mobile-controls button {
-    position: relative; /* Para posicionar el pseudo-elemento */
-    border-radius: 50%;
-    line-height: 1;
-    color: var(--text);
-    user-select: none;
-    -webkit-user-select: none;
-    clip-path: circle(50%);
+.message-author {
+    font-size: 0.9em;
     font-weight: bold;
-    border: 1px solid;
-    transition: all 0.2s;
+    color: var(--text-accent);
 }
 
-.mobile-controls button:active {
-    transform: scale(0.95);
+.message-text {
+    margin: 0;
+    font-size: 0.95em;
+    word-break: break-word;
+    color: var(--text);
 }
 
-/* Fila superior (Reinicio, Arriba, Pausa) */
-.mobile-controls-top-row {
+#chat-form {
     display: flex;
-    justify-content: space-between;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+#chat-input {
+    flex-grow: 1;
+    background-color: rgba(0,0,0,0.3);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px;
+    border-radius: 6px;
+}
+
+#chat-form button {
+    padding: 8px 12px;
+}
+
+/* --- Estilos del Ranking --- */
+#ranking-container {
+    overflow-y: auto;
+}
+
+.ranking-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.ranking-item {
+    display: grid;
+    grid-template-columns: 30px 40px 1fr auto;
     align-items: center;
-    width: 100%;
+    gap: 10px;
+    padding: 5px;
+    background-color: rgba(255,255,255,0.03);
+    border-radius: 6px;
 }
 
-/* Botones de dirección (D-Pad) */
-#ctrl-up, #ctrl-down, #ctrl-left, #ctrl-right {
-    width: 90px;
-    height: 90px;
-    font-size: 36px;
-    background: linear-gradient(180deg, rgba(138,161,255,0.12), rgba(138,161,255,0.05));
-    border-color: #8aa1ff;
+.ranking-position {
+    font-weight: bold;
+    color: var(--text-accent);
+    text-align: center;
 }
 
-/* Aumenta el área de pulsación de los botones de dirección */
-#ctrl-up::before, #ctrl-down::before, #ctrl-left::before, #ctrl-right::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 125%;
-    height: 125%;
-    background: transparent;
+.ranking-avatar {
+    width: 35px;
+    height: 35px;
     border-radius: 50%;
+    object-fit: cover;
 }
 
-#ctrl-up:hover, #ctrl-down:hover, #ctrl-left:hover, #ctrl-right:hover {
-    background: rgba(0, 182, 221, 0.15);
-    border-color: #00B6DD;
-    box-shadow: 0 0 15px rgba(0, 182, 221, 0.6),
-                0 0 30px rgba(0, 182, 221, 0.4);
+.ranking-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-/* Fila del medio (Izquierda, Derecha) */
-.mobile-controls .middle-row {
-    display: flex;
-    justify-content: center; /* Centra los botones */
-    gap: 70px; /* Mantiene el espacio entre ellos */
-    width: 100%;
-}
-
-/* Botones de Pausa y Reinicio */
-#mobile-restart-btn, #mobile-pause-btn {
-    width: 60px;
-    height: 60px;
-    font-size: 24px;
-}
-
-#mobile-pause-btn {
-    background: linear-gradient(180deg, rgba(138,161,255,0.18), rgba(138,161,255,0.08));
-    border-color: #8aa1ff;
-}
-
-#mobile-pause-btn:hover {
-    background: rgba(138, 161, 255, 0.2);
-    border-color: #a1b5ff;
-    box-shadow: 0 0 15px rgba(138, 161, 255, 0.6),
-                0 0 30px rgba(138, 161, 255, 0.4);
-}
-
-#mobile-restart-btn {
-    background: linear-gradient(180deg, rgba(67,217,173,0.18), rgba(67,217,173,0.08));
-    border-color: var(--snake);
-}
-
-#mobile-restart-btn:hover {
-    color: var(--neon-text-color, #e7e9f3);
-    background: rgba(67, 217, 173, 0.2);
-    border-color: #43d9ad;
-    box-shadow: 0 0 15px rgba(67, 217, 173, 0.6),
-                0 0 30px rgba(67, 217, 173, 0.4);
+.ranking-score {
+    font-weight: bold;
 }
 
 
-/* Rotación de iconos de flecha */
-#ctrl-down {
-    transform: rotate(180deg);
-}
-#ctrl-down:active { transform: rotate(180deg) scale(0.95); }
-
-#ctrl-left {
-    transform: rotate(-90deg);
-}
-#ctrl-left:active { transform: rotate(-90deg) scale(0.95); }
-
-
-#ctrl-right {
-    transform: rotate(90deg);
-}
-#ctrl-right:active { transform: rotate(90deg) scale(0.95); }
-
-
-/* Media Query para mostrar los controles en móviles */
+/* =====================
+     SECCIÓN: VISTAS MÓVIL
+====================== */
 @media (max-width: 768px) {
+    #game-view {
+        display: flex;
+        flex-direction: column;
+        height: auto;
+        padding: 8px;
+        gap: 8px;
+    }
+
+    .game-main-content {
+        display: block;
+        overflow: visible;
+        height: auto;
+    }
+
+    #chat-column,
+    #ranking-column {
+        display: none;
+    }
+
+    #game-column {
+        padding: 0;
+        border: none;
+        background: none;
+    }
+
+    .wrap {
+        padding: 0;
+        margin: 0;
+        gap: 16px;
+    }
+
     .mobile-controls {
         display: flex;
     }
-    /* Oculta la ayuda de teclado en móvil para ahorrar espacio */
-    .badge {
-        display: none;
-    }
+
     #start {
         display: none;
     }

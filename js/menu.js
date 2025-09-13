@@ -2,6 +2,10 @@ import { showModal } from './modal.js';
 import { settings } from './settings.js';
 import { audioManager } from './audio.js';
 import { sfx } from './sfx.js';
+import { renderAuthForm } from './ui.js';
+import { initAuth } from './auth.js';
+import { initRanking } from './ranking.js';
+import { initChat } from './chat.js';
 
 // Vistas principales
 const menuView = document.getElementById('menu-view');
@@ -12,6 +16,7 @@ const startBtn = document.getElementById('menu-start');
 const howToPlayBtn = document.getElementById('menu-how-to-play');
 const settingsBtn = document.getElementById('menu-settings');
 const creditsBtn = document.getElementById('menu-credits');
+const accountBtn = document.getElementById('menu-account');
 
 /**
  * Genera el contenido HTML para la sección "Cómo Jugar".
@@ -102,7 +107,12 @@ export function initMenu(game) {
     startBtn.addEventListener('click', () => {
         menuView.classList.add('hidden');
         gameView.classList.remove('hidden');
+        
+        // Inicia la música y los componentes en tiempo real
         audioManager.playGameMusic();
+        initRanking(document.getElementById('ranking-container'));
+        initChat();
+
         game.startGame();
     });
 
@@ -116,6 +126,13 @@ export function initMenu(game) {
 
     settingsBtn.addEventListener('click', () => {
         showModal('Configuración', getSettingsContent());
+    });
+
+    accountBtn.addEventListener('click', () => {
+        showModal('Cuenta', (modalBody) => {
+            renderAuthForm(modalBody);
+            initAuth();
+        });
     });
 
     backToMenuBtn.addEventListener('click', () => {

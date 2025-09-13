@@ -8,5 +8,7 @@
 @import url('./background.css');
 @import url('./animations.css');
 @import url('./game.css');
+@import url('./controls.css');
+@import url('./mobile-views.css');
 @import url('./menu.css');
 @import url('./modal.css');

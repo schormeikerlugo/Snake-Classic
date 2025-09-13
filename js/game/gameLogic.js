@@ -1,3 +1,4 @@
+import { supabase } from '../supabaseClient.js';
 import * as C from '../constants.js';
 import * as U from '../utils.js';
 import { settings } from '../settings.js';
@@ -205,7 +206,8 @@ export function stop(game) {
     }
 }
 
-export function gameOver(game, noDraw) {
+export async function gameOver(game, noDraw) {
+    console.log('--- GAME OVER --- La función ha sido llamada.');
     sfx.play('gameOver');
     audioManager.duckGameMusic();
     game.running = false;
@@ -215,6 +217,27 @@ export function gameOver(game, noDraw) {
         cancelAnimationFrame(game.gameLoopId);
         game.gameLoopId = null;
     }
+
+    // Enviar puntaje a Supabase
+    try {
+        // 1. Obtener el usuario actual
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+            console.log("No hay usuario logueado, no se puede guardar el puntaje.");
+            return; // No hacer nada si no hay usuario
+        }
+
+        // 2. Invocar la Edge Function con el nombre y payload correctos
+        const { error } = await supabase.functions.invoke('submit-score', { // Nombre corregido
+            body: { user_id: user.id, score: game.score }, // Payload corregido
+        });
+
+        if (error) throw error;
+        console.log('Puntaje enviado correctamente.');
+    } catch (error) {
+        console.error('Error al enviar el puntaje:', error.message);
+    }
+
     // The drawing of the game over screen is handled by the draw() function.
 }
 

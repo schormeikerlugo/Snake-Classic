@@ -30,17 +30,21 @@ export function hideModal() {
 /**
  * Muestra el modal con un título y contenido específicos.
  * @param {string} title - El título a mostrar en el modal.
- * @param {string|HTMLElement} content - El contenido (HTML o un nodo del DOM) a mostrar en el cuerpo del modal.
+ * @param {string|HTMLElement|Function} content - El contenido a mostrar. Puede ser HTML, un nodo del DOM o una función que recibe `modalBody` como argumento.
  */
 export function showModal(title, content) {
     clearModalListeners(); // Limpia listeners antiguos antes de mostrar uno nuevo
     modalTitle.textContent = title;
     modalBody.innerHTML = ''; // Limpia el contenido anterior
-    if (typeof content === 'string') {
+
+    if (typeof content === 'function') {
+        content(modalBody); // La función se encarga de poblar el modal
+    } else if (typeof content === 'string') {
         modalBody.innerHTML = content;
     } else {
         modalBody.appendChild(content);
     }
+
     modal.classList.remove('hidden');
     sfx.play('openModal');
 

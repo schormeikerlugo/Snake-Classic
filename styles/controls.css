@@ -1,0 +1,119 @@
+/*
+  Estilos para los controles móviles (d-pad, botones de acción, etc)
+*/
+
+.mobile-controls {
+    display: none; /* Oculto por defecto en escritorio */
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    margin-top: 20px;
+    width: 100%;
+    padding: 0 16px 30px;
+}
+
+.mobile-controls button {
+    position: relative;
+    border-radius: 50%;
+    line-height: 1;
+    color: var(--text);
+    user-select: none;
+    -webkit-user-select: none;
+    clip-path: circle(50%);
+    font-weight: bold;
+    border: 1px solid;
+    transition: all 0.2s;
+}
+
+.mobile-controls button:active {
+    transform: scale(0.95);
+}
+
+.mobile-controls-top-row,
+.bottom-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.middle-row, .down-row {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.middle-row { 
+    gap: 70px;
+}
+
+.bottom-row {
+    margin-top: 10px;
+}
+
+#ctrl-up, #ctrl-down, #ctrl-left, #ctrl-right {
+    width: 90px;
+    height: 90px;
+    font-size: 36px;
+    background: linear-gradient(180deg, rgba(138,161,255,0.12), rgba(138,161,255,0.05));
+    border-color: #8aa1ff;
+}
+
+#ctrl-up::before, #ctrl-down::before, #ctrl-left::before, #ctrl-right::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 125%;
+    height: 125%;
+    background: transparent;
+    border-radius: 50%;
+}
+
+#ctrl-up:hover, #ctrl-down:hover, #ctrl-left:hover, #ctrl-right:hover {
+    background: rgba(0, 182, 221, 0.15);
+    border-color: #00B6DD;
+    box-shadow: 0 0 15px rgba(0, 182, 221, 0.6),
+                0 0 30px rgba(0, 182, 221, 0.4);
+}
+
+#mobile-restart-btn, 
+#mobile-pause-btn,
+#mobile-chat-btn,
+#mobile-ranking-btn {
+    width: 60px;
+    height: 60px;
+    font-size: 24px;
+}
+
+#mobile-pause-btn {
+    background: linear-gradient(180deg, rgba(138,161,255,0.18), rgba(138,161,255,0.08));
+    border-color: #8aa1ff;
+}
+
+#mobile-chat-btn {
+    background: linear-gradient(180deg, rgba(0, 182, 221, 0.18), rgba(0, 182, 221, 0.08));
+    border-color: #00B6DD;
+}
+
+#mobile-restart-btn, 
+#mobile-ranking-btn {
+    background: linear-gradient(180deg, rgba(67,217,173,0.18), rgba(67,217,173,0.08));
+    border-color: var(--snake);
+}
+
+#ctrl-down { transform: rotate(180deg); }
+#ctrl-down:active { transform: rotate(180deg) scale(0.95); }
+#ctrl-left { transform: rotate(-90deg); }
+#ctrl-left:active { transform: rotate(-90deg) scale(0.95); }
+#ctrl-right { transform: rotate(90deg); }
+#ctrl-right:active { transform: rotate(90deg) scale(0.95); }
+
+@media (max-width: 768px) {
+    .mobile-controls {
+        display: flex;
+    }
+    .badge { display: none; }
+    #start { display: none; }
+}

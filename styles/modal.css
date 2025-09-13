@@ -122,3 +122,56 @@ input:checked + .slider {
 input:checked + .slider:before {
   transform: translateX(22px);
 }
+
+/* --- Estilos para el formulario de autenticación --- */
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: var(--text-accent);
+}
+
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border);
+    background-color: var(--bg2);
+    color: var(--text);
+    border-radius: 6px;
+    box-sizing: border-box;
+}
+
+#auth-button, #logout-btn, #upload-avatar-btn {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+}
+
+#toggle-auth-mode {
+    color: var(--text-accent);
+    text-decoration: none;
+}
+
+.error-message {
+    color: #ff8b8b;
+    margin-top: 10px;
+    min-height: 1.2em;
+}
+
+/* Estilos para la vista de perfil */
+#user-profile-container {
+    text-align: center;
+}
+
+.profile-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--border);
+    margin-bottom: 15px;
+}
