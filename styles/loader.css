@@ -1,0 +1,35 @@
+.pixel-loader-container {
+  display: none; /* Oculto por defecto */
+  justify-content: center;
+  align-items: center;
+  min-height: 250px; /* Asegura que el modal no se colapse */
+}
+
+.pixel-loader {
+  display: flex;
+  gap: 8px;
+}
+
+.pixel-loader .pixel {
+  width: 20px;
+  height: 20px;
+  background-color: var(--snake);
+  box-shadow: 0 0 5px var(--snake);
+  animation: pixel-load 1.2s infinite ease-in-out;
+}
+
+/* Animación con delays para cada píxel */
+.pixel-loader .pixel:nth-child(2) { animation-delay: 0.15s; }
+.pixel-loader .pixel:nth-child(3) { animation-delay: 0.3s; }
+.pixel-loader .pixel:nth-child(4) { animation-delay: 0.45s; }
+
+@keyframes pixel-load {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(0.8);
+    opacity: 0.6;
+  }
+}

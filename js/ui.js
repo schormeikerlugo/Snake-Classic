@@ -1,8 +1,48 @@
+const LOADER_CONTAINER_ID = 'pixel-loader-container';
+const AUTH_FORM_ID = 'auth-form-container';
+const USER_PROFILE_ID = 'user-profile-container';
+
+function show(id, displayMode = 'block') {
+    const element = document.getElementById(id);
+    if (element) element.style.display = displayMode;
+}
+
+function hide(id) {
+    const element = document.getElementById(id);
+    if (element) element.style.display = 'none';
+}
+
+export function showAuthLoader() {
+    hide(AUTH_FORM_ID);
+    hide(USER_PROFILE_ID);
+    show(LOADER_CONTAINER_ID, 'flex');
+}
+
+export function showAuthForm() {
+    hide(LOADER_CONTAINER_ID);
+    hide(USER_PROFILE_ID);
+    show(AUTH_FORM_ID);
+}
+
+export function showUserProfile() {
+    hide(LOADER_CONTAINER_ID);
+    hide(AUTH_FORM_ID);
+    show(USER_PROFILE_ID);
+}
 
 export function renderAuthForm(container) {
   container.innerHTML = `
     <div id="auth-container">
-      <div id="auth-form-container">
+      <div id="${LOADER_CONTAINER_ID}" class="pixel-loader-container">
+        <div class="pixel-loader">
+          <div class="pixel"></div>
+          <div class="pixel"></div>
+          <div class="pixel"></div>
+          <div class="pixel"></div>
+        </div>
+      </div>
+
+      <div id="${AUTH_FORM_ID}" style="display: none;">
         <h3 id="auth-title">Iniciar Sesión</h3>
         <form id="auth-form">
           <div class="form-group" id="username-group" style="display: none;">
@@ -24,7 +64,8 @@ export function renderAuthForm(container) {
           <a href="#" id="toggle-auth-mode">¿No tienes cuenta? Regístrate</a>
         </p>
       </div>
-      <div id="user-profile-container" style="display: none;">
+
+      <div id="${USER_PROFILE_ID}" style="display: none;">
         <h3 id="profile-title"></h3>
         <div id="avatar-container">
           <img id="profile-avatar" src="" alt="Avatar" class="profile-avatar" />
@@ -35,6 +76,8 @@ export function renderAuthForm(container) {
       </div>
     </div>
   `;
+  // Por defecto, mostramos el formulario de autenticación al renderizar
+  showAuthForm();
 }
 
 export function toggleAuthMode(isLogin) {

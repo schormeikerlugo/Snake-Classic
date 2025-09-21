@@ -1,10 +1,11 @@
 import { supabase } from './supabaseClient.js';
-import { toggleAuthMode } from './ui.js';
-import { hideModal } from './modal.js';
+import { toggleAuthMode, showAuthLoader, showAuthForm, showUserProfile } from './ui.js';
+import { hideModal, showModal } from './modal.js';
 
 let isLogin = true;
 
 async function updateUserProfile(user) {
+    showAuthLoader(); // Muestra el loader mientras se carga el perfil
     const { data, error } = await supabase
         .from('perfiles')
         .select('username, avatar_url')
@@ -16,22 +17,18 @@ async function updateUserProfile(user) {
 
     if (data) {
         profileTitle.textContent = `Bienvenido, ${data.username}`;
-        if (data.avatar_url) {
-            profileAvatar.src = data.avatar_url;
-        } else {
-            profileAvatar.src = 'assets/image/anonimo/anonimo.png'; // Default avatar
-        }
+        profileAvatar.src = data.avatar_url || 'assets/image/anonimo/anonimo.png';
     } else {
         profileTitle.textContent = `Bienvenido`;
         profileAvatar.src = 'assets/image/anonimo/anonimo.png';
     }
-
-    document.getElementById('auth-form-container').style.display = 'none';
-    document.getElementById('user-profile-container').style.display = 'block';
+    
+    showUserProfile(); // Muestra la vista de perfil cuando los datos están listos
 }
 
 async function handleAuthFormSubmit(event) {
     event.preventDefault();
+    showAuthLoader();
     const form = event.target;
     const email = form.email.value;
     const password = form.password.value;
@@ -44,40 +41,42 @@ async function handleAuthFormSubmit(event) {
         if (isLogin) {
             response = await supabase.auth.signInWithPassword({ email, password });
         } else {
-            // 1. Crear el usuario en el sistema de autenticación de Supabase.
-            // El trigger en la DB se encargará de crear el perfil.
             response = await supabase.auth.signUp({ 
                 email, 
                 password,
-                options: { data: { username: username } } // Guardar username en metadatos para el trigger
+                options: { data: { username: username } } 
             });
         }
 
         if (response.error) throw response.error;
 
-        // Si el registro es exitoso y no requiere confirmación de email, el usuario estará logueado.
-        // Si requiere confirmación, se le mostrará un mensaje.
         if (!isLogin && response.data.user) {
-            if (response.data.user.identities.length === 0) {
+            if (response.data.user.identities && response.data.user.identities.length === 0) {
                  errorElement.textContent = 'Este usuario ya existe. Por favor, inicia sesión.';
+                 showAuthForm(); // Vuelve a mostrar el formulario con el error
             } else {
-                alert('¡Registro exitoso! Revisa tu correo para confirmar la cuenta.');
+                hideModal();
+                setTimeout(() => {
+                    showModal('¡Registro Exitoso!', '<p>Hemos enviado un enlace de confirmación a tu correo electrónico. ¡Revísalo para activar tu cuenta!</p>');
+                }, 300);
             }
+            return;
         }
         
-        hideModal();
+        // Para el login, onAuthStateChange se encargará de llamar a updateUserProfile,
+        // que ya gestiona las vistas. No es necesario hacer nada más aquí.
 
     } catch (error) {
         errorElement.textContent = error.message;
+        showAuthForm(); // Si hay un error, vuelve a mostrar el formulario
     }
 }
 
 async function handleLogout() {
     await supabase.auth.signOut();
-    document.getElementById('auth-form-container').style.display = 'block';
-    document.getElementById('user-profile-container').style.display = 'none';
-    toggleAuthMode(true);
-    isLogin = true;
+    // onAuthStateChange se disparará y mostrará el formulario de login.
+    // No es necesario hacer nada más aquí si el modal sigue abierto.
+    hideModal(); // Opcional: cerrar el modal al hacer logout.
 }
 
 async function handleAvatarUpload(event) {
@@ -87,6 +86,8 @@ async function handleAvatarUpload(event) {
     const file = event.target.files[0];
     if (!file) return;
 
+    showAuthLoader(); // Muestra el loader durante la subida
+
     const fileExt = file.name.split('.').pop();
     const fileName = `${user.id}/avatar.${fileExt}`;
     const { error: uploadError } = await supabase.storage
@@ -95,6 +96,7 @@ async function handleAvatarUpload(event) {
 
     if (uploadError) {
         console.error('Error subiendo avatar:', uploadError);
+        showUserProfile(); // Vuelve al perfil aunque falle
         return;
     }
 
@@ -110,6 +112,8 @@ async function handleAvatarUpload(event) {
     } else {
         document.getElementById('profile-avatar').src = publicUrl;
     }
+
+    showUserProfile(); // Vuelve al perfil después de la subida
 }
 
 export function initAuth() {
@@ -119,23 +123,28 @@ export function initAuth() {
     const uploadAvatarBtn = document.getElementById('upload-avatar-btn');
     const avatarUploadInput = document.getElementById('avatar-upload');
 
-    authForm.addEventListener('submit', handleAuthFormSubmit);
-    logoutBtn.addEventListener('click', handleLogout);
-    uploadAvatarBtn.addEventListener('click', () => avatarUploadInput.click());
-    avatarUploadInput.addEventListener('change', handleAvatarUpload);
+    if(authForm) authForm.addEventListener('submit', handleAuthFormSubmit);
+    if(logoutBtn) logoutBtn.addEventListener('click', handleLogout);
+    if(uploadAvatarBtn) uploadAvatarBtn.addEventListener('click', () => avatarUploadInput.click());
+    if(avatarUploadInput) avatarUploadInput.addEventListener('change', handleAvatarUpload);
 
-    toggleLink.addEventListener('click', (e) => {
-        e.preventDefault();
-        isLogin = !isLogin;
-        toggleAuthMode(isLogin);
-    });
+    if(toggleLink) {
+        toggleLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            isLogin = !isLogin;
+            toggleAuthMode(isLogin);
+        });
+    }
 
     supabase.auth.onAuthStateChange(async (event, session) => {
-        if (session && session.user) {
-            await updateUserProfile(session.user);
-        } else {
-            document.getElementById('auth-form-container').style.display = 'block';
-            document.getElementById('user-profile-container').style.display = 'none';
+        // Solo actuar si el modal de cuenta está abierto
+        const modal = document.getElementById('modal');
+        if (modal && !modal.classList.contains('hidden')) {
+            if (session && session.user) {
+                await updateUserProfile(session.user);
+            } else {
+                showAuthForm();
+            }
         }
     });
 }
