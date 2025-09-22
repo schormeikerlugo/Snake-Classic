@@ -188,7 +188,7 @@ Este juego se ofrece "tal cual", sin garantías. No me hago responsable por dañ
 ### 6. 🤝 Colaboraciones
 Si deseas contribuir con mejoras, assets, traducciones o nuevas mecánicas, eres bienvenido. Revisa el roadmap y abre un issue o pull request con tu propuesta.
 
-© 2024 Retro Snake Classic.
+© 2025 Retro Snake Classic.
 
 **Gracias por apoyar este proyecto retro-futurista. Tu respeto por estos términos permite que siga creciendo y evolucionando.**
 

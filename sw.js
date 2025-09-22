@@ -1,4 +1,4 @@
-const CACHE_NAME = 'snake-game-v5';
+const CACHE_NAME = 'snake-game-v10';
 const urlsToCache = [
   './',
   'index.html',
@@ -68,4 +68,11 @@ self.addEventListener('activate', event => {
       );
     })
   );
+});
+
+// Listen for a message from the client to skip waiting.
+self.addEventListener('message', event => {
+  if (event.data && event.data.action === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });

@@ -1,0 +1,30 @@
+#update-btn {
+    /* Estructura base de los botones del menú */
+    
+    padding: 12px;
+    font-size: 16px;
+    width: 180px; /* Ancho del contenedor de los botones del menú */
+    
+    /* Estilo explícito para un look consistente */
+    font-family: 'Pixelify Sans', system-ui, sans-serif;
+    color: white;
+    text-transform: uppercase;
+    border: 2px solid #7e42a5;
+    border-radius: 8px;
+    cursor: pointer;
+    
+    /* Posicionamiento */
+    display: none; /* Oculto por defecto */
+    margin-top: -40px; /* Espacio debajo del botón "Iniciar" */
+    
+    /* Nuevo esquema de color retro-futurista */
+    background: #311042;
+    transition: all 0.3s ease;
+}
+
+#update-btn:hover {
+    background: #4d1a69;
+    border-color: #a958e0;
+    box-shadow: 0 0 10px #a958e0;
+    transform: scale(1.03);
+}

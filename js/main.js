@@ -2,12 +2,14 @@ import { Game } from './game.js';
 import { initMenu } from './menu.js';
 import { audioManager } from './audio.js';
 import { sfx } from './sfx.js';
+import { registerServiceWorker } from './update.js';
 
 // Se importa modal.js para asegurar que sus event listeners se registren.
 import './modal.js';
 import './mobile-views.js'; // Maneja la lógica de las vistas móviles
 
 document.addEventListener('DOMContentLoaded', () => {
+    registerServiceWorker();
     const splashScreen = document.getElementById('splash-screen');
     const menuView = document.getElementById('menu-view');
     const enterBtn = document.getElementById('enter-btn');
@@ -23,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
         enterBtn.addEventListener('click', async () => {
             // Inicializa el AudioContext y carga los SFX después de la interacción del usuario
             audioManager.initAudioContext();
-            await sfx.init(); // Esperar a que los SFX se carguen
+            sfx.init(); // La carga de SFX se inicia en segundo plano, sin bloquear.
 
             // Oculta la pantalla de inicio y muestra el menú
             if (splashScreen) splashScreen.classList.add('hidden');
