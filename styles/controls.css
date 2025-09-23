@@ -19,10 +19,12 @@
     color: var(--text);
     user-select: none;
     -webkit-user-select: none;
-    clip-path: circle(50%);
     font-weight: bold;
-    border: 1px solid;
+    border: none; /* Sin borde en el botón contenedor */
     transition: all 0.2s;
+    background: transparent;
+    padding: 0;
+    margin: 0;
 }
 
 .mobile-controls button:active {
@@ -58,8 +60,6 @@
     width: 90px;
     height: 90px;
     font-size: 36px;
-    background: linear-gradient(180deg, rgba(138,161,255,0.12), rgba(138,161,255,0.05));
-    border-color: #8aa1ff;
 
     @media screen and (max-width: 400px) {
         width: 82px;
@@ -68,19 +68,38 @@
     }
 }
 
+/* ::before es el ÁREA DE TOQUE extendida */
 #ctrl-up::before, #ctrl-down::before, #ctrl-left::before, #ctrl-right::before {
     content: '';
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 125%;
-    height: 125%;
+    width: 140%; /* Área de toque más grande */
+    height: 140%;
     background: transparent;
     border-radius: 50%;
 }
 
-#ctrl-up:hover, #ctrl-down:hover, #ctrl-left:hover, #ctrl-right:hover {
+/* ::after es la PARTE VISUAL del botón */
+#ctrl-up::after, #ctrl-down::after, #ctrl-left::after, #ctrl-right::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(180deg, rgba(138,161,255,0.12), rgba(138,161,255,0.05));
+    border: 1px solid #8aa1ff;
+    border-radius: 50%;
+    clip-path: circle(50%);
+    transition: all 0.2s;
+    pointer-events: none; /* El visual no captura eventos */
+}
+
+/* El hover afecta a la parte VISUAL (::after) */
+#ctrl-up:hover::after, #ctrl-down:hover::after, #ctrl-left:hover::after, #ctrl-right:hover::after {
     background: rgba(0, 182, 221, 0.15);
     border-color: #00B6DD;
     box-shadow: 0 0 15px rgba(0, 182, 221, 0.6),
