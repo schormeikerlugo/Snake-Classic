@@ -24,10 +24,67 @@ const accountBtn = document.getElementById('menu-account');
  */
 function getHowToPlayContent() {
     return `
-        <p>Usa las <strong>teclas de flecha</strong> o <strong>WASD</strong> para mover la serpiente.</p>
-        <p>El objetivo es comer la comida (puntos rojos) para crecer y sumar puntos.</p>
-        <p>Evita chocar contra las paredes o contra tu propio cuerpo.</p>
-        <p>Usa la <strong>barra espaciadora</strong> para pausar el juego.</p>
+        <div class="how-to-play-content">
+            <div class="section">
+                <h2>Controles</h2>
+                <p>Usa las <strong>teclas de flecha</strong> o <strong>WASD</strong> para mover la serpiente.</p>
+                <p>Usa la <strong>barra espaciadora</strong> para pausar el juego.</p>
+            </div>
+
+            <div class="section">
+                <h2>Objetivo</h2>
+                <p>Come la comida para crecer y sumar puntos. ¡Pero cuidado! Por cada <strong>10 puntos</strong>, la serpiente aumentará su velocidad.</p>
+                <p>Evita chocar contra las paredes, los <strong>obstáculos</strong> (bloques grises que aparecen aleatoriamente) o tu propio cuerpo.</p>
+            </div>
+
+            <div class="section">
+                <h2>Power-Ups</h2>
+                <p>Recoge las figuras geométricas para activar habilidades especiales:</p>
+                <div class="power-ups-table-container">
+                    <table class="power-ups-table">
+                        <thead>
+                            <tr>
+                                <th>Power-Up</th>
+                                <th>Forma</th>
+                                <th>Efecto</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Ralentizar</strong></td>
+                                <td><div class="shape triangle blue"></div></td>
+                                <td>Reduce la velocidad de la serpiente temporalmente.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Puntos Dobles</strong></td>
+                                <td><div class="shape quadrilateral yellow"></div></td>
+                                <td>Duplica los puntos que obtienes por cada comida.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Inmunidad</strong></td>
+                                <td><div class="shape hexagon green"></div></td>
+                                <td>Te vuelve inmune a los choques. ¡Atraviésalo todo!</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Encoger</strong></td>
+                                <td><div class="shape circle purple"></div></td>
+                                <td>Reduce el tamaño de la serpiente.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Limpiar Obstáculos</strong></td>
+                                <td><div class="shape star red"></div></td>
+                                <td>Elimina todos los obstáculos del tablero.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Bomba</strong></td>
+                                <td><div class="shape square gray"></div></td>
+                                <td>¡Cuidado! Resta puntos y genera nueva comida.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     `;
 }
 

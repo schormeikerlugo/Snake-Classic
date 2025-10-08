@@ -6,7 +6,9 @@ import { settings } from '../features/settings.js';
 import { drawCell, draw, drawFx, drawCountdown } from './rendering.js';
 import {
     placeFood, inSnake, resetGame, updateScore, tick, gameLoop, spawnFx,
-    setDirection, handleKeydown, countdown, startGame, togglePause, stop, gameOver, animateGlow, requestRestart, generateObstacles, inObstacle
+    setDirection, handleKeydown, countdown, startGame, togglePause, stop, 
+    gameOver, animateGlow, requestRestart, generateObstacles, inObstacle, 
+    spawnPowerUp, changeAndAnimateObstacles
 } from './gameLogic.js';
 
 /**
@@ -58,6 +60,16 @@ export class Game {
         this.oldObstacles = []; // Nuevo
         this.isGameOver = false; // New property to track game over state
         this.scannerProgress = 0; // New property for scanner animation
+
+        // Power-ups
+        this.powerUps = [];
+        this.activePowerUp = { type: null, timeoutId: null };
+        this.isImmune = false;
+        this.pointsMultiplier = 1;
+        this.powerUpSpawnTimer = null;
+        this.powerUpGlowProgress = 0;
+        this.originalTickMs = 0;
+
 
         C.BEST_EL.textContent = this.best;
         this.init();
@@ -153,8 +165,9 @@ export class Game {
     stop() { return stop(this); }
     gameOver(noDraw) { return gameOver(this, noDraw); }
     animateGlow(targetIntensity, duration) { return animateGlow(this, targetIntensity, duration); }
-    requestRestart() { return requestRestart(this); } // Nueva función delegada
+    requestRestart() { return requestRestart(this); } 
     generateObstacles() { return generateObstacles(this); }
     inObstacle(pos) { return inObstacle(this, pos); }
-    changeAndAnimateObstacles() { return changeAndAnimateObstacles(this); } // Nuevo
+    changeAndAnimateObstacles() { return changeAndAnimateObstacles(this); }
+    spawnPowerUp() { return spawnPowerUp(this); }
 }

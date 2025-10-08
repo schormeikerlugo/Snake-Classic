@@ -115,6 +115,16 @@ Retro Snake Classic es una versión moderna del icónico juego **Snake** que muc
 - 🏆 **Best Score**: Guardado en `localStorage` con persistencia y visualización clara.
 - 📱 **Móvil Friendly**: Gestos táctiles y controles WASD funcionan igual que en PC.
 - 📊 **Pantalla de Puntuaciones**: Interfaz clara con el mejor puntaje y botón `Reset`.
+- ✨ **Power-Ups Dinámicos:** ¡El juego ahora incluye power-ups que aparecen periódicamente para cambiar el ritmo del juego! Cada power-up tiene una forma y color únicos para que puedas identificarlos al instante.
+
+| Power-Up | Forma | Color | Efecto |
+| :--- | :--- | :--- | :--- |
+| **Ralentizar** | Triángulo | Azul | Reduce la velocidad de la serpiente temporalmente. ¡Ideal para maniobrar en situaciones difíciles! |
+| **Puntos Dobles** | Cuadrilátero | Amarillo | Duplica los puntos que obtienes por cada comida durante un tiempo limitado. |
+| **Inmunidad** | Hexágono | Verde | Te vuelve inmune a los choques contra las paredes y obstáculos. ¡Atraviésalo todo! |
+| **Encoger** | Círculo | Morado | Reduce el tamaño de la serpiente, eliminando los últimos segmentos de la cola. |
+| **Limpiar Obstáculos** | Estrella | Rojo | Elimina todos los obstáculos del tablero instantáneamente. |
+| **Bomba** | Cuadrado | Gris | ¡Cuidado! Este power-up negativo te resta puntos y genera una nueva comida en otro lugar. |
 
 ---
 
@@ -168,7 +178,7 @@ Cada idea está organizada por estado, tipo de mejora y detalles técnicos. Este
 | 🧩 Feature                  | 📌 Estado         | 🧪 Tipo de Mejora     | ⚙️ Detalles Técnicos                                                                 |
 |----------------------------|------------------|-----------------------|--------------------------------------------------------------------------------------|
 | Modo Obstáculos            | ✅ Propuesta      | Jugabilidad           | Paredes internas que aumentan la dificultad progresivamente.                        |
-| Power‑Ups                  | 🧪 En pruebas      | Mecánicas             | Ralentizar, duplicar puntos, invulnerabilidad temporal.                             |
+| Power‑Ups                  | ✅ Implementado   | Mecánicas             | Ralentizar, duplicar puntos, invulnerabilidad temporal.                             |
 | Modo multijugador          | 🔄 En prototipo   | Jugabilidad avanzada  | Dos serpientes compiten por la misma comida. Requiere sincronización de inputs.     |
 | Leaderboard online         | 🌐 En exploración | Backend / Persistencia| Integración con Firebase o backend modular para puntajes globales persistentes.     |
 

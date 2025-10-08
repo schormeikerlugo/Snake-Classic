@@ -16,15 +16,16 @@
 }
 
 .modal-content {
-  background: var(--bg1);
-  padding: 24px;
-  border-radius: 12px;
-  border: 1px solid var(--border);
-  width: 90%;
-  max-width: 500px;
-  position: relative;
-  box-shadow: 0 5px 20px rgba(0,0,0,0.4);
-  max-height: 85vh; /* Asegura que el modal no sea más alto que la pantalla */
+    background-color: #1a1f3a;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+    width: 90%;
+    max-width: 800px; /* Aumentado para el nuevo contenido */
+    max-height: 90vh; /* Añadido para pantallas pequeñas */
+    overflow-y: auto; /* Añadido para scroll */
+    position: relative;
+    animation: slide-down 0.3s ease-out;
 }
 
 .modal-close-btn {

@@ -22,7 +22,7 @@ export function drawCell(game, x, y, color, isMobile) {
 }
 
 export function draw(game, currentTime) {
-    console.log('Draw called. isGameOver:', game.isGameOver, 'running:', game.running);
+    // console.log('Draw called. isGameOver:', game.isGameOver, 'running:', game.running);
     // Clear canvas only if game is running
     if (game.running) {
         C.ctx.clearRect(0, 0, C.canvas.width, C.canvas.height);
@@ -85,6 +85,15 @@ export function draw(game, currentTime) {
             }
         }
 
+        // Draw power-ups
+        game.powerUps.forEach(p => {
+            C.ctx.shadowColor = p.color;
+            C.ctx.shadowBlur = 5 + (game.powerUpGlowProgress * 15); // Faster pulse
+            drawPowerUp(game, p);
+        });
+        C.ctx.shadowBlur = 0;
+        C.ctx.shadowColor = 'transparent';
+
         if (game.food.x !== undefined) { // Only draw food if defined
             drawCell(game, game.food.x, game.food.y, game.foodColor, isMobile); // Pass isMobile
         }
@@ -120,7 +129,7 @@ export function draw(game, currentTime) {
 
     // If game is over, draw game over screen (always drawn last)
     if (game.isGameOver) {
-        console.log('Drawing game over screen. Scanner progress:', game.scannerProgress);
+        // console.log('Drawing game over screen. Scanner progress:', game.scannerProgress);
         C.ctx.fillStyle = 'rgba(255, 0, 0, 0.3)'; // Red semi-transparent overlay (more transparent)
         C.ctx.fillRect(0, 0, C.canvas.width, C.canvas.height);
         C.ctx.fillStyle = '#fff';
@@ -129,6 +138,87 @@ export function draw(game, currentTime) {
         C.ctx.fillText('GAME OVER', C.canvas.width / 2, C.canvas.height / 2);
     }
 }
+
+function drawPowerUp(game, powerUp) {
+    const px = powerUp.x * game.cellSize;
+    const py = powerUp.y * game.cellSize;
+    const size = game.cellSize;
+    const half = size / 2;
+    const ctx = C.ctx;
+
+    ctx.fillStyle = powerUp.color;
+    ctx.strokeStyle = powerUp.color;
+    ctx.lineWidth = 2;
+
+    const centerX = px + half;
+    const centerY = py + half;
+
+    switch (powerUp.shape) {
+        case 'triangle':
+            ctx.beginPath();
+            ctx.moveTo(centerX, py + size * 0.2);
+            ctx.lineTo(px + size * 0.8, py + size * 0.8);
+            ctx.lineTo(px + size * 0.2, py + size * 0.8);
+            ctx.closePath();
+            ctx.fill();
+            break;
+        case 'quadrilateral':
+            ctx.beginPath();
+            ctx.moveTo(px + size * 0.2, py + size * 0.2);
+            ctx.lineTo(px + size * 0.8, py + size * 0.2);
+            ctx.lineTo(px + size * 0.9, py + size * 0.8);
+            ctx.lineTo(px + size * 0.1, py + size * 0.8);
+            ctx.closePath();
+            ctx.fill();
+            break;
+        case 'hexagon':
+            ctx.beginPath();
+            ctx.moveTo(centerX + half * 0.8, centerY);
+            for (let i = 1; i <= 6; i++) {
+                ctx.lineTo(centerX + half * 0.8 * Math.cos(i * 2 * Math.PI / 6), centerY + half * 0.8 * Math.sin(i * 2 * Math.PI / 6));
+            }
+            ctx.closePath();
+            ctx.fill();
+            break;
+        case 'circle':
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, half * 0.8, 0, 2 * Math.PI);
+            ctx.fill();
+            break;
+        case 'star':
+            drawStar(ctx, centerX, centerY, 5, half * 0.8, half * 0.4);
+            ctx.fill();
+            break;
+        case 'square':
+        default:
+            ctx.fillRect(px + size * 0.1, py + size * 0.1, size * 0.8, size * 0.8);
+            break;
+    }
+}
+
+function drawStar(ctx, cx, cy, spikes, outerRadius, innerRadius) {
+    let rot = Math.PI / 2 * 3;
+    let x = cx;
+    let y = cy;
+    let step = Math.PI / spikes;
+
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - outerRadius);
+    for (let i = 0; i < spikes; i++) {
+        x = cx + Math.cos(rot) * outerRadius;
+        y = cy + Math.sin(rot) * outerRadius;
+        ctx.lineTo(x, y);
+        rot += step;
+
+        x = cx + Math.cos(rot) * innerRadius;
+        y = cy + Math.sin(rot) * innerRadius;
+        ctx.lineTo(x, y);
+        rot += step;
+    }
+    ctx.lineTo(cx, cy - outerRadius);
+    ctx.closePath();
+}
+
 
 export function drawFx(game, ts) {
     C.fxCtx.clearRect(0, 0, C.fxCanvas.width, C.fxCanvas.height);

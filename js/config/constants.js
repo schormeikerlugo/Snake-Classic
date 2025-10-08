@@ -11,3 +11,4 @@ export const PAUSED_OVERLAY = document.getElementById('paused');
 export const MIN_TICK = 60;
 export const SPEED_STEP = 3;
 export const INITIAL_TICK_MS = 110;
+export const SLOW_TICK_MS = 180; // Power-up de ralentización
