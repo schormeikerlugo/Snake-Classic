@@ -1,18 +1,79 @@
-import { supabase } from '../supabaseClient.js';
-import * as C from '../constants.js';
-import * as U from '../utils.js';
-import { settings } from '../settings.js';
-import { draw, drawFx, drawCountdown } from './rendering.js'; // Import drawing functions
-import { updateSnakeColor } from '../colors.js';
-import { sfx } from '../sfx.js';
-import { audioManager } from '../audio.js';
-import { showConfirmationModal } from '../modal.js';
+import { supabase } from '../lib/supabaseClient.js';
+import * as C from '../config/constants.js';
+import * as U from '../utils/utils.js';
+import { settings } from '../features/settings.js';
+import { draw, drawFx, drawCountdown } from './rendering.js';
+import { updateSnakeColor, updateObstacleColor } from '../config/colors.js';
+import { sfx } from '../sound/sfx.js';
+import { audioManager } from '../sound/audio.js';
+import { showConfirmationModal } from '../ui/modal.js';
+
+export function changeAndAnimateObstacles(game) {
+    game.paused = true;
+    game.isGlitching = true;
+    game.glitchStartTime = Date.now();
+    game.oldObstacles = [...game.obstacles]; // Guardar estado anterior
+
+    C.canvas.classList.add('glitch-effect'); // Aplicar efecto al canvas
+
+    generateObstacles(game, true); // Generar nuevos obstáculos inmediatamente
+
+    const glitchDuration = 500; // Duración del efecto en ms
+
+    setTimeout(() => {
+        game.isGlitching = false;
+        game.oldObstacles = [];
+        if (game.running) {
+            game.paused = false;
+        }
+        C.canvas.classList.remove('glitch-effect'); // Quitar efecto del canvas
+    }, glitchDuration);
+}
+
+export function generateObstacles(game, isDynamic = false) {
+    game.obstacles = [];
+
+    // For dynamic changes, generate random obstacles
+    if (isDynamic && settings.obstacles) {
+        const numObstacles = U.randInt(3, 6); // Generate 3 to 6 obstacle clusters
+        for (let i = 0; i < numObstacles; i++) {
+            const obstacleWidth = U.randInt(1, 4); // Width from 1 to 3
+            const obstacleHeight = U.randInt(1, 4); // Height from 1 to 3
+            
+            // Ensure obstacles don't spawn too close to the edges
+            const startX = U.randInt(2, game.cols - 2 - obstacleWidth);
+            const startY = U.randInt(2, game.rows - 2 - obstacleHeight);
+
+            for (let w = 0; w < obstacleWidth; w++) {
+                for (let h = 0; h < obstacleHeight; h++) {
+                    const pos = { x: startX + w, y: startY + h };
+                    // Avoid placing on snake, other obstacles, or too close to the snake head
+                    if (!game.inSnake(pos) && !inObstacle(game, pos) && (Math.abs(pos.x - game.snake[0].x) > 3 || Math.abs(pos.y - game.snake[0].y) > 3)) {
+                        game.obstacles.push(pos);
+                    }
+                }
+            }
+        }
+    } else if (settings.obstacles) {
+        // Original static obstacles for the start of the game
+        const center_x = Math.floor(game.cols / 2);
+        const center_y = Math.floor(game.rows / 2);
+        for (let i = 0; i < 8; i++) {
+            game.obstacles.push({ x: center_x - 5, y: center_y - 4 + i });
+            game.obstacles.push({ x: center_x + 5, y: center_y - 4 + i });
+        }
+    }
+}
+
+export function inObstacle(game, pos) {
+    return game.obstacles.some(obstacle => U.posEq(obstacle, pos));
+}
 
 export function placeFood(game) {
     let tries = 0;
     while (true) {
         const c = { x: U.randInt(0, game.cols - 1), y: U.randInt(0, game.rows - 1) };
-        if (!game.inSnake(c)) {
+        if (!game.inSnake(c) && !inObstacle(game, c)) {
             game.food = c;
             game.foodSpawnTime = Date.now();
             return;
@@ -39,17 +100,21 @@ export function resetGame(game) {
     game.snake = [{ x: cx, y: cy }];
     game.dir = { x: 1, y: 0 };
     game.nextDir = { ...game.dir };
+
+    generateObstacles(game, false); // Generate static obstacles at start
+
     placeFood(game);
     game.score = 0;
     game.tickMs = C.INITIAL_TICK_MS;
     game.running = false;
     game.paused = false;
-    game.isGameOver = false; // Reset game over flag
-    game.scannerProgress = 0; // Reset scanner progress
+    game.isGameOver = false;
+    game.scannerProgress = 0;
     game.updateScore();
 
     // Inicializar/restablecer colores y música
     updateSnakeColor(game);
+    updateObstacleColor(game, true); // MODIFIED: Reset obstacle color
     game.gridColor = U.getCssVar('--grid');
     game.foodColor = U.getCssVar('--food');
     audioManager.restoreGameMusic();
@@ -68,11 +133,11 @@ export function updateScore(game) {
 }
 
 export function tick(game) {
-    game.prevSnake = [...game.snake]; // Store current snake position for interpolation
+    game.prevSnake = [...game.snake];
     game.dir = game.nextDir;
     const head = { x: game.snake[0].x + game.dir.x, y: game.snake[0].y + game.dir.y };
 
-    if (head.x < 0 || head.y < 0 || head.x >= game.cols || head.y >= game.rows || game.inSnake(head)) {
+    if (head.x < 0 || head.y < 0 || head.x >= game.cols || head.y >= game.rows || game.inSnake(head) || inObstacle(game, head)) {
         game.gameOver();
         return;
     }
@@ -82,34 +147,31 @@ export function tick(game) {
     if (U.posEq(head, game.food)) {
         game.score++;
         game.updateScore();
-        updateSnakeColor(game); // Actualizar el color
+        updateSnakeColor(game); // This also updates obstacle color
         placeFood(game);
         game.spawnFx(head.x, head.y);
 
-        // Sonido de comer o bonus
-        if (game.score > 0 && game.score % 10 === 0) {
-            // Atenuar música de fondo, reproducir bonus, y restaurar música
-            audioManager.fadeVolume(audioManager.gameMusic, audioManager.baseGameVolume * settings.masterVolume * 0.6, 200) // Bajar a 60% en 200ms
+        // MODIFIED: Sonido de comer o bonus y cambio de obstáculos
+        if (game.score > 0 && game.score % 10 === 0 && settings.obstacles) {
+            audioManager.fadeVolume(audioManager.gameMusic, audioManager.baseGameVolume * settings.masterVolume * 0.6, 200)
                 .then(() => {
                     sfx.play('bonus');
-                    // Esperar la duración del sonido de bonus para restaurar la música
-                    // Asumiendo que el sonido de bonus es corto, podemos usar un tiempo fijo o la duración del audio
                     setTimeout(() => {
-                        audioManager.fadeVolume(audioManager.gameMusic, audioManager.baseGameVolume * settings.masterVolume, 500); // Subir a 100% en 500ms
-                    }, 800); // Ajustar este tiempo según la duración real del bonus.wav
+                        audioManager.fadeVolume(audioManager.gameMusic, audioManager.baseGameVolume * settings.masterVolume, 500);
+                    }, 800);
                 });
+            changeAndAnimateObstacles(game); // Call the new function
         } else {
             sfx.play('eat');
         }
 
         if (game.tickMs > C.MIN_TICK) game.tickMs -= C.SPEED_STEP;
 
-        // Snake glow effect
-        game.animateGlow(1, 300); // Animate to full glow in 300ms
+        game.animateGlow(1, 300);
         if (game.snakeGlowTimer) clearTimeout(game.snakeGlowTimer);
         game.snakeGlowTimer = setTimeout(() => {
-            game.animateGlow(0, 500); // Animate back to no glow in 500ms
-        }, 2000); // Strong glow for 2 seconds
+            game.animateGlow(0, 500);
+        }, 2000);
     } else {
         game.snake.pop();
     }
@@ -119,8 +181,10 @@ export function tick(game) {
 
 export function gameLoop(game, currentTime) {
     game.gameLoopId = requestAnimationFrame(ts => gameLoop(game, ts));
+
+    // Actualizar el pulso de brillo del obstáculo
+    game.obstacleGlowProgress = (Math.sin(currentTime / 1000) + 1) / 2; // Oscila entre 0 y 1 (más lento)
     
-    // Only update game logic if running and not paused
     if (game.running && !game.paused) {
         const timeSinceLastTick = currentTime - game.lastTickTime;
         if (timeSinceLastTick > game.tickMs) {
@@ -129,8 +193,7 @@ export function gameLoop(game, currentTime) {
         }
     }
 
-    // Always draw if not paused (even if game is over)
-    if (!game.paused) {
+    if (!game.paused || game.isGlitching) {
         draw(game, currentTime);
     }
 }
@@ -211,25 +274,22 @@ export async function gameOver(game, noDraw) {
     sfx.play('gameOver');
     audioManager.duckGameMusic();
     game.running = false;
-    game.isGameOver = true; // Set game over flag
-    game.scannerProgress = 0; // Reset scanner progress
+    game.isGameOver = true;
+    game.scannerProgress = 0;
     if (game.gameLoopId) {
         cancelAnimationFrame(game.gameLoopId);
         game.gameLoopId = null;
     }
 
-    // Enviar puntaje a Supabase
     try {
-        // 1. Obtener el usuario actual
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) {
             console.log("No hay usuario logueado, no se puede guardar el puntaje.");
-            return; // No hacer nada si no hay usuario
+            return;
         }
 
-        // 2. Invocar la Edge Function con el nombre y payload correctos
-        const { error } = await supabase.functions.invoke('submit-score', { // Nombre corregido
-            body: { user_id: user.id, score: game.score }, // Payload corregido
+        const { error } = await supabase.functions.invoke('submit-score', {
+            body: { user_id: user.id, score: game.score },
         });
 
         if (error) throw error;
@@ -237,8 +297,6 @@ export async function gameOver(game, noDraw) {
     } catch (error) {
         console.error('Error al enviar el puntaje:', error.message);
     }
-
-    // The drawing of the game over screen is handled by the draw() function.
 }
 
 export function animateGlow(game, targetIntensity, duration) {
@@ -248,7 +306,6 @@ export function animateGlow(game, targetIntensity, duration) {
     const animate = () => {
         const elapsed = Date.now() - startTime;
         const progress = Math.min(1, elapsed / duration);
-        // Ease-in-out for smoother transition
         const easedProgress = progress < 0.5 ? 2 * progress * progress : -1 + (4 - 2 * progress) * progress;
 
         game.currentGlowIntensity = startIntensity + (targetIntensity - startIntensity) * easedProgress;
@@ -284,17 +341,15 @@ export function requestRestart(game) {
     if (game.running && !game.isGameOver) {
         const wasPaused = game.paused;
         if (!wasPaused) {
-            game.togglePause(); // Pause the game only if it was running
+            game.togglePause();
         }
         showConfirmationModal(
             'Reiniciar Partida',
             '¿Seguro que quieres reiniciar la partida actual?',
             () => {
-                // onConfirm: start a new game.
                 game.startGame();
             },
             () => {
-                // onCancel: resume game only if we paused it.
                 if (!wasPaused) {
                     game.togglePause();
                 }

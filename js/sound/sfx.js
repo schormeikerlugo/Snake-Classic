@@ -1,4 +1,4 @@
-import { settings } from './settings.js';
+import { settings } from '../features/settings.js';
 import { audioManager } from './audio.js'; // Importar el audioManager para acceder al AudioContext
 
 const SFX_PATHS = {

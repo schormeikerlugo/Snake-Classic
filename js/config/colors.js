@@ -1,7 +1,6 @@
+import * as U from '../utils/utils.js';
 
-import * as U from './utils.js';
-
-const COLORS = [
+export const COLORS = [
     { base: '#0084FF', head: '#66B5FF' }, // Azul
     { base: '#EA13A2', head: '#F56CD1' }, // Rosa
     { base: '#F6E844', head: '#F9F07E' }, // Amarillo
@@ -9,7 +8,16 @@ const COLORS = [
     { base: '#EB4335', head: '#F57D73' }  // Rojo
 ];
 
-let currentColorIndex = -1; // Empezamos en -1 para que la primera selección sea el índice 0
+export const OBSTACLE_COLORS = [
+    '#FF5733', // Naranja rojizo
+    '#DAF7A6', // Verde pálido
+    '#FFC300', // Amarillo dorado
+    '#C70039', // Rojo carmesí
+    '#900C3F'  // Borgoña
+];
+
+let currentColorIndex = -1;
+let currentObstacleColorIndex = 0; // Índice para el color de los obstáculos
 
 /**
  * Actualiza el color de la serpiente y su resplandor basado en la puntuación.
@@ -33,6 +41,7 @@ export function updateSnakeColor(game) {
         game.snakeGlowStrongColor = strong;
 
         currentColorIndex = -1; // Restablecer el índice
+        updateObstacleColor(game, true); // Restablecer color de obstáculo
         return;
     }
 
@@ -55,5 +64,28 @@ export function updateSnakeColor(game) {
         game.snakeHeadColor = newColor.head;
         game.snakeGlowSubtle = subtle;
         game.snakeGlowStrongColor = strong;
+
+        updateObstacleColor(game); // Actualizar color de obstáculo
     }
+}
+
+/**
+ * Actualiza el color de los obstáculos, asegurando que no coincida con el de la serpiente.
+ * @param {Game} game - La instancia principal del juego.
+ * @param {boolean} [reset=false] - Indica si se debe restablecer al color por defecto.
+ */
+export function updateObstacleColor(game, reset = false) {
+    if (reset) {
+        game.obstacleColor = U.getCssVar('--obstacle-color');
+        return;
+    }
+
+    // Asegurarse de que el color del obstáculo sea diferente al de la serpiente
+    let nextColor;
+    do {
+        currentObstacleColorIndex = (currentObstacleColorIndex + 1) % OBSTACLE_COLORS.length;
+        nextColor = OBSTACLE_COLORS[currentObstacleColorIndex];
+    } while (nextColor === game.snakeBodyColor);
+
+    game.obstacleColor = nextColor;
 }

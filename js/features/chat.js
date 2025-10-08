@@ -1,4 +1,4 @@
-import { supabase } from './supabaseClient.js';
+import { supabase } from '../lib/supabaseClient.js';
 
 let chatChannel;
 const messagesContainer = document.getElementById('chat-messages');

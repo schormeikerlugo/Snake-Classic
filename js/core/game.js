@@ -1,13 +1,13 @@
-import * as C from './constants.js';
-import * as U from './utils.js';
-import { settings } from './settings.js';
+import * as C from '../config/constants.js';
+import * as U from '../utils/utils.js';
+import { settings } from '../features/settings.js';
 
 // Import modularized functions
-import { drawCell, draw, drawFx, drawCountdown } from './game/rendering.js';
+import { drawCell, draw, drawFx, drawCountdown } from './rendering.js';
 import {
     placeFood, inSnake, resetGame, updateScore, tick, gameLoop, spawnFx,
-    setDirection, handleKeydown, countdown, startGame, togglePause, stop, gameOver, animateGlow, requestRestart
-} from './game/gameLogic.js';
+    setDirection, handleKeydown, countdown, startGame, togglePause, stop, gameOver, animateGlow, requestRestart, generateObstacles, inObstacle
+} from './gameLogic.js';
 
 /**
  * Clase principal que encapsula toda la lógica y el estado del juego Snake.
@@ -22,6 +22,7 @@ export class Game {
         this.cols = 0;
         this.rows = 0;
         this.snake = [];
+        this.obstacles = []; // Array para almacenar las posiciones de los obstáculos
         this.prevSnake = []; // Store previous snake positions for interpolation
         this.dir = { x: 1, y: 0 };
         this.nextDir = { x: 1, y: 0 };
@@ -50,6 +51,11 @@ export class Game {
         this.snakeBodyColor = '';
         this.foodColor = '';
         this.gridColor = '';
+        this.obstacleColor = '';
+        this.obstacleGlowProgress = 0; // Nuevo
+        this.isGlitching = false; // Nuevo
+        this.glitchStartTime = 0; // Nuevo
+        this.oldObstacles = []; // Nuevo
         this.isGameOver = false; // New property to track game over state
         this.scannerProgress = 0; // New property for scanner animation
 
@@ -148,4 +154,7 @@ export class Game {
     gameOver(noDraw) { return gameOver(this, noDraw); }
     animateGlow(targetIntensity, duration) { return animateGlow(this, targetIntensity, duration); }
     requestRestart() { return requestRestart(this); } // Nueva función delegada
+    generateObstacles() { return generateObstacles(this); }
+    inObstacle(pos) { return inObstacle(this, pos); }
+    changeAndAnimateObstacles() { return changeAndAnimateObstacles(this); } // Nuevo
 }

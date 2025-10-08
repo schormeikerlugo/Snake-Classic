@@ -1,6 +1,6 @@
-import { supabase } from './supabaseClient.js';
-import { toggleAuthMode, showAuthLoader, showAuthForm, showUserProfile } from './ui.js';
-import { hideModal, showModal } from './modal.js';
+import { supabase } from '../lib/supabaseClient.js';
+import { toggleAuthMode, showAuthLoader, showAuthForm, showUserProfile } from '../ui/ui.js';
+import { hideModal, showModal } from '../ui/modal.js';
 
 let isLogin = true;
 

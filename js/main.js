@@ -1,12 +1,12 @@
-import { Game } from './game.js';
-import { initMenu } from './menu.js';
-import { audioManager } from './audio.js';
-import { sfx } from './sfx.js';
-import { registerServiceWorker } from './update.js';
+import { Game } from './core/game.js';
+import { initMenu } from './ui/menu.js';
+import { audioManager } from './sound/audio.js';
+import { sfx } from './sound/sfx.js';
+import { registerServiceWorker } from './ui/update.js';
 
 // Se importa modal.js para asegurar que sus event listeners se registren.
-import './modal.js';
-import './mobile-views.js'; // Maneja la lógica de las vistas móviles
+import './ui/modal.js';
+import './ui/mobile-views.js'; // Maneja la lógica de las vistas móviles
 
 document.addEventListener('DOMContentLoaded', () => {
     registerServiceWorker();
@@ -29,7 +29,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Oculta la pantalla de inicio y muestra el menú
             if (splashScreen) splashScreen.classList.add('hidden');
-            if (menuView) menuView.classList.remove('hidden');
+            if (menuView) {
+                menuView.classList.remove('hidden');
+                menuView.classList.add('glitch-effect');
+                setTimeout(() => {
+                    menuView.classList.remove('glitch-effect');
+                }, 500); // La duración debe coincidir con la animación en CSS
+            }
 
             // --- Solicitud de Pantalla Completa ---
             const docEl = document.documentElement;

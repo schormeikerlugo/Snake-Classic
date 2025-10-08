@@ -1,5 +1,6 @@
-import * as C from '../constants.js';
-import * as U from '../utils.js';
+import * as C from '../config/constants.js';
+import * as U from '../utils/utils.js';
+import { settings } from '../features/settings.js';
 
 export function drawCell(game, x, y, color, isMobile) {
     const px = x * game.cellSize;
@@ -45,6 +46,44 @@ export function draw(game, currentTime) {
         }
 
         const isMobile = window.innerWidth <= 768; // Determine isMobile here
+
+        // Draw obstacles
+        if (settings.obstacles) {
+            if (game.isGlitching) {
+                const glitchDuration = 500;
+                const elapsed = Date.now() - game.glitchStartTime;
+                const progress = Math.min(1, elapsed / glitchDuration);
+
+                // Dibujar obstáculos viejos "glitcheando"
+                C.ctx.globalAlpha = 1 - progress; // Desvanecer
+                game.oldObstacles.forEach(obstacle => {
+                    const xOffset = (Math.random() - 0.5) * 15;
+                    const yOffset = (Math.random() - 0.5) * 15;
+                    drawCell(game, obstacle.x + xOffset / game.cellSize, obstacle.y + yOffset / game.cellSize, game.obstacleColor, isMobile);
+                });
+
+                // Dibujar obstáculos nuevos "apareciendo"
+                C.ctx.globalAlpha = progress; // Aparecer
+                game.obstacles.forEach(obstacle => {
+                    const xOffset = (Math.random() - 0.5) * (1 - progress) * 20;
+                    const yOffset = (Math.random() - 0.5) * (1 - progress) * 20;
+                    drawCell(game, obstacle.x + xOffset / game.cellSize, obstacle.y + yOffset / game.cellSize, game.obstacleColor, isMobile);
+                });
+
+                C.ctx.globalAlpha = 1; // Restablecer alpha
+            } else {
+                // Dibujado normal con pulso de neón
+                C.ctx.shadowColor = game.obstacleColor;
+                C.ctx.shadowBlur = 5 + (game.obstacleGlowProgress * 15); // Pulso de 5 a 20
+
+                game.obstacles.forEach(obstacle => {
+                    drawCell(game, obstacle.x, obstacle.y, game.obstacleColor, isMobile);
+                });
+                
+                C.ctx.shadowBlur = 0;
+                C.ctx.shadowColor = 'transparent';
+            }
+        }
 
         if (game.food.x !== undefined) { // Only draw food if defined
             drawCell(game, game.food.x, game.food.y, game.foodColor, isMobile); // Pass isMobile

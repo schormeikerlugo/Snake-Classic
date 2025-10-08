@@ -42,16 +42,40 @@ Retro Snake Classic es una versión moderna del icónico juego **Snake** que muc
 
 ---
 
-## 🛠️ **EStructura del proyecto**
+## 🛠️ **Estructura del proyecto**
 
-| 📁 Carpeta / Archivo               | 🧾 Descripción                                                                 |
-|-----------------------------------|--------------------------------------------------------------------------------|
-| `index.html`                      | 🚀 Entrada HTML que carga todo el juego.                                       |
-| `snake/`                          | 🎮 Carpeta principal con el código fuente.                                     |
-| `snake/src/`                      | 🧩 Código modular:<br>• `constants.js` – ⚙️ Configuración y elementos del DOM.<br>• `audio.js` – 🔊 API de audio y efectos.<br>• `audio-config.js` – 🎚️ Configuración de sonidos.<br>• `bestscore.js` – 🏆 Manejo del puntaje más alto.<br>• `bestscore-config.js` – 🧠 Configuración, pantalla e inicialización del bestscore.<br>• `config.js` – 🎨 Configuración global (colores, canvas, etc.). |
-| `snake/src/modules/`              | 🛠️ Módulos separados:<br>• `core.js`, `game.js`, `game-over.js`, `rendering.js`.<br>• Archivos compartidos: `constants.js`, `audio.js`, `config.js`, `bestscore.js`, `audio-config.js`, `bestscore-config.js`. |
-| `snake/README.md`                 | 📘 Tu nuevo README – redactado con estilo y claridad.                          |
-| `snake/.github/workflows/`        | ⚙️ Archivos de CI para GitHub Actions.                                         |
+| 📁 Carpeta / Archivo | 🧾 Descripción |
+|---|---|
+| `index.html` | 🚀 Punto de entrada HTML que carga todo el juego. |
+| `js/` | 📁 Carpeta principal que contiene todo el código fuente de JavaScript. |
+| `js/main.js` | 🏁 Punto de entrada principal de la aplicación. Inicializa el juego y el menú. |
+| `js/config/` | ⚙️ Módulo de configuración. |
+| `js/config/constants.js` | 📏 Define las constantes globales del juego (lienzo, elementos del DOM, etc.). |
+| `js/config/colors.js` | 🎨 Gestiona la paleta de colores y la lógica de cambio de color de la serpiente. |
+| `js/core/` | 🧠 Núcleo del juego. |
+| `js/core/game.js` | 🎮 Clase principal del juego, encapsula el estado y la lógica principal. |
+| `js/core/gameLogic.js` | 🕹️ Contiene la lógica de movimiento, colisiones, puntuación y estado del juego. |
+| `js/core/rendering.js` | 🖼️ Funciones responsables de dibujar todos los elementos en el lienzo. |
+| `js/ui/` | 🖥️ Módulo de interfaz de usuario. |
+| `js/ui/menu.js` | 📜 Gestiona la lógica de los botones y la navegación del menú principal. |
+| `js/ui/modal.js` | 💬 Controla la visualización y el comportamiento de los modales. |
+| `js/ui/ui.js` | ✨ Funciones de utilidad para gestionar la visibilidad de los componentes de la interfaz. |
+| `js/ui/mobile-views.js`| 📱 Gestiona la lógica para alternar entre las vistas de escritorio y móvil para el chat y el ranking. |
+| `js/ui/update.js` | 🔄 Gestiona la lógica de actualización del Service Worker. |
+| `js/features/` | 🧩 Módulo de características adicionales. |
+| `js/features/auth.js` | 👤 Gestiona la autenticación de usuarios (registro, inicio de sesión). |
+| `js/features/chat.js` | 💬 Implementa la funcionalidad de chat en tiempo real. |
+| `js/features/ranking.js` | 🏆 Gestiona la tabla de clasificación de puntajes. |
+| `js/features/settings.js`| 🔧 Define la configuración del juego (sonido, volumen). |
+| `js/sound/` | 🎵 Módulo de sonido. |
+| `js/sound/audio.js` | 🔊 Gestiona la reproducción de la música de fondo. |
+| `js/sound/sfx.js` | 🎶 Gestiona la reproducción de efectos de sonido. |
+| `js/lib/` | 📚 Módulo de librerías de terceros. |
+| `js/lib/supabaseClient.js`| ☁️ Cliente de Supabase para la interacción con el backend. |
+| `js/utils/` | 🛠️ Módulo de utilidades. |
+| `js/utils/utils.js` | 🔨 Funciones de ayuda reutilizables en todo el proyecto. |
+| `styles/` | 🎨 Carpeta que contiene todos los archivos de estilo CSS. |
+| `assets/` | 🖼️ Carpeta que contiene todos los recursos (imágenes, audio, fuentes). |
 
 ---
 

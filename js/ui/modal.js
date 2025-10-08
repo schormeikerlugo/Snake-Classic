@@ -1,4 +1,4 @@
-import { sfx } from './sfx.js';
+import { sfx } from '../sound/sfx.js';
 
 const modal = document.getElementById('modal');
 const modalTitle = document.getElementById('modal-title');

@@ -1,4 +1,4 @@
-import { settings } from './settings.js';
+import { settings } from '../features/settings.js';
 
 /**
  * Gestiona la reproducción de la música de fondo utilizando Web Audio API.

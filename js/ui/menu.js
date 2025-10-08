@@ -1,11 +1,11 @@
 import { showModal } from './modal.js';
-import { settings } from './settings.js';
-import { audioManager } from './audio.js';
-import { sfx } from './sfx.js';
+import { settings } from '../features/settings.js';
+import { audioManager } from '../sound/audio.js';
+import { sfx } from '../sound/sfx.js';
 import { renderAuthForm } from './ui.js';
-import { initAuth } from './auth.js';
-import { initRanking } from './ranking.js';
-import { initChat } from './chat.js';
+import { initAuth } from '../features/auth.js';
+import { initRanking } from '../features/ranking.js';
+import { initChat } from '../features/chat.js';
 
 // Vistas principales
 const menuView = document.getElementById('menu-view');
@@ -91,6 +91,23 @@ function getSettingsContent() {
         audioManager.setMasterVolume(newVolume);
         sfx.setMasterVolume(newVolume);
         localStorage.setItem('snake_volume', newVolume);
+    });
+    fragment.appendChild(item);
+
+    // Toggle de Obstáculos
+    item = document.createElement('div');
+    item.className = 'settings-item';
+    item.innerHTML = `
+        <span>Modo Obstáculos</span>
+        <label class="switch">
+            <input type="checkbox" id="obstacles-toggle">
+            <span class="slider"></span>
+        </label>
+    `;
+    const obstaclesToggle = item.querySelector('#obstacles-toggle');
+    obstaclesToggle.checked = settings.obstacles;
+    obstaclesToggle.addEventListener('change', () => {
+        settings.obstacles = obstaclesToggle.checked;
     });
     fragment.appendChild(item);
 

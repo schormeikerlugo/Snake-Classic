@@ -110,6 +110,7 @@ button span:nth-child(4) {
 #start {
     background: linear-gradient(180deg, rgba(67,217,173,0.18), rgba(67,217,173,0.08));
     border-color: var(--snake);
+     color: white;
 }
 #start:hover, 
 #start:focus {
@@ -149,4 +150,60 @@ button span:nth-child(4) {
 .modal-close-btn:hover {
     box-shadow: none;
     animation: none;
+}
+
+/* --- Glitch Effect --- */
+.glitch-effect {
+  animation: glitch-animation 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+@keyframes glitch-animation {
+  0% {
+    transform: translate(0);
+    opacity: 1;
+    filter: none;
+  }
+  10% {
+    transform: translate(-2px, -2px) skewX(-5deg);
+    opacity: 0.8;
+  }
+  20% {
+    transform: translate(2px, 2px) skewX(5deg);
+    opacity: 1;
+  }
+  30% {
+    transform: translate(-3px, 3px) skewX(-3deg);
+    filter: blur(1px) contrast(2);
+  }
+  40% {
+    transform: translate(3px, -3px) skewX(3deg);
+    filter: none;
+  }
+  50% {
+    transform: translate(-2px, 2px) skewX(-2deg);
+    opacity: 0.7;
+    filter: saturate(1.5);
+  }
+  60% {
+    transform: translate(2px, -2px) skewX(2deg);
+    opacity: 1;
+    filter: none;
+  }
+  70% {
+    transform: translate(-4px, 4px) skewX(-4deg);
+    filter: brightness(1.5) sepia(0.5);
+  }
+  80% {
+    transform: translate(4px, -4px) skewX(4deg);
+    filter: none;
+  }
+  90% {
+    transform: translate(-1px, 1px) skewX(-1deg);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate(0);
+    opacity: 1;
+    filter: none;
+  }
 }
