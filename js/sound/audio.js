@@ -7,10 +7,18 @@ class AudioManager {
     constructor() {
         this.audioContext = null;
         this.menuMusicElement = null;
-        this.gameMusicElement = null;
+
+        this.gameMusicTracks = [
+            'assets/audio/game/pista-01.mp3',
+            'assets/audio/game/pista-02.mp3',
+            'assets/audio/game/pista-03.mp3',
+            'assets/audio/game/pista-04.mp3',
+        ];
+        this.gameMusicElements = [];
+        this.currentTrackIndex = -1;
 
         this.menuMusicSource = null;
-        this.gameMusicSource = null;
+        this.gameMusicSources = [];
 
         this.menuMusicGain = null;
         this.gameMusicGain = null;
@@ -31,37 +39,41 @@ class AudioManager {
 
         this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
-        // Crear elementos HTMLAudioElement
-        this.menuMusicElement = new Audio('assets/audio/menu/menu.mp3');
-        this.gameMusicElement = new Audio('assets/audio/game/pista-01.mp3');
-
-        this.menuMusicElement.loop = true;
-        this.gameMusicElement.loop = true;
-
-        // Crear nodos de fuente a partir de los elementos de audio
-        this.menuMusicSource = this.audioContext.createMediaElementSource(this.menuMusicElement);
-        this.gameMusicSource = this.audioContext.createMediaElementSource(this.gameMusicElement);
-
         // Crear nodos de ganancia para cada pista y para el volumen maestro
         this.menuMusicGain = this.audioContext.createGain();
         this.gameMusicGain = this.audioContext.createGain();
         this.masterGain = this.audioContext.createGain();
 
-        // Conectar nodos: Fuente -> Ganancia de pista -> Ganancia maestra -> Destino
-        this.menuMusicSource.connect(this.menuMusicGain);
-        this.menuMusicGain.connect(this.masterGain);
+        // Conectar la ganancia maestra al destino
+        this.masterGain.connect(this.audioContext.destination);
 
-        this.gameMusicSource.connect(this.gameMusicGain);
+        // Conectar ganancias de pista a la ganancia maestra
+        this.menuMusicGain.connect(this.masterGain);
         this.gameMusicGain.connect(this.masterGain);
 
-        this.masterGain.connect(this.audioContext.destination);
+        // Crear y configurar música del menú
+        this.menuMusicElement = new Audio('assets/audio/menu/menu.mp3');
+        this.menuMusicElement.loop = true;
+        this.menuMusicSource = this.audioContext.createMediaElementSource(this.menuMusicElement);
+        this.menuMusicSource.connect(this.menuMusicGain);
+
+        // Crear y configurar música del juego (playlist)
+        this.gameMusicTracks.forEach(trackPath => {
+            const audioEl = new Audio(trackPath);
+            audioEl.loop = false;
+            audioEl.addEventListener('ended', () => this.playNextGameTrack());
+            this.gameMusicElements.push(audioEl);
+
+            const source = this.audioContext.createMediaElementSource(audioEl);
+            source.connect(this.gameMusicGain);
+            this.gameMusicSources.push(source);
+        });
 
         // Establecer volúmenes iniciales
         this.menuMusicGain.gain.value = this.baseMenuVolume;
         this.gameMusicGain.gain.value = this.baseGameVolume;
-        this.setMasterVolume(settings.masterVolume); // Aplica el volumen maestro guardado
+        this.setMasterVolume(settings.masterVolume);
 
-        // Intentar reanudar el contexto de audio si está suspendido (común en iOS)
         if (this.audioContext.state === 'suspended') {
             this.audioContext.resume().catch(e => console.warn("Error al reanudar AudioContext:", e));
         }
@@ -84,18 +96,15 @@ class AudioManager {
      * @private
      */
     _play(element) {
-        if (!this.audioContext) {
-            console.warn("AudioContext no inicializado. Llama a initAudioContext() primero.");
-            return;
-        }
-        if (this.currentTrack === element) return;
+        if (!this.audioContext || !element) return;
+        if (this.currentTrack === element && !element.paused) return;
         if (!settings.sound) return;
 
         this.stopAllMusic();
+
         element.play().catch(e => console.warn("La reproducción de audio fue impedida por el navegador:", e));
         this.currentTrack = element;
 
-        // Asegurarse de que el contexto esté corriendo
         if (this.audioContext.state === 'suspended') {
             this.audioContext.resume().catch(e => console.warn("Error al reanudar AudioContext durante _play:", e));
         }
@@ -109,43 +118,61 @@ class AudioManager {
     }
 
     /**
-     * Inicia la música del juego.
+     * Inicia la música del juego con una pista aleatoria.
      */
     playGameMusic() {
-        this._play(this.gameMusicElement);
+        if (this.gameMusicElements.length === 0) return;
+        
+        let nextTrackIndex = this.currentTrackIndex;
+        if (this.gameMusicElements.length > 1) {
+            while (nextTrackIndex === this.currentTrackIndex) {
+                nextTrackIndex = Math.floor(Math.random() * this.gameMusicElements.length);
+            }
+        }
+        this.currentTrackIndex = nextTrackIndex;
+        this._play(this.gameMusicElements[this.currentTrackIndex]);
+    }
+
+    /**
+     * Reproduce la siguiente pista aleatoria del juego.
+     */
+    playNextGameTrack() {
+        this.playGameMusic();
     }
 
     /**
      * Detiene toda la música y reinicia su tiempo.
      */
     stopAllMusic() {
-        if (this.menuMusicElement) {
+        if (this.menuMusicElement && !this.menuMusicElement.paused) {
             this.menuMusicElement.pause();
             this.menuMusicElement.currentTime = 0;
         }
-        if (this.gameMusicElement) {
-            this.gameMusicElement.pause();
-            this.gameMusicElement.currentTime = 0;
-        }
+        this.gameMusicElements.forEach(el => {
+            if (!el.paused) {
+                el.pause();
+                el.currentTime = 0;
+            }
+        });
         this.currentTrack = null;
     }
 
     /**
-     * Reduce el volumen de la música del juego al 10% del volumen base.
+     * Reduce el volumen de la música del juego.
      */
     duckGameMusic() {
         if (!this.gameMusicGain || !this.audioContext) return;
-        const targetVolume = this.baseGameVolume * 0.1; // 10% del volumen base
-        this.fadeVolume(this.gameMusicGain, targetVolume, 200); // Atenuar en 200ms
+        const targetVolume = this.baseGameVolume * 0.1 * settings.masterVolume;
+        this.fadeVolume(this.gameMusicGain, targetVolume, 200);
     }
 
     /**
-     * Restaura el volumen de la música del juego al 100% del volumen base.
+     * Restaura el volumen de la música del juego.
      */
     restoreGameMusic() {
         if (!this.gameMusicGain || !this.audioContext) return;
-        const targetVolume = this.baseGameVolume; // 100% del volumen base
-        this.fadeVolume(this.gameMusicGain, targetVolume, 500); // Restaurar en 500ms
+        const targetVolume = this.baseGameVolume * settings.masterVolume;
+        this.fadeVolume(this.gameMusicGain, targetVolume, 500);
     }
 
     /**

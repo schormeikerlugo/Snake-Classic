@@ -1,6 +1,7 @@
 import * as C from '../config/constants.js';
 import * as U from '../utils/utils.js';
 import { settings } from '../features/settings.js';
+import { updateAndDrawParticles } from '../fx/particles.js';
 
 export function drawCell(game, x, y, color, isMobile) {
     const px = x * game.cellSize;
@@ -118,8 +119,8 @@ export function draw(game, currentTime) {
                 const dx = seg.x - game.prevSnake[i].x;
                 const dy = seg.y - game.prevSnake[i].y;
 
-                // Si la serpiente se teletransporta (salta más de la mitad del tablero), no interpolar
-                if (Math.abs(dx) > game.cols / 2 || Math.abs(dy) > game.rows / 2) {
+                // Si la serpiente se teletransporta (salta más de 1 celda), no interpolar
+                if (Math.abs(dx) > 1 || Math.abs(dy) > 1) {
                     interpolatedX = seg.x;
                     interpolatedY = seg.y;
                 } else {
@@ -134,6 +135,10 @@ export function draw(game, currentTime) {
         C.ctx.shadowBlur = 0;
         C.ctx.shadowColor = 'transparent';
         // --- End Glow and Snake Drawing ---
+
+        // --- Particle Effects ---
+        updateAndDrawParticles(C.ctx);
+
     }
 
     // If game is over, draw game over screen (always drawn last)

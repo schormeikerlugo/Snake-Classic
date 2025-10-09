@@ -8,6 +8,13 @@ const SFX_PATHS = {
     eat: 'assets/audio/game/efectos/comer.wav',
     gameOver: 'assets/audio/game/efectos/game-over.wav',
     pause: 'assets/audio/game/efectos/pausa.ogg',
+    // Power-up sounds
+    slowDown: 'assets/audio/game/efectos/Ralentizar.mp3',
+    doublePoints: 'assets/audio/game/efectos/Duplicar.mp3',
+    shrink: 'assets/audio/game/efectos/Encoger.mp3',
+    bomb: 'assets/audio/game/efectos/Bomba.mp3',
+    immunity: 'assets/audio/game/efectos/Inmunidad.mp3',
+    clearObstacles: 'assets/audio/game/efectos/Limpiar-Obstaculos.mp3',
 };
 
 const sounds = {}; // Almacenará los AudioBufferSourceNode

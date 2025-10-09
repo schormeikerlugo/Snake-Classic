@@ -8,6 +8,23 @@ import { sfx } from '../sound/sfx.js';
 import { audioManager } from '../sound/audio.js';
 import { showConfirmationModal } from '../ui/modal.js';
 import { POWER_UP_TYPES, POWER_UP_CONFIG } from '../config/powerups.js';
+import { createShrinkParticles, createObstacleClearParticles } from '../fx/particles.js';
+
+/**
+ * Helper function to play a sound with audio ducking.
+ * @param {string} soundName - The name of the sound to play.
+ */
+function playSoundWithDucking(soundName) {
+    audioManager.fadeVolume(audioManager.gameMusicGain, audioManager.baseGameVolume * settings.masterVolume * 0.3, 150)
+        .then(() => {
+            sfx.play(soundName);
+            // Estimate sound duration, or use a fixed delay
+            setTimeout(() => {
+                audioManager.fadeVolume(audioManager.gameMusicGain, audioManager.baseGameVolume * settings.masterVolume, 400);
+            }, 1000); // Adjusted delay for sound to play out
+        });
+}
+
 
 export function changeAndAnimateObstacles(game) {
     game.paused = true;
@@ -184,13 +201,7 @@ export function tick(game) {
 
         // MODIFIED: Sonido de comer o bonus y cambio de obstáculos
         if (game.score > 0 && game.score % 10 === 0) {
-            audioManager.fadeVolume(audioManager.gameMusic, audioManager.baseGameVolume * settings.masterVolume * 0.6, 200)
-                .then(() => {
-                    sfx.play('bonus');
-                    setTimeout(() => {
-                        audioManager.fadeVolume(audioManager.gameMusic, audioManager.baseGameVolume * settings.masterVolume, 500);
-                    }, 800);
-                });
+            playSoundWithDucking('bonus');
             changeAndAnimateObstacles(game); // Call the new function
             activateImmunity(game, 5000); // 5 seconds of immunity
         } else {
@@ -213,6 +224,10 @@ export function tick(game) {
 
 export function gameLoop(game, currentTime) {
     game.gameLoopId = requestAnimationFrame(ts => gameLoop(game, ts));
+
+    // Remove expired power-ups
+    const now = Date.now();
+    game.powerUps = game.powerUps.filter(p => (now - p.spawnTime) < 10000);
 
     // Actualizar el pulso de brillo del obstáculo
     game.obstacleGlowProgress = (Math.sin(currentTime / 1000) + 1) / 2; // Oscila entre 0 y 1 (más lento)
@@ -466,6 +481,7 @@ export function spawnPowerUp(game) {
         ...chosenType,
         x: pos.x,
         y: pos.y,
+        spawnTime: Date.now(), // Track spawn time
     };
 
     game.powerUps.push(newPowerUp);
@@ -483,14 +499,14 @@ export function activatePowerUp(game, powerUp) {
     }
 
     game.activePowerUp.type = powerUp.type;
-    sfx.play('bonus'); // General sound for all power-ups
-
     switch (powerUp.type) {
         case POWER_UP_TYPES.IMMUNITY.type:
+            playSoundWithDucking('immunity');
             activateImmunity(game, powerUp.duration);
             break;
 
         case POWER_UP_TYPES.SLOW_DOWN.type:
+            playSoundWithDucking('slowDown');
             if (game.originalTickMs === 0) {
                 game.originalTickMs = game.tickMs;
                 game.tickMs *= 1.5; // 50% slower
@@ -501,6 +517,7 @@ export function activatePowerUp(game, powerUp) {
             break;
 
         case POWER_UP_TYPES.DOUBLE_POINTS.type:
+            playSoundWithDucking('doublePoints');
             game.pointsMultiplier = 2;
             game.activePowerUp.timeoutId = setTimeout(() => {
                 deactivatePowerUp(game, POWER_UP_TYPES.DOUBLE_POINTS.type);
@@ -508,23 +525,38 @@ export function activatePowerUp(game, powerUp) {
             break;
 
         case POWER_UP_TYPES.SHRINK.type:
+            playSoundWithDucking('shrink');
             if (game.snake.length > 3) {
-                const segmentsToRemove = Math.floor(game.snake.length / 3);
-                game.snake.splice(game.snake.length - segmentsToRemove);
+                const segmentsToRemoveCount = Math.floor(game.snake.length / 3);
+                const removedSegments = game.snake.slice(-segmentsToRemoveCount);
+
+                // Create particles for each removed segment
+                removedSegments.forEach(seg => {
+                    createShrinkParticles(seg.x, seg.y, game.snakeBodyColor, game.cellSize);
+                });
+
+                game.snake.splice(game.snake.length - segmentsToRemoveCount);
             }
             break;
 
         case POWER_UP_TYPES.CLEAR_OBSTACLES.type:
+            playSoundWithDucking('clearObstacles');
             if (settings.obstacles) {
+                createObstacleClearParticles(game.obstacles, game.obstacleColor, game.cellSize);
                 game.obstacles = [];
             }
             break;
 
         case POWER_UP_TYPES.BOMB.type:
+            playSoundWithDucking('bomb');
             game.score = Math.max(0, game.score - 5); // Subtract 5 points, min 0
             game.updateScore();
             placeFood(game);
             // Optional: Add a small screen shake or visual effect
+            break;
+        
+        default:
+            playSoundWithDucking('bonus'); // Fallback for any other case
             break;
     }
 }
