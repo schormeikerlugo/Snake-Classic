@@ -120,6 +120,7 @@ export function resetGame(game) {
     game.activePowerUp = { type: null, timeoutId: null };
     game.isImmune = false;
     game.pointsMultiplier = 1;
+    game.lastPowerUpType = null;
 
     // Inicializar/restablecer colores y música
     updateSnakeColor(game);
@@ -175,14 +176,14 @@ export function tick(game) {
     }
 
     if (U.posEq(head, game.food)) {
-        game.score++;
+        game.score += game.pointsMultiplier;
         game.updateScore();
         updateSnakeColor(game); // This also updates obstacle color
         placeFood(game);
         game.spawnFx(head.x, head.y);
 
         // MODIFIED: Sonido de comer o bonus y cambio de obstáculos
-        if (game.score > 0 && game.score % 10 === 0 && settings.obstacles) {
+        if (game.score > 0 && game.score % 10 === 0) {
             audioManager.fadeVolume(audioManager.gameMusic, audioManager.baseGameVolume * settings.masterVolume * 0.6, 200)
                 .then(() => {
                     sfx.play('bonus');
@@ -405,18 +406,24 @@ export function spawnPowerUp(game) {
 
     // Probabilities for each power-up type
     const weightedPowerUps = [
-        { type: POWER_UP_TYPES.SLOW_DOWN, weight: 3 },
+        { type: POWER_UP_TYPES.SLOW_DOWN, weight: game.score >= 25 ? 3 : 0 },
         { type: POWER_UP_TYPES.DOUBLE_POINTS, weight: 2 },
         { type: POWER_UP_TYPES.IMMUNITY, weight: 2 },
-        // SHRINK appears only after 25 points
         { type: POWER_UP_TYPES.SHRINK, weight: game.score >= 25 ? 1 : 0 },
         { type: POWER_UP_TYPES.CLEAR_OBSTACLES, weight: 1 },
         { type: POWER_UP_TYPES.BOMB, weight: 1 },
     ];
 
+    // Reduce weight of last spawned power-up to avoid repetition
+    if (game.lastPowerUpType) {
+        const last = weightedPowerUps.find(p => p.type.type === game.lastPowerUpType);
+        if (last) {
+            last.weight *= 0.2; // Reduce weight to 20% of original
+        }
+    }
+
     const totalWeight = weightedPowerUps.reduce((sum, p) => sum + p.weight, 0);
     if (totalWeight === 0) {
-        // Schedule next attempt if no power-ups can be spawned
         if (game.powerUpSpawnTimer) clearTimeout(game.powerUpSpawnTimer);
         game.powerUpSpawnTimer = setTimeout(() => spawnPowerUp(game), POWER_UP_CONFIG.spawnInterval);
         return;
@@ -434,22 +441,21 @@ export function spawnPowerUp(game) {
     }
 
     if (!chosenType) {
-        // Fallback in case something goes wrong
-        chosenType = POWER_UP_TYPES.SLOW_DOWN;
+        // Fallback: find first available power-up
+        chosenType = weightedPowerUps.find(p => p.weight > 0)?.type || POWER_UP_TYPES.SLOW_DOWN;
     }
 
+    game.lastPowerUpType = chosenType.type; // Store last spawned type
 
     let pos;
     let tries = 0;
     while (true) {
         pos = { x: U.randInt(0, game.cols - 1), y: U.randInt(0, game.rows - 1) };
-        // Check that it's not on snake, obstacles, or other power-ups
         if (!game.inSnake(pos) && !inObstacle(game, pos) && !game.powerUps.some(p => U.posEq(p, pos))) {
             break;
         }
-        if (++tries > 500) { // Prevent infinite loop
+        if (++tries > 500) {
             console.warn("Could not find a valid position for a new power-up.");
-            // Schedule next attempt without placing a power-up
             if (game.powerUpSpawnTimer) clearTimeout(game.powerUpSpawnTimer);
             game.powerUpSpawnTimer = setTimeout(() => spawnPowerUp(game), POWER_UP_CONFIG.spawnInterval);
             return;
@@ -457,7 +463,7 @@ export function spawnPowerUp(game) {
     }
 
     const newPowerUp = {
-        ...chosenType, // Copy type, color, shape, duration
+        ...chosenType,
         x: pos.x,
         y: pos.y,
     };
@@ -465,39 +471,61 @@ export function spawnPowerUp(game) {
     game.powerUps.push(newPowerUp);
     console.log(`Spawned power-up: ${newPowerUp.type} at`, pos);
 
-
-    // Schedule the next one
     if (game.powerUpSpawnTimer) clearTimeout(game.powerUpSpawnTimer);
     game.powerUpSpawnTimer = setTimeout(() => spawnPowerUp(game), POWER_UP_CONFIG.spawnInterval);
 }
 
 
 export function activatePowerUp(game, powerUp) {
-    // Deactivate previous power-up if one is active
     if (game.activePowerUp.timeoutId) {
         clearTimeout(game.activePowerUp.timeoutId);
         deactivatePowerUp(game, game.activePowerUp.type);
     }
 
     game.activePowerUp.type = powerUp.type;
-    console.log('Collected power-up:', powerUp.type);
+    sfx.play('bonus'); // General sound for all power-ups
 
     switch (powerUp.type) {
         case POWER_UP_TYPES.IMMUNITY.type:
             activateImmunity(game, powerUp.duration);
             break;
+
         case POWER_UP_TYPES.SLOW_DOWN.type:
-            if (game.originalTickMs === 0) { // Prevent stacking
+            if (game.originalTickMs === 0) {
                 game.originalTickMs = game.tickMs;
-                game.tickMs = game.tickMs * 1.5; // 50% slower
+                game.tickMs *= 1.5; // 50% slower
                 game.activePowerUp.timeoutId = setTimeout(() => {
                     deactivatePowerUp(game, POWER_UP_TYPES.SLOW_DOWN.type);
-                    game.activePowerUp.type = null;
-                    game.activePowerUp.timeoutId = null;
                 }, powerUp.duration);
             }
             break;
-        // TODO: Add other power-up types
+
+        case POWER_UP_TYPES.DOUBLE_POINTS.type:
+            game.pointsMultiplier = 2;
+            game.activePowerUp.timeoutId = setTimeout(() => {
+                deactivatePowerUp(game, POWER_UP_TYPES.DOUBLE_POINTS.type);
+            }, powerUp.duration);
+            break;
+
+        case POWER_UP_TYPES.SHRINK.type:
+            if (game.snake.length > 3) {
+                const segmentsToRemove = Math.floor(game.snake.length / 3);
+                game.snake.splice(game.snake.length - segmentsToRemove);
+            }
+            break;
+
+        case POWER_UP_TYPES.CLEAR_OBSTACLES.type:
+            if (settings.obstacles) {
+                game.obstacles = [];
+            }
+            break;
+
+        case POWER_UP_TYPES.BOMB.type:
+            game.score = Math.max(0, game.score - 5); // Subtract 5 points, min 0
+            game.updateScore();
+            placeFood(game);
+            // Optional: Add a small screen shake or visual effect
+            break;
     }
 }
 
@@ -507,7 +535,7 @@ export function deactivatePowerUp(game, powerUpType) {
     console.log('Deactivating power-up:', powerUpType);
     switch (powerUpType) {
         case POWER_UP_TYPES.IMMUNITY.type:
-            // The logic is handled by the timeout in activateImmunity
+            // Logic is handled by the timeout in activateImmunity
             break;
         case POWER_UP_TYPES.DOUBLE_POINTS.type:
             game.pointsMultiplier = 1;
@@ -519,6 +547,9 @@ export function deactivatePowerUp(game, powerUpType) {
             }
             break;
     }
+    // Clear active power-up state after deactivation
+    game.activePowerUp.type = null;
+    game.activePowerUp.timeoutId = null;
 }
 
 
@@ -529,7 +560,6 @@ export function isSelfColliding(game) {
 }
 
 export function activateImmunity(game, duration) {
-    // If immunity is already active, clear the old timeout to extend it
     if (game.activePowerUp.type === 'IMMUNITY' && game.activePowerUp.timeoutId) {
         clearTimeout(game.activePowerUp.timeoutId);
     }
@@ -542,9 +572,7 @@ export function activateImmunity(game, duration) {
             game.activePowerUp.timeoutId = setTimeout(endImmunity, 100);
         } else {
             game.isImmune = false;
-            game.activePowerUp.type = null;
-            game.activePowerUp.timeoutId = null;
-            console.log('Immunity deactivated');
+            deactivatePowerUp(game, POWER_UP_TYPES.IMMUNITY.type);
         }
     };
 

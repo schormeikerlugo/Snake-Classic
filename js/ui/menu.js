@@ -47,6 +47,7 @@ function getHowToPlayContent() {
                                 <th>Power-Up</th>
                                 <th>Forma</th>
                                 <th>Efecto</th>
+                                <th>Duración</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -54,31 +55,37 @@ function getHowToPlayContent() {
                                 <td><strong>Ralentizar</strong></td>
                                 <td><div class="shape triangle blue"></div></td>
                                 <td>Reduce la velocidad de la serpiente temporalmente.</td>
+                                <td>10 seg</td>
                             </tr>
                             <tr>
                                 <td><strong>Puntos Dobles</strong></td>
                                 <td><div class="shape quadrilateral yellow"></div></td>
                                 <td>Duplica los puntos que obtienes por cada comida.</td>
+                                <td>15 seg</td>
                             </tr>
                             <tr>
                                 <td><strong>Inmunidad</strong></td>
                                 <td><div class="shape hexagon green"></div></td>
                                 <td>Te vuelve inmune a los choques. ¡Atraviésalo todo!</td>
+                                <td>10 seg</td>
                             </tr>
                             <tr>
                                 <td><strong>Encoger</strong></td>
                                 <td><div class="shape circle purple"></div></td>
                                 <td>Reduce el tamaño de la serpiente.</td>
+                                <td>Instantáneo</td>
                             </tr>
                             <tr>
                                 <td><strong>Limpiar Obstáculos</strong></td>
                                 <td><div class="shape star red"></div></td>
                                 <td>Elimina todos los obstáculos del tablero.</td>
+                                <td>Instantáneo</td>
                             </tr>
                             <tr>
                                 <td><strong>Bomba</strong></td>
                                 <td><div class="shape square gray"></div></td>
                                 <td>¡Cuidado! Resta puntos y genera nueva comida.</td>
+                                <td>Instantáneo</td>
                             </tr>
                         </tbody>
                     </table>

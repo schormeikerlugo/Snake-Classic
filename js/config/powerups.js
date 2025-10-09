@@ -38,5 +38,5 @@ export const POWER_UP_TYPES = {
 };
 
 export const POWER_UP_CONFIG = {
-    spawnInterval: 15000, // 15 seconds
+    spawnInterval: 20000, // 20 seconds
 };

@@ -117,14 +117,14 @@ Retro Snake Classic es una versión moderna del icónico juego **Snake** que muc
 - 📊 **Pantalla de Puntuaciones**: Interfaz clara con el mejor puntaje y botón `Reset`.
 - ✨ **Power-Ups Dinámicos:** ¡El juego ahora incluye power-ups que aparecen periódicamente para cambiar el ritmo del juego! Cada power-up tiene una forma y color únicos para que puedas identificarlos al instante.
 
-| Power-Up | Forma | Color | Efecto |
-| :--- | :--- | :--- | :--- |
-| **Ralentizar** | Triángulo | Azul | Reduce la velocidad de la serpiente temporalmente. ¡Ideal para maniobrar en situaciones difíciles! |
-| **Puntos Dobles** | Cuadrilátero | Amarillo | Duplica los puntos que obtienes por cada comida durante un tiempo limitado. |
-| **Inmunidad** | Hexágono | Verde | Te vuelve inmune a los choques contra las paredes y obstáculos. ¡Atraviésalo todo! |
-| **Encoger** | Círculo | Morado | Reduce el tamaño de la serpiente, eliminando los últimos segmentos de la cola. |
-| **Limpiar Obstáculos** | Estrella | Rojo | Elimina todos los obstáculos del tablero instantáneamente. |
-| **Bomba** | Cuadrado | Gris | ¡Cuidado! Este power-up negativo te resta puntos y genera una nueva comida en otro lugar. |
+| Power-Up | Forma | Color | Efecto | Duración |
+| :--- | :--- | :--- | :--- | :--- |
+| **Ralentizar** | Triángulo | Azul | Reduce la velocidad de la serpiente temporalmente. ¡Ideal para maniobrar en situaciones difíciles! | 10 seg |
+| **Puntos Dobles** | Cuadrilátero | Amarillo | Duplica los puntos que obtienes por cada comida durante un tiempo limitado. | 15 seg |
+| **Inmunidad** | Hexágono | Verde | Te vuelve inmune a los choques contra las paredes y obstáculos. ¡Atraviésalo todo! | 10 seg |
+| **Encoger** | Círculo | Morado | Reduce el tamaño de la serpiente, eliminando los últimos segmentos de la cola. | Instantáneo |
+| **Limpiar Obstáculos** | Estrella | Rojo | Elimina todos los obstáculos del tablero instantáneamente. | Instantáneo |
+| **Bomba** | Cuadrado | Gris | ¡Cuidado! Este power-up negativo te resta puntos y genera una nueva comida en otro lugar. | Instantáneo |
 
 ---
 

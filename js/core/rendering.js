@@ -115,8 +115,17 @@ export function draw(game, currentTime) {
             let interpolatedY = seg.y;
 
             if (game.prevSnake[i]) { // Ensure previous segment exists
-                interpolatedX = game.prevSnake[i].x + (seg.x - game.prevSnake[i].x) * alpha;
-                interpolatedY = game.prevSnake[i].y + (seg.y - game.prevSnake[i].y) * alpha;
+                const dx = seg.x - game.prevSnake[i].x;
+                const dy = seg.y - game.prevSnake[i].y;
+
+                // Si la serpiente se teletransporta (salta más de la mitad del tablero), no interpolar
+                if (Math.abs(dx) > game.cols / 2 || Math.abs(dy) > game.rows / 2) {
+                    interpolatedX = seg.x;
+                    interpolatedY = seg.y;
+                } else {
+                    interpolatedX = game.prevSnake[i].x + dx * alpha;
+                    interpolatedY = game.prevSnake[i].y + dy * alpha;
+                }
             }
 
             drawCell(game, interpolatedX, interpolatedY, i === 0 ? game.snakeHeadColor : game.snakeBodyColor, isMobile); // Pass isMobile
@@ -142,7 +151,7 @@ export function draw(game, currentTime) {
 function drawPowerUp(game, powerUp) {
     const px = powerUp.x * game.cellSize;
     const py = powerUp.y * game.cellSize;
-    const size = game.cellSize;
+    const size = game.cellSize * 1.3; // 30% larger
     const half = size / 2;
     const ctx = C.ctx;
 
@@ -150,48 +159,42 @@ function drawPowerUp(game, powerUp) {
     ctx.strokeStyle = powerUp.color;
     ctx.lineWidth = 2;
 
-    const centerX = px + half;
-    const centerY = py + half;
+    const centerX = px + game.cellSize / 2; // Center based on original cell size
+    const centerY = py + game.cellSize / 2;
 
     switch (powerUp.shape) {
         case 'triangle':
             ctx.beginPath();
-            ctx.moveTo(centerX, py + size * 0.2);
-            ctx.lineTo(px + size * 0.8, py + size * 0.8);
-            ctx.lineTo(px + size * 0.2, py + size * 0.8);
+            ctx.moveTo(centerX, centerY - half * 0.5);
+            ctx.lineTo(centerX + half * 0.5, centerY + half * 0.5);
+            ctx.lineTo(centerX - half * 0.5, centerY + half * 0.5);
             ctx.closePath();
             ctx.fill();
             break;
         case 'quadrilateral':
-            ctx.beginPath();
-            ctx.moveTo(px + size * 0.2, py + size * 0.2);
-            ctx.lineTo(px + size * 0.8, py + size * 0.2);
-            ctx.lineTo(px + size * 0.9, py + size * 0.8);
-            ctx.lineTo(px + size * 0.1, py + size * 0.8);
-            ctx.closePath();
-            ctx.fill();
+            ctx.fillRect(centerX - half, centerY - half * 0.7, size, size * 0.7);
             break;
         case 'hexagon':
             ctx.beginPath();
-            ctx.moveTo(centerX + half * 0.8, centerY);
+            ctx.moveTo(centerX + half, centerY);
             for (let i = 1; i <= 6; i++) {
-                ctx.lineTo(centerX + half * 0.8 * Math.cos(i * 2 * Math.PI / 6), centerY + half * 0.8 * Math.sin(i * 2 * Math.PI / 6));
+                ctx.lineTo(centerX + half * Math.cos(i * 2 * Math.PI / 6), centerY + half * Math.sin(i * 2 * Math.PI / 6));
             }
             ctx.closePath();
             ctx.fill();
             break;
         case 'circle':
             ctx.beginPath();
-            ctx.arc(centerX, centerY, half * 0.8, 0, 2 * Math.PI);
+            ctx.arc(centerX, centerY, half, 0, 2 * Math.PI);
             ctx.fill();
             break;
         case 'star':
-            drawStar(ctx, centerX, centerY, 5, half * 0.8, half * 0.4);
+            drawStar(ctx, centerX, centerY, 5, half, half / 2);
             ctx.fill();
             break;
         case 'square':
         default:
-            ctx.fillRect(px + size * 0.1, py + size * 0.1, size * 0.8, size * 0.8);
+            ctx.fillRect(centerX - half, centerY - half, size, size);
             break;
     }
 }
