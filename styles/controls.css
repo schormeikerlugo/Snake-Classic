@@ -19,7 +19,6 @@
     color: var(--text);
     user-select: none;
     -webkit-user-select: none;
-    clip-path: circle(50%);
     font-weight: bold;
     border: 1px solid;
     transition: all 0.2s;
@@ -65,8 +64,8 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 125%;
-    height: 125%;
+    width: 140%;
+    height: 140%;
     background: transparent;
     border-radius: 50%;
 }
@@ -85,6 +84,21 @@
     width: 60px;
     height: 60px;
     font-size: 24px;
+}
+
+#mobile-restart-btn::before, 
+#mobile-pause-btn::before,
+#mobile-chat-btn::before,
+#mobile-ranking-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 140%;
+    height: 140%;
+    background: transparent;
+    border-radius: 50%;
 }
 
 #mobile-pause-btn {

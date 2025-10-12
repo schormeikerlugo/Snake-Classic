@@ -119,7 +119,11 @@ export function resetGame(game) {
     game.dir = { x: 1, y: 0 };
     game.nextDir = { ...game.dir };
 
-    generateObstacles(game, false); // Generate static obstacles at start
+    if (settings.obstacles) {
+        generateObstacles(game, false); // Generate static obstacles at start
+    } else {
+        game.obstacles = [];
+    }
 
     placeFood(game);
     game.score = 0;

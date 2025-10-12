@@ -6,6 +6,7 @@ import { renderAuthForm } from './ui.js';
 import { initAuth } from '../features/auth.js';
 import { initRanking } from '../features/ranking.js';
 import { initChat } from '../features/chat.js';
+import { initModeSelection } from './mode-selection.js';
 
 // Vistas principales
 const menuView = document.getElementById('menu-view');
@@ -178,6 +179,15 @@ function getSettingsContent() {
     return fragment;
 }
 
+async function showModeSelection(game) {
+    const response = await fetch('templates/mode-selection.html');
+    const html = await response.text();
+    showModal('Elige el modo de juego', (modalBody) => {
+        modalBody.innerHTML = html;
+        initModeSelection(game);
+    });
+}
+
 /**
  * Inicializa el menú, configurando los listeners para los botones.
  * @param {Game} game - La instancia del juego para poder iniciarlo.
@@ -186,15 +196,7 @@ export function initMenu(game) {
     const backToMenuBtn = document.getElementById('back-to-menu-btn');
 
     startBtn.addEventListener('click', () => {
-        menuView.classList.add('hidden');
-        gameView.classList.remove('hidden');
-        
-        // Inicia la música y los componentes en tiempo real
-        audioManager.playGameMusic();
-        initRanking(document.getElementById('ranking-container'));
-        initChat();
-
-        game.startGame();
+        showModeSelection(game);
     });
 
     howToPlayBtn.addEventListener('click', () => {
