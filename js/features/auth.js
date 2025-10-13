@@ -29,47 +29,50 @@ async function updateUserProfile(user) {
 async function handleAuthFormSubmit(event) {
     event.preventDefault();
     showAuthLoader();
-    const form = event.target;
-    const email = form.email.value;
-    const password = form.password.value;
-    const username = form.username.value;
-    const errorElement = document.getElementById('auth-error');
-    errorElement.textContent = '';
 
-    try {
-        let response;
-        if (isLogin) {
-            response = await supabase.auth.signInWithPassword({ email, password });
-        } else {
-            response = await supabase.auth.signUp({ 
-                email, 
-                password,
-                options: { data: { username: username } } 
-            });
-        }
+    setTimeout(async () => {
+        const form = event.target;
+        const email = form.email.value;
+        const password = form.password.value;
+        const username = form.username.value;
+        const errorElement = document.getElementById('auth-error');
+        errorElement.textContent = '';
 
-        if (response.error) throw response.error;
-
-        if (!isLogin && response.data.user) {
-            if (response.data.user.identities && response.data.user.identities.length === 0) {
-                 errorElement.textContent = 'Este usuario ya existe. Por favor, inicia sesión.';
-                 showAuthForm(); // Vuelve a mostrar el formulario con el error
+        try {
+            let response;
+            if (isLogin) {
+                response = await supabase.auth.signInWithPassword({ email, password });
             } else {
-                hideModal();
-                setTimeout(() => {
-                    showModal('¡Registro Exitoso!', '<p>Hemos enviado un enlace de confirmación a tu correo electrónico. ¡Revísalo para activar tu cuenta!</p>');
-                }, 300);
+                response = await supabase.auth.signUp({
+                    email,
+                    password,
+                    options: { data: { username: username } }
+                });
             }
-            return;
-        }
-        
-        // Para el login, onAuthStateChange se encargará de llamar a updateUserProfile,
-        // que ya gestiona las vistas. No es necesario hacer nada más aquí.
 
-    } catch (error) {
-        errorElement.textContent = error.message;
-        showAuthForm(); // Si hay un error, vuelve a mostrar el formulario
-    }
+            if (response.error) throw response.error;
+
+            if (!isLogin && response.data.user) {
+                if (response.data.user.identities && response.data.user.identities.length === 0) {
+                    errorElement.textContent = 'Este usuario ya existe. Por favor, inicia sesión.';
+                    showAuthForm(); // Vuelve a mostrar el formulario con el error
+                } else {
+                    hideModal();
+                    setTimeout(() => {
+                        showModal('¡Registro Exitoso!', '<p>Hemos enviado un enlace de confirmación a tu correo electrónico. ¡Revísalo para activar tu cuenta!</p>');
+                    }, 300);
+                }
+                return;
+            }
+
+            // Para el login, onAuthStateChange se encargará de llamar a updateUserProfile,
+            // que ya gestiona las vistas. No es necesario hacer nada más aquí.
+
+        } catch (error) {
+            errorElement.textContent = error.message;
+            showAuthForm(); // Si hay un error, vuelve a mostrar el formulario
+        }
+    }, 50); // Un pequeño retardo para asegurar que el DOM se actualice
 }
 
 async function handleLogout() {
@@ -80,40 +83,45 @@ async function handleLogout() {
 }
 
 async function handleAvatarUpload(event) {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
     const file = event.target.files[0];
     if (!file) return;
 
     showAuthLoader(); // Muestra el loader durante la subida
 
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${user.id}/avatar.${fileExt}`;
-    const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(fileName, file, { upsert: true });
+    setTimeout(async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+            showUserProfile(); // Si no hay usuario, volver al perfil
+            return;
+        }
 
-    if (uploadError) {
-        console.error('Error subiendo avatar:', uploadError);
-        showUserProfile(); // Vuelve al perfil aunque falle
-        return;
-    }
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${user.id}/avatar.${fileExt}`;
+        const { error: uploadError } = await supabase.storage
+            .from('avatars')
+            .upload(fileName, file, { upsert: true });
 
-    const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(fileName);
+        if (uploadError) {
+            console.error('Error subiendo avatar:', uploadError);
+            showUserProfile(); // Vuelve al perfil aunque falle
+            return;
+        }
 
-    const { error: updateError } = await supabase
-        .from('perfiles')
-        .update({ avatar_url: publicUrl })
-        .eq('id', user.id);
+        const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(fileName);
 
-    if (updateError) {
-        console.error('Error actualizando URL de avatar:', updateError);
-    } else {
-        document.getElementById('profile-avatar').src = publicUrl;
-    }
+        const { error: updateError } = await supabase
+            .from('perfiles')
+            .update({ avatar_url: publicUrl })
+            .eq('id', user.id);
 
-    showUserProfile(); // Vuelve al perfil después de la subida
+        if (updateError) {
+            console.error('Error actualizando URL de avatar:', updateError);
+        } else {
+            document.getElementById('profile-avatar').src = publicUrl;
+        }
+
+        showUserProfile(); // Vuelve al perfil después de la subida
+    }, 50);
 }
 
 export function initAuth() {

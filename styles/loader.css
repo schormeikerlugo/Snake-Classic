@@ -1,5 +1,4 @@
 .pixel-loader-container {
-  display: none; /* Oculto por defecto */
   justify-content: center;
   align-items: center;
   min-height: 250px; /* Asegura que el modal no se colapse */
