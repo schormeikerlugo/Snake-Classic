@@ -43,6 +43,30 @@ export function createObstacleClearParticles(obstacles, color, cellSize) {
 }
 
 /**
+ * Creates a trail of particles for the slow-down effect.
+ * @param {number} x - The grid x-coordinate.
+ * @param {number} y - The grid y-coordinate.
+ * @param {number} cellSize - The size of a grid cell in pixels.
+ */
+export function createSlowDownTrail(x, y, cellSize) {
+    const centerX = x * cellSize + cellSize / 2;
+    const centerY = y * cellSize + cellSize / 2;
+
+    for (let i = 0; i < 2; i++) { // Fewer particles for a subtle trail
+        particles.push({
+            x: centerX + (Math.random() - 0.5) * cellSize, // Spawn within the cell
+            y: centerY + (Math.random() - 0.5) * cellSize,
+            vx: (Math.random() - 0.5) * 0.3, // Very low velocity
+            vy: (Math.random() - 0.5) * 0.3,
+            alpha: 0.8,
+            color: '#00BFFF', // Deep sky blue color
+            lifespan: 1200, // Longer lifespan for a trailing effect
+            startTime: Date.now(),
+        });
+    }
+}
+
+/**
  * Updates and draws all active particles.
  * @param {CanvasRenderingContext2D} ctx - The canvas rendering context.
  */

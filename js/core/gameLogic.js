@@ -8,7 +8,8 @@ import { sfx } from '../sound/sfx.js';
 import { audioManager } from '../sound/audio.js';
 import { showConfirmationModal } from '../ui/modal.js';
 import { POWER_UP_TYPES, POWER_UP_CONFIG } from '../config/powerups.js';
-import { createShrinkParticles, createObstacleClearParticles } from '../fx/particles.js';
+import { createShrinkParticles, createObstacleClearParticles, createSlowDownTrail } from '../fx/particles.js';
+import { triggerBombAnimation, triggerShrinkAnimation } from '../fx/animationManager.js';
 
 /**
  * Helper function to play a sound with audio ducking.
@@ -225,6 +226,14 @@ export function tick(game) {
         }, 2000);
     } else {
         game.snake.pop();
+    }
+
+    // SLOW_DOWN particle trail effect
+    if (game.activePowerUp && game.activePowerUp.type === 'SLOW_DOWN') {
+        const tail = game.snake[game.snake.length - 1];
+        if (tail) {
+            createSlowDownTrail(tail.x, tail.y, game.cellSize);
+        }
     }
 
     game.turnLocked = false;
@@ -544,6 +553,7 @@ export function activatePowerUp(game, powerUp) {
                 });
 
                 game.snake.splice(game.snake.length - segmentsToRemoveCount);
+                triggerShrinkAnimation(removedSegments);
             }
             break;
 
@@ -557,6 +567,7 @@ export function activatePowerUp(game, powerUp) {
 
         case POWER_UP_TYPES.BOMB.type:
             playSoundWithDucking('bomb');
+            triggerBombAnimation(game.snake);
             game.score = Math.max(0, game.score - 5); // Subtract 5 points, min 0
             game.updateScore();
             placeFood(game);

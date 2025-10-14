@@ -2,6 +2,48 @@ import * as C from '../config/constants.js';
 import * as U from '../utils/utils.js';
 import { settings } from '../features/settings.js';
 import { updateAndDrawParticles } from '../fx/particles.js';
+import { drawImmunityEffect, drawDoublePointsEffect, drawSlowDownEffect } from '../fx/snakeEffects.js';
+import { updateAndDrawAnimations } from '../fx/animationManager.js';
+
+function drawSnake(game, alpha, isMobile, currentTime) {
+    // FIX: Check the correct properties for active power-ups.
+    const isImmune = game.isImmune;
+    const hasDoublePoints = game.activePowerUp && game.activePowerUp.type === 'DOUBLE_POINTS';
+    const isSlowedDown = game.activePowerUp && game.activePowerUp.type === 'SLOW_DOWN';
+
+    const interpolatedSnake = game.snake.map((seg, i) => {
+        let interpolatedX = seg.x * game.cellSize;
+        let interpolatedY = seg.y * game.cellSize;
+
+        if (game.prevSnake[i]) {
+            const dx = seg.x - game.prevSnake[i].x;
+            const dy = seg.y - game.prevSnake[i].y;
+
+            if (Math.abs(dx) <= 1 && Math.abs(dy) <= 1) {
+                interpolatedX = (game.prevSnake[i].x + dx * alpha) * game.cellSize;
+                interpolatedY = (game.prevSnake[i].y + dy * alpha) * game.cellSize;
+            }
+        }
+        return { x: interpolatedX, y: interpolatedY };
+    });
+
+    if (isImmune) {
+        drawImmunityEffect(C.ctx, interpolatedSnake, game.snakeBodyColor, game.cellSize);
+    } else if (hasDoublePoints) {
+        drawDoublePointsEffect(C.ctx, interpolatedSnake, game.cellSize, currentTime);
+    } else if (isSlowedDown) {
+        drawSlowDownEffect(C.ctx, interpolatedSnake, game.cellSize, currentTime);
+    } else {
+        // Lógica de dibujado original (ahora usa el array interpolado)
+        interpolatedSnake.forEach((seg, i) => {
+            // Para el dibujado normal, necesitamos las coordenadas de la grilla, no de píxeles.
+            const gridX = seg.x / game.cellSize;
+            const gridY = seg.y / game.cellSize;
+            const isHead = i === 0;
+            drawCell(game, gridX, gridY, isHead ? game.snakeHeadColor : game.snakeBodyColor, isMobile);
+        });
+    }
+}
 
 export function drawCell(game, x, y, color, isMobile) {
     const px = x * game.cellSize;
@@ -111,26 +153,7 @@ export function draw(game, currentTime) {
         C.ctx.shadowColor = glowColor;
         C.ctx.shadowBlur = 15 + (game.currentGlowIntensity * 10);
 
-        game.snake.forEach((seg, i) => {
-            let interpolatedX = seg.x;
-            let interpolatedY = seg.y;
-
-            if (game.prevSnake[i]) { // Ensure previous segment exists
-                const dx = seg.x - game.prevSnake[i].x;
-                const dy = seg.y - game.prevSnake[i].y;
-
-                // Si la serpiente se teletransporta (salta más de 1 celda), no interpolar
-                if (Math.abs(dx) > 1 || Math.abs(dy) > 1) {
-                    interpolatedX = seg.x;
-                    interpolatedY = seg.y;
-                } else {
-                    interpolatedX = game.prevSnake[i].x + dx * alpha;
-                    interpolatedY = game.prevSnake[i].y + dy * alpha;
-                }
-            }
-
-            drawCell(game, interpolatedX, interpolatedY, i === 0 ? game.snakeHeadColor : game.snakeBodyColor, isMobile); // Pass isMobile
-        });
+        drawSnake(game, alpha, isMobile, currentTime);
         
         C.ctx.shadowBlur = 0;
         C.ctx.shadowColor = 'transparent';
@@ -138,6 +161,9 @@ export function draw(game, currentTime) {
 
         // --- Particle Effects ---
         updateAndDrawParticles(C.ctx);
+
+        // --- One-off Animations ---
+        updateAndDrawAnimations(game);
 
     }
 

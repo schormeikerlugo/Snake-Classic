@@ -5,7 +5,7 @@ export const COLORS = [
     { base: '#EA13A2', head: '#F56CD1' }, // Rosa
     { base: '#F6E844', head: '#F9F07E' }, // Amarillo
     { base: '#F6AC44', head: '#F9C67E' }, // Naranja
-    { base: '#EB4335', head: '#F57D73' }, // Rojo
+    { base: '#f10c0cff', head: '#e73b3bff' }, // Rojo
     // Nuevos colores eléctricos
     { base: '#39FF14', head: '#7FFF00' }, // Verde Neón
     { base: '#00FFFF', head: '#E0FFFF' }, // Cian
