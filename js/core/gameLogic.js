@@ -200,6 +200,10 @@ export function tick(game) {
         game.score += game.pointsMultiplier;
         game.updateScore();
         updateSnakeColor(game); // This also updates obstacle color
+        
+        // Create particle effect before placing new food
+        createShrinkParticles(game.food.x, game.food.y, game.foodColor, game.cellSize);
+
         placeFood(game);
         game.spawnFx(head.x, head.y);
 

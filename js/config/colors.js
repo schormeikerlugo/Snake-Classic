@@ -5,7 +5,13 @@ export const COLORS = [
     { base: '#EA13A2', head: '#F56CD1' }, // Rosa
     { base: '#F6E844', head: '#F9F07E' }, // Amarillo
     { base: '#F6AC44', head: '#F9C67E' }, // Naranja
-    { base: '#EB4335', head: '#F57D73' }  // Rojo
+    { base: '#EB4335', head: '#F57D73' }, // Rojo
+    // Nuevos colores eléctricos
+    { base: '#39FF14', head: '#7FFF00' }, // Verde Neón
+    { base: '#00FFFF', head: '#E0FFFF' }, // Cian
+    { base: '#9400D3', head: '#BF00FF' }, // Púrpura Eléctrico
+    { base: '#FF00FF', head: '#FF77FF' }, // Magenta Vívido
+    { base: '#FF5F1F', head: '#FF8C00' }  // Naranja Intenso
 ];
 
 export const OBSTACLE_COLORS = [
