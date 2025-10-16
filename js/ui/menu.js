@@ -187,9 +187,10 @@ export function initMenu(game) {
     });
 
     settingsBtn.addEventListener('click', () => {
-        const modalTitle = document.getElementById('modal-title');
-        if (modalTitle) modalTitle.dataset.translateKey = 'settings';
-        showModal(getTranslation('settings'), getSettingsContent());
+        showModal(getTranslation('settings'), (modalBody) => {
+            modalBody.appendChild(getSettingsContent());
+            updateUI(); // Traduce el contenido dinámico
+        });
     });
 
     accountBtn.addEventListener('click', () => {

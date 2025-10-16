@@ -3,7 +3,7 @@ let currentLanguage = 'es';
 
 async function loadLanguage(lang) {
   try {
-    const response = await fetch(`/assets/locales/${lang}.json`);
+    const response = await fetch(`assets/locales/${lang}.json`);
     if (!response.ok) {
       throw new Error(`Failed to load ${lang}.json`);
     }

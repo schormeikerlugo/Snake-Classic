@@ -236,7 +236,7 @@ export function initializePowerupDemos(container) {
         titleWrapper.appendChild(title);
 
         const description = document.createElement('p');
-        description.textContent = getTranslation(config.description);
+        description.dataset.translateKey = config.description;
 
         const demoCanvas = document.createElement('canvas');
         demoCanvas.width = 100;
