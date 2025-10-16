@@ -28,7 +28,7 @@ function updateUI() {
     if (element.tagName === 'INPUT' && element.placeholder) {
         element.placeholder = translation;
     } else {
-        element.textContent = translation;
+        element.innerHTML = translation;
     }
   });
 }

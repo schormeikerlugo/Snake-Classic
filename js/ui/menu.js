@@ -29,20 +29,20 @@ function renderHowToPlayContent(modalBody) {
     modalBody.innerHTML = `
         <div class="how-to-play-content">
             <div class="section">
-                <h2>${getTranslation('howToPlayControlsTitle')}</h2>
-                <p>${getTranslation('howToPlayControlsDesc1')}</p>
-                <p>${getTranslation('howToPlayControlsDesc2')}</p>
+                <h2 data-translate-key="howToPlayControlsTitle"></h2>
+                <p data-translate-key="howToPlayControlsDesc1"></p>
+                <p data-translate-key="howToPlayControlsDesc2"></p>
             </div>
 
             <div class="section">
-                <h2>${getTranslation('howToPlayObjectiveTitle')}</h2>
-                <p>${getTranslation('howToPlayObjectiveDesc1')}</p>
-                <p>${getTranslation('howToPlayObjectiveDesc2')}</p>
+                <h2 data-translate-key="howToPlayObjectiveTitle"></h2>
+                <p data-translate-key="howToPlayObjectiveDesc1"></p>
+                <p data-translate-key="howToPlayObjectiveDesc2"></p>
             </div>
 
             <div class="section">
-                <h2>${getTranslation('howToPlayPowerUpsTitle')}</h2>
-                <p>${getTranslation('howToPlayPowerUpsDesc')}</p>
+                <h2 data-translate-key="howToPlayPowerUpsTitle"></h2>
+                <p data-translate-key="howToPlayPowerUpsDesc"></p>
                 <div id="powerup-demos-container"></div>
             </div>
         </div>
@@ -61,15 +61,15 @@ function getCreditsContent() {
         <div style="text-align: center; margin-bottom: 20px;">
             <img src="assets/image/creditos/avatar.jpeg" alt="Schormeiker Lugo" style="max-width: 150px; border-radius: 50%; margin-bottom: 10px;">
             <p style="font-weight: bold; font-size: 1.2em;">Schormeiker Lugo</p>
-            <p>${getTranslation('creditsRole')}</p>
+            <p data-translate-key="creditsRole"></p>
         </div>
-      <p>${getTranslation('creditsLine1')}</p>
-        <p>${getTranslation('creditsLine2')}</p>
-        <p>${getTranslation('creditsLine3')}</p>
-        <p>${getTranslation('creditsLine4')}</p>
-        <p>${getTranslation('creditsDonation')}</p>
-        <p style="font-weight: bold; font-size: 1.2em;" >${getTranslation('creditsBitcoin')}</p>
-        <p style="font-weight: bold; font-size: 1.2em;">${getTranslation('creditsUsdt')}</p>
+      <p data-translate-key="creditsLine1"></p>
+        <p data-translate-key="creditsLine2"></p>
+        <p data-translate-key="creditsLine3"></p>
+        <p data-translate-key="creditsLine4"></p>
+        <p data-translate-key="creditsDonation"></p>
+        <p style="font-weight: bold; font-size: 1.2em;" data-translate-key="creditsBitcoin"></p>
+        <p style="font-weight: bold; font-size: 1.2em;" data-translate-key="creditsUsdt"></p>
     `;
 }
 
@@ -173,11 +173,17 @@ export function initMenu(game) {
     });
 
     howToPlayBtn.addEventListener('click', () => {
-        showModal(getTranslation('howToPlay'), renderHowToPlayContent);
+        showModal(getTranslation('howToPlay'), (modalBody) => {
+            renderHowToPlayContent(modalBody);
+            updateUI();
+        });
     });
 
     creditsBtn.addEventListener('click', () => {
-        showModal(getTranslation('credits'), getCreditsContent());
+        showModal(getTranslation('credits'), (modalBody) => {
+            modalBody.innerHTML = getCreditsContent();
+            updateUI();
+        });
     });
 
     settingsBtn.addEventListener('click', () => {
