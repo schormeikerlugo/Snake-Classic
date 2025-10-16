@@ -29,28 +29,28 @@
   <div id="menu-view" class="hidden animated-grid-bg">
     <img src="assets/image/logo/logo.png" alt="Snake Game Logo" id="menu-logo">
     <div class="menu-buttons">
-      <button id="menu-start">Iniciar Juego</button>
-      <button id="menu-how-to-play">Cómo Jugar</button>
-      <button id="menu-settings">Configuración</button>
-      <button id="menu-account">Cuenta</button>
-      <button id="menu-credits">Créditos</button>
+      <button id="menu-start" data-translate-key="play">Iniciar Juego</button>
+      <button id="menu-how-to-play" data-translate-key="howToPlay">Cómo Jugar</button>
+      <button id="menu-settings" data-translate-key="settings">Configuración</button>
+      <button id="menu-account" data-translate-key="account">Cuenta</button>
+      <button id="menu-credits" data-translate-key="credits">Créditos</button>
     </div>
-    <div id="version-display">v.07</div>
+    <div id="version-display">v.08</div>
   </div>
 
   <!-- 🎮 Vista del Juego -->
   <div id="game-view" class="hidden">
     <!-- 📊 HUD (Puntuación y Botones de Escritorio) -->
     <div class="hud">
-      <button id="back-to-menu-btn">Menú</button>
-      <button id="start">Reiniciar</button>
+      <button id="back-to-menu-btn" data-translate-key="back">Menú</button>
+      <button id="start" data-translate-key="play">Reiniciar</button>
       <div class="scores-group">
         <div class="stat">
-          <label>Puntos: 🎖️</label>
+          <label data-translate-key="score">Puntos: 🎖️</label>
           <span id="score" class="value">0</span>
         </div>
         <div class="stat">
-          <label>Record: 🏆</label>
+          <label data-translate-key="bestScore">Record: 🏆</label>
           <span id="best" class="value">0</span>
         </div>
       </div>
@@ -59,11 +59,11 @@
     <div class="game-main-content">
       <!-- Columna de Chat (Izquierda) -->
       <div id="chat-column" class="side-column">
-        <h2 class="column-title">Chat en Vivo</h2>
+        <h2 class="column-title" data-translate-key="liveChat">Chat en Vivo</h2>
         <div id="chat-messages"></div>
         <form id="chat-form">
-          <input type="text" id="chat-input" placeholder="Escribe un mensaje..." required autocomplete="off">
-          <button type="submit">Enviar</button>
+          <input type="text" id="chat-input" placeholder="Escribe un mensaje..." data-translate-key="chatPlaceholder" required autocomplete="off">
+          <button type="submit" data-translate-key="send">Enviar</button>
         </form>
       </div>
 
@@ -74,14 +74,14 @@
           <div class="board">
             <canvas id="game"></canvas>
             <canvas id="fx"></canvas>
-            <div id="paused" class="paused">Respira un poco y continua...</div>
+            <div id="paused" class="paused" data-translate-key="pausedMessage">Respira un poco y continua...</div>
           </div>
         </div>
       </div>
 
       <!-- Columna de Ranking (Derecha) -->
       <div id="ranking-column" class="side-column">
-        <h2 class="column-title">Ranking Global 🏆</h2>
+        <h2 class="column-title" data-translate-key="globalRanking">Ranking Global 🏆</h2>
         <div id="ranking-container"></div>
       </div>
     </div>

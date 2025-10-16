@@ -1,4 +1,5 @@
 import { sfx } from '../sound/sfx.js';
+import { getTranslation } from '../utils/language.js';
 
 const modal = document.getElementById('modal');
 const modalTitle = document.getElementById('modal-title');
@@ -73,8 +74,8 @@ export function showConfirmationModal(title, message, onConfirm, onCancel) {
     const contentHTML = `
         <p>${message}</p>
         <div class="modal-buttons" style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px;">
-            <button id="confirm-no">No</button>
-            <button id="confirm-yes">Sí, reiniciar</button>
+            <button id="confirm-no">${getTranslation('no')}</button>
+            <button id="confirm-yes">${getTranslation('yesRestart')}</button>
         </div>
     `;
     // Usamos showModal para la estructura base, pero gestionaremos los listeners aquí

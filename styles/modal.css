@@ -75,9 +75,31 @@
   padding: 12px 0;
 }
 
-.settings-item:not(:last-child) {
-    border-bottom: 1px solid var(--border);
+.settings-item span {
+    color: var(--text-color);
+    font-size: 1.1em;
 }
+
+.language-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.lang-btn {
+    padding: 8px 16px;
+    border: 1px solid var(--primary-color);
+    background-color: transparent;
+    color: var(--primary-color);
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+    border-radius: 5px;
+}
+
+.lang-btn:hover {
+    background-color: var(--primary-color);
+    color: var(--background-color-dark);
+}
+
 
 .switch {
   position: relative;

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'snake-game-v0.6';
+const CACHE_NAME = 'snake-game-v0.8';
 const urlsToCache = [
   // Core files
   './',
@@ -21,6 +21,8 @@ const urlsToCache = [
   'styles/power-ups.css',
   'styles/update.css',
   'styles/variables.css',
+  'styles/powerup-demos.css',
+
 
   // JavaScript
   'js/main.js',
@@ -35,6 +37,8 @@ const urlsToCache = [
   'js/features/ranking.js',
   'js/features/settings.js',
   'js/fx/particles.js',
+  'js/fx/snakeEffect.js',
+  'js/fx/animationManager.js',
   'js/lib/supabaseClient.js',
   'js/sound/audio.js',
   'js/sound/sfx.js',
@@ -55,7 +59,7 @@ const urlsToCache = [
   
   // Audio - Menu
   'assets/audio/menu/menu.mp3',
-  
+ 
   // Audio - Game Music
   'assets/audio/game/pista-01.mp3',
   'assets/audio/game/pista-02.mp3',
@@ -74,7 +78,12 @@ const urlsToCache = [
   'assets/audio/game/efectos/Inmunidad.mp3',
   'assets/audio/game/efectos/Limpiar-Obstaculos.mp3',
   'assets/audio/game/efectos/pausa.ogg',
-  'assets/audio/game/efectos/Ralentizar.mp3'
+  'assets/audio/game/efectos/Ralentizar.mp3',
+
+  //locales
+ 'assets/locales/en.json',
+ 'assets/locales/es.json',
+
 ];
 
 // Evento de instalación: se abre la caché y se añaden los archivos base.

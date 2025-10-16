@@ -3,12 +3,16 @@ import { initMenu } from './ui/menu.js';
 import { audioManager } from './sound/audio.js';
 import { sfx } from './sound/sfx.js';
 import { registerServiceWorker } from './ui/update.js';
+import { init as initLanguage } from './utils/language.js';
 
 // Se importa modal.js para asegurar que sus event listeners se registren.
 import './ui/modal.js';
 import './ui/mobile-views.js'; // Maneja la lógica de las vistas móviles
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    // Inicializa el sistema de lenguaje primero para traducir el texto inicial.
+    await initLanguage();
+
     registerServiceWorker();
     const splashScreen = document.getElementById('splash-screen');
     const menuView = document.getElementById('menu-view');
