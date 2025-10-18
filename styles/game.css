@@ -138,7 +138,7 @@ canvas#fx {
     flex-grow: 1;
     overflow-y: auto;
     display: flex;
-    flex-direction: column-reverse; /* Mensajes nuevos abajo */
+    flex-direction: column; /* Mensajes nuevos abajo */
     gap: 16px; /* Aumentado para más espacio */
     padding-right: 5px; /* Espacio para la barra de scroll */
     padding-bottom: 10px;

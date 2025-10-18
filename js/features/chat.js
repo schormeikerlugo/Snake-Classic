@@ -1,9 +1,22 @@
 import { supabase } from '../lib/supabaseClient.js';
 
+// DOM nodes will be looked up when initializing the chat to avoid null
+// errors if this module is imported before the DOM is ready.
+let messagesContainer;
+let chatForm;
+let chatInput;
+let newMessageIndicator;
+
 let chatChannel;
-const messagesContainer = document.getElementById('chat-messages');
-const chatForm = document.getElementById('chat-form');
-const chatInput = document.getElementById('chat-input');
+let isUserAtBottom = true;
+
+/**
+ * Comprueba si el usuario está al final del contenedor de mensajes.
+ */
+function checkScrollPosition() {
+    const threshold = 100; // Píxeles de tolerancia
+    isUserAtBottom = messagesContainer.scrollHeight - messagesContainer.scrollTop - messagesContainer.clientHeight < threshold;
+}
 
 /**
  * Renderiza un solo mensaje en el contenedor de chat.
@@ -30,7 +43,15 @@ function renderMessage(message, currentUserId) {
         </div>
     `;
     
-    messagesContainer.prepend(messageElement);
+    if (!messagesContainer) return; // defensive
+
+    messagesContainer.append(messageElement);
+
+    if (isUserAtBottom) {
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    } else if (newMessageIndicator) {
+        newMessageIndicator.classList.add('visible');
+    }
 }
 
 /**
@@ -42,7 +63,7 @@ async function fetchMessages(currentUserId) {
     const { data: messages, error: messagesError } = await supabase
         .from('mensajes')
         .select('id, content, created_at, user_id')
-        .order('created_at', { ascending: false })
+                .order('created_at', { ascending: true })
         .limit(50);
 
     if (messagesError) {
@@ -68,8 +89,12 @@ async function fetchMessages(currentUserId) {
         perfiles: profilesById[message.user_id]
     }));
 
+    if (!messagesContainer) return; // defensive
+
     messagesContainer.innerHTML = '';
     combinedData.forEach(message => renderMessage(message, currentUserId));
+    // Asegura que la vista inicie abajo
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }
 
 /**
@@ -96,6 +121,10 @@ async function handleMessageSubmit(event) {
         console.error('Error sending message:', error);
     } else {
         chatInput.value = '';
+        if (newMessageIndicator) {
+            newMessageIndicator.classList.remove('visible');
+        }
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
 }
 
@@ -106,9 +135,37 @@ export async function initChat() {
     const { data: { user } } = await supabase.auth.getUser();
     const currentUserId = user ? user.id : null;
 
-    fetchMessages(currentUserId);
+    // Lookup DOM elements now that initChat is called (DOM should be ready).
+    messagesContainer = document.getElementById('chat-messages');
+    chatForm = document.getElementById('chat-form');
+    chatInput = document.getElementById('chat-input');
+    newMessageIndicator = document.getElementById('new-message-indicator');
 
-    chatForm.addEventListener('submit', handleMessageSubmit);
+    if (!messagesContainer) {
+        console.warn('Chat: #chat-messages not found, aborting chat init.');
+        return;
+    }
+
+    // Fetch messages after we have the container
+    await fetchMessages(currentUserId);
+
+    // Attach event listeners defensively
+    if (chatForm) {
+        chatForm.addEventListener('submit', handleMessageSubmit);
+    } else {
+        console.warn('Chat: #chat-form not found, send disabled.');
+    }
+
+    if (messagesContainer) {
+        messagesContainer.addEventListener('scroll', checkScrollPosition);
+    }
+
+    if (newMessageIndicator) {
+        newMessageIndicator.addEventListener('click', () => {
+            newMessageIndicator.classList.remove('visible');
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        });
+    }
 
     if (chatChannel) {
         supabase.removeChannel(chatChannel);
