@@ -8,8 +8,6 @@
  */
 
 import { POWER_UP_TYPES } from '../config/powerups.js';
-import { drawImmunityEffect, drawDoublePointsEffect, drawSlowDownEffect } from '../fx/snakeEffects.js';
-import { getTranslation } from '../utils/language.js';
 
 // --- Drawing functions for static icons ---
 
@@ -93,7 +91,7 @@ const demoCellSize = 10;
 // Funciones de dibujado específicas para cada demo
 const demoRenderers = {
     IMMUNITY: (ctx, time) => {
-        // Re-implementamos una versión simple del efecto con gradiente animado
+        // Este ya está reimplementado, así que está bien.
         const pulse = Math.sin(time / 500) * 0.5 + 0.5; // Pulso lento
         const borderWidth = 2;
         demoSnake.forEach(segment => {
@@ -111,10 +109,38 @@ const demoRenderers = {
         });
     },
     DOUBLE_POINTS: (ctx, time) => {
-        drawDoublePointsEffect(ctx, demoSnake, demoCellSize, time);
+        // Reimplementación del efecto de puntos dobles
+        const pulse = Math.sin(time / 150) * 0.5 + 0.5;
+        const color1 = '#FFD700';
+        const color2 = '#FFA500';
+        const goldColor = pulse > 0.5 ? color1 : color2;
+
+        demoSnake.forEach(segment => {
+            ctx.fillStyle = goldColor;
+            ctx.shadowColor = '#FFFFFF';
+            ctx.shadowBlur = 10 * pulse;
+            ctx.fillRect(segment.x, segment.y, demoCellSize, demoCellSize);
+        });
+
+        ctx.shadowBlur = 0;
+        ctx.shadowColor = 'transparent';
     },
     SLOW_DOWN: (ctx, time) => {
-        drawSlowDownEffect(ctx, demoSnake, demoCellSize, time);
+        // Reimplementación del efecto de ralentización
+        const slowDownColor = '#00BFFF';
+        demoSnake.forEach((segment, index) => {
+            const wave = Math.sin(time / 200 + index / 3) * (demoCellSize / 12);
+            const x = segment.x + wave;
+            const y = segment.y + wave;
+
+            ctx.fillStyle = slowDownColor;
+            ctx.shadowColor = '#FFFFFF';
+            ctx.shadowBlur = 5;
+            ctx.fillRect(x, y, demoCellSize, demoCellSize);
+        });
+
+        ctx.shadowBlur = 0;
+        ctx.shadowColor = 'transparent';
     },
     BOMB: (ctx, time) => {
         const progress = (time % 1000) / 1000; // Animación de 1s en bucle
@@ -129,7 +155,7 @@ const demoRenderers = {
         const progress = (time % 1500) / 1500; // Animación de 1.5s en bucle
         const segmentsToShow = demoSnake.length - Math.floor(progress * demoSnake.length);
         const snakeBody = demoSnake.slice(0, segmentsToShow);
-        
+
         ctx.fillStyle = '#9b59b6';
         snakeBody.forEach(seg => {
             ctx.fillRect(seg.x, seg.y, demoCellSize, demoCellSize);

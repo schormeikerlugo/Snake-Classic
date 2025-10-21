@@ -61,6 +61,10 @@ export class Game {
         this.isGameOver = false; // New property to track game over state
         this.scannerProgress = 0; // New property for scanner animation
 
+        // Expresiones y estado de los ojos
+        this.expression = 'normal';
+        this.expressionTimeoutId = null;
+
         // Power-ups
         this.powerUps = [];
         this.activePowerUp = { type: null, timeoutId: null };

@@ -2,7 +2,7 @@ import { supabase } from '../lib/supabaseClient.js';
 import * as C from '../config/constants.js';
 import * as U from '../utils/utils.js';
 import { settings } from '../features/settings.js';
-import { draw, drawFx, drawCountdown } from './rendering.js';
+import { draw,drawCountdown } from './rendering.js';
 import { updateSnakeColor, updateObstacleColor } from '../config/colors.js';
 import { sfx } from '../sound/sfx.js';
 import { audioManager } from '../sound/audio.js';
@@ -10,6 +10,27 @@ import { showConfirmationModal } from '../ui/modal.js';
 import { POWER_UP_TYPES, POWER_UP_CONFIG } from '../config/powerups.js';
 import { createShrinkParticles, createObstacleClearParticles, createSlowDownTrail } from '../fx/particles.js';
 import { triggerBombAnimation, triggerShrinkAnimation } from '../fx/animationManager.js';
+
+/**
+ * Devuelve la expresión facial correspondiente a un tipo de power-up.
+ * @param {string} powerUpType - El tipo de power-up.
+ * @returns {string} La expresión correspondiente.
+ */
+function getExpressionForPowerUp(powerUpType) {
+    switch (powerUpType) {
+        case POWER_UP_TYPES.IMMUNITY.type:
+        case POWER_UP_TYPES.DOUBLE_POINTS.type:
+            return 'aggressive';
+        case POWER_UP_TYPES.SLOW_DOWN.type:
+            return 'relaxed';
+        case POWER_UP_TYPES.SHRINK.type:
+            return 'surprised';
+        case POWER_UP_TYPES.CLEAR_OBSTACLES.type:
+            return 'focused';
+        default:
+            return 'normal';
+    }
+}
 
 /**
  * Helper function to play a sound with audio ducking.
@@ -135,14 +156,16 @@ export function resetGame(game) {
     game.scannerProgress = 0;
     game.updateScore();
 
-    // Reset power-ups
+    // Reset power-ups and expressions
     if (game.activePowerUp.timeoutId) clearTimeout(game.activePowerUp.timeoutId);
     if (game.powerUpSpawnTimer) clearTimeout(game.powerUpSpawnTimer);
+    if (game.expressionTimeoutId) clearTimeout(game.expressionTimeoutId);
     game.powerUps = [];
     game.activePowerUp = { type: null, timeoutId: null };
     game.isImmune = false;
     game.pointsMultiplier = 1;
     game.lastPowerUpType = null;
+    game.expression = 'normal';
 
     // Inicializar/restablecer colores y música
     updateSnakeColor(game);
@@ -201,7 +224,14 @@ export function tick(game) {
         game.score += game.pointsMultiplier;
         game.updateScore();
         updateSnakeColor(game); // This also updates obstacle color
-        
+
+        // Efecto de parpadeo
+        if (game.expressionTimeoutId) clearTimeout(game.expressionTimeoutId);
+        game.expression = 'blink';
+        game.expressionTimeoutId = setTimeout(() => {
+            game.expression = game.activePowerUp.type ? getExpressionForPowerUp(game.activePowerUp.type) : 'normal';
+        }, 150);
+
         // Create particle effect before placing new food
         createShrinkParticles(game.food.x, game.food.y, game.foodColor, game.cellSize);
 
@@ -338,7 +368,7 @@ export function stop(game) {
     }
 }
 
-export async function gameOver(game, noDraw) {
+export async function gameOver(game) {
     console.log('--- GAME OVER --- La función ha sido llamada.');
     sfx.play('gameOver');
     audioManager.duckGameMusic();
@@ -389,27 +419,6 @@ export function animateGlow(game, targetIntensity, duration) {
     };
     requestAnimationFrame(animate);
 }
-
-export function animateScanner(game, duration, callback) {
-    const startTime = Date.now();
-    console.log('Starting scanner animation...');
-
-    const animate = () => {
-        const elapsed = Date.now() - startTime;
-        const progress = Math.min(1, elapsed / duration);
-        
-        game.scannerProgress = progress;
-        console.log('Scanner progress:', game.scannerProgress);
-
-        if (progress < 1) {
-            requestAnimationFrame(animate);
-        } else if (callback) {
-            callback();
-        }
-    };
-    requestAnimationFrame(animate);
-}
-
 export function requestRestart(game) {
     if (game.running && !game.isGameOver) {
         const wasPaused = game.paused;
@@ -516,6 +525,8 @@ export function activatePowerUp(game, powerUp) {
     }
 
     game.activePowerUp.type = powerUp.type;
+    game.expression = getExpressionForPowerUp(powerUp.type);
+
     switch (powerUp.type) {
         case POWER_UP_TYPES.IMMUNITY.type:
             playSoundWithDucking('immunity');
@@ -584,6 +595,8 @@ export function deactivatePowerUp(game, powerUpType) {
     if (!powerUpType) return;
 
     console.log('Deactivating power-up:', powerUpType);
+    game.expression = 'normal'; // Reset expression
+
     switch (powerUpType) {
         case POWER_UP_TYPES.IMMUNITY.type:
             // Logic is handled by the timeout in activateImmunity
@@ -616,6 +629,7 @@ export function activateImmunity(game, duration) {
     }
 
     game.isImmune = true;
+    game.expression = 'aggressive'; // Set expression for immunity
     console.log(`Immunity activated for ${duration}ms`);
 
     const endImmunity = () => {

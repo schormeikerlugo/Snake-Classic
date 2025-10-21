@@ -2,15 +2,9 @@ import * as C from '../config/constants.js';
 import * as U from '../utils/utils.js';
 import { settings } from '../features/settings.js';
 import { updateAndDrawParticles } from '../fx/particles.js';
-import { drawImmunityEffect, drawDoublePointsEffect, drawSlowDownEffect } from '../fx/snakeEffects.js';
 import { updateAndDrawAnimations } from '../fx/animationManager.js';
 
 function drawSnake(game, alpha, isMobile, currentTime) {
-    // FIX: Check the correct properties for active power-ups.
-    const isImmune = game.isImmune;
-    const hasDoublePoints = game.activePowerUp && game.activePowerUp.type === 'DOUBLE_POINTS';
-    const isSlowedDown = game.activePowerUp && game.activePowerUp.type === 'SLOW_DOWN';
-
     const interpolatedSnake = game.snake.map((seg, i) => {
         let interpolatedX = seg.x * game.cellSize;
         let interpolatedY = seg.y * game.cellSize;
@@ -27,52 +21,194 @@ function drawSnake(game, alpha, isMobile, currentTime) {
         return { x: interpolatedX, y: interpolatedY };
     });
 
-    if (isImmune) {
-        drawImmunityEffect(C.ctx, interpolatedSnake, game.snakeBodyColor, game.cellSize);
-    } else if (hasDoublePoints) {
-        drawDoublePointsEffect(C.ctx, interpolatedSnake, game.cellSize, currentTime);
-    } else if (isSlowedDown) {
-        drawSlowDownEffect(C.ctx, interpolatedSnake, game.cellSize, currentTime);
-    } else {
-        // Lógica de dibujado original (ahora usa el array interpolado)
-        interpolatedSnake.forEach((seg, i) => {
-            // Para el dibujado normal, necesitamos las coordenadas de la grilla, no de píxeles.
-            const gridX = seg.x / game.cellSize;
-            const gridY = seg.y / game.cellSize;
-            const isHead = i === 0;
-            drawCell(game, gridX, gridY, isHead ? game.snakeHeadColor : game.snakeBodyColor, isMobile);
-        });
-    }
+    const activePowerUp = game.activePowerUp ? game.activePowerUp.type : null;
+
+    interpolatedSnake.forEach((seg, i) => {
+        const gridX = seg.x / game.cellSize;
+        const gridY = seg.y / game.cellSize;
+        const isHead = i === 0;
+
+        let color = isHead ? game.snakeHeadColor : game.snakeBodyColor;
+
+        C.ctx.save();
+
+        if (activePowerUp) {
+            switch (activePowerUp) {
+                case 'IMMUNITY':
+                    const borderWidth = 2;
+                    C.ctx.fillStyle = color;
+                    C.ctx.fillRect(seg.x, seg.y, game.cellSize, game.cellSize);
+                    const innerSize = game.cellSize - borderWidth * 2;
+                    const gradient = C.ctx.createRadialGradient(
+                        seg.x + game.cellSize / 2, seg.y + game.cellSize / 2, 0,
+                        seg.x + game.cellSize / 2, seg.y + game.cellSize / 2, game.cellSize / 2
+                    );
+                    gradient.addColorStop(0, '#4a0e6c');
+                    gradient.addColorStop(1, '#000000');
+                    color = gradient;
+                    break;
+                case 'DOUBLE_POINTS':
+                    const pulse = Math.sin(currentTime / 150) * 0.5 + 0.5;
+                    const color1 = '#FFD700';
+                    const color2 = '#FFA500';
+                    color = pulse > 0.5 ? color1 : color2;
+                    C.ctx.shadowColor = '#FFFFFF';
+                    C.ctx.shadowBlur = 10 * pulse;
+                    break;
+                case 'SLOW_DOWN':
+                    color = '#00BFFF';
+                    const wave = Math.sin(currentTime / 200 + i / 3) * (game.cellSize / 12);
+                    C.ctx.translate(wave, wave);
+                    C.ctx.shadowColor = '#FFFFFF';
+                    C.ctx.shadowBlur = 5;
+                    break;
+            }
+        }
+
+        drawCell(game, gridX, gridY, color, isMobile, isHead ? game.dir : null, isHead ? game.expression : 'normal');
+        
+        C.ctx.restore();
+    });
 }
 
-export function drawCell(game, x, y, color, isMobile) {
+export function drawCell(game, x, y, color, isMobile, direction = null, expression = 'normal') {
     const px = x * game.cellSize;
     const py = y * game.cellSize;
-
-    // Food animation
-    let scale = 1;
-    if (color === game.foodColor) {
-        const elapsed = Date.now() - game.foodSpawnTime;
-        const duration = 200; // Animation duration in ms (faster)
-        let progress = Math.min(1, elapsed / duration);
-        // Apply ease-out effect
-        progress = progress * (2 - progress); // EaseOutQuad
-        scale = 0.5 + (progress * 0.5); // Scale from 0.5 to 1
-    }
+    const size = game.cellSize;
+    const radius = size / 4;
 
     C.ctx.fillStyle = color;
-    C.ctx.fillRect(px + (game.cellSize * (1 - scale) / 2), py + (game.cellSize * (1 - scale) / 2), game.cellSize * scale, game.cellSize * scale);
+
+    if (direction) { // Es la cabeza de la serpiente
+        C.ctx.beginPath();
+
+        if (direction.x === 1) { // Derecha
+            C.ctx.moveTo(px, py);
+            C.ctx.lineTo(px + size - radius, py);
+            C.ctx.arcTo(px + size, py, px + size, py + radius, radius);
+            C.ctx.lineTo(px + size, py + size - radius);
+            C.ctx.arcTo(px + size, py + size, px + size - radius, py + size, radius);
+            C.ctx.lineTo(px, py + size);
+        } else if (direction.x === -1) { // Izquierda
+            C.ctx.moveTo(px + size, py);
+            C.ctx.lineTo(px + radius, py);
+            C.ctx.arcTo(px, py, px, py + radius, radius);
+            C.ctx.lineTo(px, py + size - radius);
+            C.ctx.arcTo(px, py + size, px + radius, py + size, radius);
+            C.ctx.lineTo(px + size, py + size);
+        } else if (direction.y === 1) { // Abajo
+            C.ctx.moveTo(px, py);
+            C.ctx.lineTo(px + size, py);
+            C.ctx.lineTo(px + size, py + size - radius);
+            C.ctx.arcTo(px + size, py + size, px + size - radius, py + size, radius);
+            C.ctx.lineTo(px + radius, py + size);
+            C.ctx.arcTo(px, py + size, px, py + size - radius, radius);
+        } else if (direction.y === -1) { // Arriba
+            C.ctx.moveTo(px, py + size);
+            C.ctx.lineTo(px + size, py + size);
+            C.ctx.lineTo(px + size, py + radius);
+            C.ctx.arcTo(px + size, py, px + size - radius, py, radius);
+            C.ctx.lineTo(px + radius, py);
+            C.ctx.arcTo(px, py, px, py + radius, radius);
+        }
+        C.ctx.closePath();
+        C.ctx.fill();
+
+        const eyeSize = size / 5;
+        let eye1, eye2;
+
+        if (direction.x !== 0) { // Movimiento horizontal
+            eye1 = { x: px + size / 2, y: py + size / 4 };
+            eye2 = { x: px + size / 2, y: py + size * 3 / 4 };
+        } else { // Movimiento vertical
+            eye1 = { x: px + size / 4, y: py + size / 2 };
+            eye2 = { x: px + size * 3 / 4, y: py + size / 2 };
+        }
+
+        C.ctx.fillStyle = 'white';
+        C.ctx.strokeStyle = 'black';
+        C.ctx.lineWidth = 1;
+
+        switch (expression) {
+            case 'blink':
+                const blinkWidth = eyeSize * 1.2;
+                C.ctx.beginPath();
+                C.ctx.moveTo(eye1.x - blinkWidth / 2, eye1.y);
+                C.ctx.lineTo(eye1.x + blinkWidth / 2, eye1.y);
+                C.ctx.stroke();
+                C.ctx.beginPath();
+                C.ctx.moveTo(eye2.x - blinkWidth / 2, eye2.y);
+                C.ctx.lineTo(eye2.x + blinkWidth / 2, eye2.y);
+                C.ctx.stroke();
+                break;
+
+            case 'aggressive':
+                C.ctx.fillStyle = '#FFD700';
+                C.ctx.beginPath();
+                C.ctx.moveTo(eye1.x - eyeSize / 2, eye1.y + eyeSize / 2);
+                C.ctx.lineTo(eye1.x + eyeSize / 2, eye1.y - eyeSize / 2);
+                C.ctx.stroke();
+                C.ctx.beginPath();
+                C.ctx.moveTo(eye2.x - eyeSize / 2, eye2.y + eyeSize / 2);
+                C.ctx.lineTo(eye2.x + eyeSize / 2, eye2.y - eyeSize / 2);
+                C.ctx.stroke();
+                break;
+
+            case 'relaxed':
+                C.ctx.beginPath();
+                C.ctx.arc(eye1.x, eye1.y + eyeSize / 3, eyeSize / 2, Math.PI, 2 * Math.PI);
+                C.ctx.stroke();
+                C.ctx.beginPath();
+                C.ctx.arc(eye2.x, eye2.y + eyeSize / 3, eyeSize / 2, Math.PI, 2 * Math.PI);
+                C.ctx.stroke();
+                break;
+
+            case 'surprised':
+                C.ctx.beginPath();
+                C.ctx.arc(eye1.x, eye1.y, eyeSize / 1.5, 0, 2 * Math.PI);
+                C.ctx.fill();
+                C.ctx.stroke();
+                C.ctx.beginPath();
+                C.ctx.arc(eye2.x, eye2.y, eyeSize / 1.5, 0, 2 * Math.PI);
+                C.ctx.fill();
+                C.ctx.stroke();
+                break;
+
+            case 'focused':
+                C.ctx.fillRect(eye1.x - eyeSize/2, eye1.y - eyeSize/4, eyeSize, eyeSize/2);
+                C.ctx.fillRect(eye2.x - eyeSize/2, eye2.y - eyeSize/4, eyeSize, eyeSize/2);
+                break;
+
+            case 'normal':
+            default:
+                const pupilSize = eyeSize / 2;
+                C.ctx.fillRect(eye1.x - eyeSize / 2, eye1.y - eyeSize / 2, eyeSize, eyeSize);
+                C.ctx.fillRect(eye2.x - eyeSize / 2, eye2.y - eyeSize / 2, eyeSize, eyeSize);
+                C.ctx.fillStyle = 'black';
+                C.ctx.fillRect(eye1.x - pupilSize / 2, eye1.y - pupilSize / 2, pupilSize, pupilSize);
+                C.ctx.fillRect(eye2.x - pupilSize / 2, eye2.y - pupilSize / 2, pupilSize, pupilSize);
+                break;
+        }
+
+    } else {
+        let scale = 1;
+        if (color === game.foodColor) {
+            const elapsed = Date.now() - game.foodSpawnTime;
+            const duration = 200;
+            let progress = Math.min(1, elapsed / duration);
+            progress = progress * (2 - progress);
+            scale = 0.5 + (progress * 0.5);
+        }
+        C.ctx.fillRect(px + (size * (1 - scale) / 2), py + (size * (1 - scale) / 2), size * scale, size * scale);
+    }
 }
 
 export function draw(game, currentTime) {
-    // console.log('Draw called. isGameOver:', game.isGameOver, 'running:', game.running);
-    // Clear canvas only if game is running
     if (game.running) {
         C.ctx.clearRect(0, 0, C.canvas.width, C.canvas.height);
     }
 
-    // Draw game elements only if game is running or paused (not game over)
-    if (game.running || game.paused) { // Draw game elements if running or paused
+    if (game.running || game.paused) {
         C.ctx.strokeStyle = game.gridColor;
         C.ctx.lineWidth = 1;
         for (let i = 1; i < game.cols; i++) {
@@ -88,36 +224,32 @@ export function draw(game, currentTime) {
             C.ctx.stroke();
         }
 
-        const isMobile = window.innerWidth <= 768; // Determine isMobile here
+        const isMobile = window.innerWidth <= 768;
 
-        // Draw obstacles
         if (settings.obstacles) {
             if (game.isGlitching) {
                 const glitchDuration = 500;
                 const elapsed = Date.now() - game.glitchStartTime;
                 const progress = Math.min(1, elapsed / glitchDuration);
 
-                // Dibujar obstáculos viejos "glitcheando"
-                C.ctx.globalAlpha = 1 - progress; // Desvanecer
+                C.ctx.globalAlpha = 1 - progress;
                 game.oldObstacles.forEach(obstacle => {
                     const xOffset = (Math.random() - 0.5) * 15;
                     const yOffset = (Math.random() - 0.5) * 15;
                     drawCell(game, obstacle.x + xOffset / game.cellSize, obstacle.y + yOffset / game.cellSize, game.obstacleColor, isMobile);
                 });
 
-                // Dibujar obstáculos nuevos "apareciendo"
-                C.ctx.globalAlpha = progress; // Aparecer
+                C.ctx.globalAlpha = progress;
                 game.obstacles.forEach(obstacle => {
                     const xOffset = (Math.random() - 0.5) * (1 - progress) * 20;
                     const yOffset = (Math.random() - 0.5) * (1 - progress) * 20;
                     drawCell(game, obstacle.x + xOffset / game.cellSize, obstacle.y + yOffset / game.cellSize, game.obstacleColor, isMobile);
                 });
 
-                C.ctx.globalAlpha = 1; // Restablecer alpha
+                C.ctx.globalAlpha = 1;
             } else {
-                // Dibujado normal con pulso de neón
                 C.ctx.shadowColor = game.obstacleColor;
-                C.ctx.shadowBlur = 5 + (game.obstacleGlowProgress * 15); // Pulso de 5 a 20
+                C.ctx.shadowBlur = 5 + (game.obstacleGlowProgress * 15);
 
                 game.obstacles.forEach(obstacle => {
                     drawCell(game, obstacle.x, obstacle.y, game.obstacleColor, isMobile);
@@ -128,27 +260,24 @@ export function draw(game, currentTime) {
             }
         }
 
-        // Draw power-ups
         game.powerUps.forEach(p => {
             C.ctx.shadowColor = p.color;
-            C.ctx.shadowBlur = 5 + (game.powerUpGlowProgress * 15); // Faster pulse
+            C.ctx.shadowBlur = 5 + (game.powerUpGlowProgress * 15);
             drawPowerUp(game, p);
         });
         C.ctx.shadowBlur = 0;
         C.ctx.shadowColor = 'transparent';
 
-        if (game.food.x !== undefined) { // Only draw food if defined
-            drawCell(game, game.food.x, game.food.y, game.foodColor, isMobile); // Pass isMobile
+        if (game.food.x !== undefined) {
+            drawCell(game, game.food.x, game.food.y, game.foodColor, isMobile);
         }
 
-        // Interpolate snake position
-        let alpha = 1; // Default to 1 if not running or first frame
+        let alpha = 1;
         if (game.running && game.prevSnake.length > 0) {
             alpha = (currentTime - game.lastTickTime) / game.tickMs;
-            if (alpha > 1) alpha = 1; // Cap alpha at 1
+            if (alpha > 1) alpha = 1;
         }
 
-        // --- Glow and Snake Drawing ---
         const glowColor = game.currentGlowIntensity > 0.5 ? game.snakeGlowStrongColor : game.snakeGlowSubtle;
         C.ctx.shadowColor = glowColor;
         C.ctx.shadowBlur = 15 + (game.currentGlowIntensity * 10);
@@ -157,20 +286,14 @@ export function draw(game, currentTime) {
         
         C.ctx.shadowBlur = 0;
         C.ctx.shadowColor = 'transparent';
-        // --- End Glow and Snake Drawing ---
 
-        // --- Particle Effects ---
         updateAndDrawParticles(C.ctx);
 
-        // --- One-off Animations ---
         updateAndDrawAnimations(game);
-
     }
 
-    // If game is over, draw game over screen (always drawn last)
     if (game.isGameOver) {
-        // console.log('Drawing game over screen. Scanner progress:', game.scannerProgress);
-        C.ctx.fillStyle = 'rgba(255, 0, 0, 0.3)'; // Red semi-transparent overlay (more transparent)
+        C.ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
         C.ctx.fillRect(0, 0, C.canvas.width, C.canvas.height);
         C.ctx.fillStyle = '#fff';
         C.ctx.font = '48px "Pixelify Sans"';
@@ -182,7 +305,7 @@ export function draw(game, currentTime) {
 function drawPowerUp(game, powerUp) {
     const px = powerUp.x * game.cellSize;
     const py = powerUp.y * game.cellSize;
-    const size = game.cellSize * 1.3; // 30% larger
+    const size = game.cellSize * 1.3;
     const half = size / 2;
     const ctx = C.ctx;
 
@@ -190,7 +313,7 @@ function drawPowerUp(game, powerUp) {
     ctx.strokeStyle = powerUp.color;
     ctx.lineWidth = 2;
 
-    const centerX = px + game.cellSize / 2; // Center based on original cell size
+    const centerX = px + game.cellSize / 2;
     const centerY = py + game.cellSize / 2;
 
     switch (powerUp.shape) {
