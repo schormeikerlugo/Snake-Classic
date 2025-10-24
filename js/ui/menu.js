@@ -4,8 +4,6 @@ import { audioManager } from '../sound/audio.js';
 import { sfx } from '../sound/sfx.js';
 import { renderAuthForm } from './ui.js';
 import { initAuth } from '../features/auth.js';
-import { initRanking } from '../features/ranking.js';
-import { initChat } from '../features/chat.js';
 import { initModeSelection } from './mode-selection.js';
 import { initializePowerupDemos } from './powerupDemos.js';
 import { setLanguage, getTranslation, updateUI } from '../utils/language.js';
