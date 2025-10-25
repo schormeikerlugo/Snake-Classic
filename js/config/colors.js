@@ -46,6 +46,14 @@ export function updateSnakeColor(game) {
         game.snakeGlowSubtle = subtle;
         game.snakeGlowStrongColor = strong;
 
+        // If a power-up has stored previous colors to restore later, update that snapshot
+        if (game._prevPowerupColors) {
+            game._prevPowerupColors.snakeBodyColor = game.snakeBodyColor;
+            game._prevPowerupColors.snakeHeadColor = game.snakeHeadColor;
+            game._prevPowerupColors.snakeGlowSubtle = game.snakeGlowSubtle;
+            game._prevPowerupColors.snakeGlowStrongColor = game.snakeGlowStrongColor;
+        }
+
         currentColorIndex = -1; // Restablecer el índice
         updateObstacleColor(game, true); // Restablecer color de obstáculo
         return;
@@ -70,6 +78,13 @@ export function updateSnakeColor(game) {
         game.snakeHeadColor = newColor.head;
         game.snakeGlowSubtle = subtle;
         game.snakeGlowStrongColor = strong;
+        // If a power-up has stored previous colors to restore later, update that snapshot
+        if (game._prevPowerupColors) {
+            game._prevPowerupColors.snakeBodyColor = game.snakeBodyColor;
+            game._prevPowerupColors.snakeHeadColor = game.snakeHeadColor;
+            game._prevPowerupColors.snakeGlowSubtle = game.snakeGlowSubtle;
+            game._prevPowerupColors.snakeGlowStrongColor = game.snakeGlowStrongColor;
+        }
 
         updateObstacleColor(game); // Actualizar color de obstáculo
     }

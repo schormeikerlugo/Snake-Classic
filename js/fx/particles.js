@@ -67,6 +67,12 @@ export function createSlowDownTrail(x, y, cellSize) {
 }
 
 /**
+ * Spawns small 'star' particles around a grid cell for immunity effect.
+ * These are subtle, additive and slow-moving to give a retro sparkly look.
+ */
+// (immunity specific star particles removed — restored to original particle set)
+
+/**
  * Updates and draws all active particles.
  * @param {CanvasRenderingContext2D} ctx - The canvas rendering context.
  */

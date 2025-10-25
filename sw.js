@@ -1,4 +1,4 @@
-const CACHE_NAME = 'snake-game-v0.9';
+const CACHE_NAME = 'snake-game-v1.0';
 const urlsToCache = [
   // Core files
   './',
@@ -31,7 +31,13 @@ const urlsToCache = [
   'js/config/powerups.js',
   'js/core/game.js',
   'js/core/gameLogic.js',
+  'js/core/gameLogic/powerups.js',
   'js/core/rendering.js',
+  // Rendering submodules (new/modified)
+  'js/core/rendering/cell.js',
+  'js/core/rendering/snake.js',
+  'js/core/rendering/fx.js',
+  'js/core/rendering/powerup.js',
   'js/features/auth.js',
   'js/features/chat.js',
   'js/features/ranking.js',

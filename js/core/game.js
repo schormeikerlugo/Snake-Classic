@@ -3,7 +3,7 @@ import * as U from '../utils/utils.js';
 import { settings } from '../features/settings.js';
 
 // Import modularized functions
-import { drawCell, draw, drawFx, drawCountdown } from './rendering.js';
+import { draw, drawFx, drawCountdown } from './rendering.js';
 import {
     placeFood, inSnake, resetGame, updateScore, tick, gameLoop, spawnFx,
     setDirection, handleKeydown, countdown, startGame, togglePause, stop, 
@@ -73,6 +73,15 @@ export class Game {
         this.powerUpSpawnTimer = null;
         this.powerUpGlowProgress = 0;
         this.originalTickMs = 0;
+
+    // Head behaviour: passive blinking and focus
+    this.headBlinkInterval = 3000; // ms between passive blinks
+    this.headBlinkDuration = 150; // ms duration of passive blink
+    this.nextHeadBlinkTime = Date.now() + this.headBlinkInterval;
+    this.headBlinkEndTime = 0;
+    this.headBlinkActive = false;
+    this.headFocusRange = 12; // cells within which head will focus targets
+    this.focusTarget = null; // {x, y, type}
 
 
         C.BEST_EL.textContent = this.best;

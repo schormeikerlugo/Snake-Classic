@@ -10,120 +10,16 @@ import { showConfirmationModal } from '../ui/modal.js';
 import { POWER_UP_TYPES, POWER_UP_CONFIG } from '../config/powerups.js';
 import { createShrinkParticles, createObstacleClearParticles, createSlowDownTrail } from '../fx/particles.js';
 import { triggerBombAnimation, triggerShrinkAnimation } from '../fx/animationManager.js';
+import { changeAndAnimateObstacles, generateObstacles, inObstacle } from './gameLogic/obstacles.js';
+import { placeFood } from './gameLogic/food.js';
+import { spawnPowerUp, activatePowerUp, deactivatePowerUp, activateImmunity, isSelfColliding, getExpressionForPowerUp } from './gameLogic/powerups.js';
+import { playSoundWithDucking } from './gameLogic/audioHelpers.js';
 
-/**
- * Devuelve la expresión facial correspondiente a un tipo de power-up.
- * @param {string} powerUpType - El tipo de power-up.
- * @returns {string} La expresión correspondiente.
- */
-function getExpressionForPowerUp(powerUpType) {
-    switch (powerUpType) {
-        case POWER_UP_TYPES.IMMUNITY.type:
-        case POWER_UP_TYPES.DOUBLE_POINTS.type:
-            return 'aggressive';
-        case POWER_UP_TYPES.SLOW_DOWN.type:
-            return 'relaxed';
-        case POWER_UP_TYPES.SHRINK.type:
-            return 'surprised';
-        case POWER_UP_TYPES.CLEAR_OBSTACLES.type:
-            return 'focused';
-        default:
-            return 'normal';
-    }
-}
-
-/**
- * Helper function to play a sound with audio ducking.
- * @param {string} soundName - The name of the sound to play.
- */
-function playSoundWithDucking(soundName) {
-    audioManager.fadeVolume(audioManager.gameMusicGain, audioManager.baseGameVolume * settings.masterVolume * 0.3, 150)
-        .then(() => {
-            sfx.play(soundName);
-            // Estimate sound duration, or use a fixed delay
-            setTimeout(() => {
-                audioManager.fadeVolume(audioManager.gameMusicGain, audioManager.baseGameVolume * settings.masterVolume, 400);
-            }, 1000); // Adjusted delay for sound to play out
-        });
-}
-
-
-export function changeAndAnimateObstacles(game) {
-    game.paused = true;
-    game.isGlitching = true;
-    game.glitchStartTime = Date.now();
-    game.oldObstacles = [...game.obstacles]; // Guardar estado anterior
-
-    C.canvas.classList.add('glitch-effect'); // Aplicar efecto al canvas
-
-    generateObstacles(game, true); // Generar nuevos obstáculos inmediatamente
-
-    const glitchDuration = 500; // Duración del efecto en ms
-
-    setTimeout(() => {
-        game.isGlitching = false;
-        game.oldObstacles = [];
-        if (game.running) {
-            game.paused = false;
-        }
-        C.canvas.classList.remove('glitch-effect'); // Quitar efecto del canvas
-    }, glitchDuration);
-}
-
-export function generateObstacles(game, isDynamic = false) {
-    game.obstacles = [];
-
-    // For dynamic changes, generate random obstacles
-    if (isDynamic && settings.obstacles) {
-        const numObstacles = U.randInt(3, 6); // Generate 3 to 6 obstacle clusters
-        for (let i = 0; i < numObstacles; i++) {
-            const obstacleWidth = U.randInt(1, 4); // Width from 1 to 3
-            const obstacleHeight = U.randInt(1, 4); // Height from 1 to 3
-            
-            // Ensure obstacles don't spawn too close to the edges
-            const startX = U.randInt(2, game.cols - 2 - obstacleWidth);
-            const startY = U.randInt(2, game.rows - 2 - obstacleHeight);
-
-            for (let w = 0; w < obstacleWidth; w++) {
-                for (let h = 0; h < obstacleHeight; h++) {
-                    const pos = { x: startX + w, y: startY + h };
-                    // Avoid placing on snake, other obstacles, or too close to the snake head
-                    if (!game.inSnake(pos) && !inObstacle(game, pos) && (Math.abs(pos.x - game.snake[0].x) > 3 || Math.abs(pos.y - game.snake[0].y) > 3)) {
-                        game.obstacles.push(pos);
-                    }
-                }
-            }
-        }
-    } else if (settings.obstacles) {
-        // Original static obstacles for the start of the game
-        const center_x = Math.floor(game.cols / 2);
-        const center_y = Math.floor(game.rows / 2);
-        for (let i = 0; i < 8; i++) {
-            game.obstacles.push({ x: center_x - 5, y: center_y - 4 + i });
-            game.obstacles.push({ x: center_x + 5, y: center_y - 4 + i });
-        }
-    }
-}
-
-export function inObstacle(game, pos) {
-    return game.obstacles.some(obstacle => U.posEq(obstacle, pos));
-}
-
-export function placeFood(game) {
-    let tries = 0;
-    while (true) {
-        const c = { x: U.randInt(0, game.cols - 1), y: U.randInt(0, game.rows - 1) };
-        if (!game.inSnake(c) && !inObstacle(game, c)) {
-            game.food = c;
-            game.foodSpawnTime = Date.now();
-            return;
-        }
-        if (++tries > 2000) {
-            game.gameOver(true);
-            return;
-        }
-    }
-}
+// Re-export modularized functions so other modules can still import from this file
+export { changeAndAnimateObstacles, generateObstacles, inObstacle };
+export { placeFood };
+export { spawnPowerUp, activatePowerUp, deactivatePowerUp, activateImmunity, isSelfColliding, getExpressionForPowerUp };
+export { playSoundWithDucking };
 
 export function inSnake(game, pos) {
     return game.snake.some(seg => U.posEq(seg, pos));
@@ -166,6 +62,12 @@ export function resetGame(game) {
     game.pointsMultiplier = 1;
     game.lastPowerUpType = null;
     game.expression = 'normal';
+
+    // Reset head blink/focus
+    game.headBlinkActive = false;
+    game.nextHeadBlinkTime = Date.now() + (game.headBlinkInterval || 3000);
+    game.headBlinkEndTime = 0;
+    game.focusTarget = null;
 
     // Inicializar/restablecer colores y música
     updateSnakeColor(game);
@@ -442,205 +344,8 @@ export function requestRestart(game) {
     }
 }
 
-export function spawnPowerUp(game) {
-    if (!game.running) return;
+/* spawn/activate/deactivate power-up logic moved to js/core/gameLogic/powerups.js */
 
-    // Probabilities for each power-up type
-    const weightedPowerUps = [
-        { type: POWER_UP_TYPES.SLOW_DOWN, weight: game.score >= 25 ? 3 : 0 },
-        { type: POWER_UP_TYPES.DOUBLE_POINTS, weight: 2 },
-        { type: POWER_UP_TYPES.IMMUNITY, weight: 2 },
-        { type: POWER_UP_TYPES.SHRINK, weight: game.score >= 25 ? 1 : 0 },
-        { type: POWER_UP_TYPES.CLEAR_OBSTACLES, weight: 1 },
-        { type: POWER_UP_TYPES.BOMB, weight: 1 },
-    ];
-
-    // Reduce weight of last spawned power-up to avoid repetition
-    if (game.lastPowerUpType) {
-        const last = weightedPowerUps.find(p => p.type.type === game.lastPowerUpType);
-        if (last) {
-            last.weight *= 0.2; // Reduce weight to 20% of original
-        }
-    }
-
-    const totalWeight = weightedPowerUps.reduce((sum, p) => sum + p.weight, 0);
-    if (totalWeight === 0) {
-        if (game.powerUpSpawnTimer) clearTimeout(game.powerUpSpawnTimer);
-        game.powerUpSpawnTimer = setTimeout(() => spawnPowerUp(game), POWER_UP_CONFIG.spawnInterval);
-        return;
-    }
-
-    let random = Math.random() * totalWeight;
-    let chosenType = null;
-
-    for (const p of weightedPowerUps) {
-        if (random < p.weight) {
-            chosenType = p.type;
-            break;
-        }
-        random -= p.weight;
-    }
-
-    if (!chosenType) {
-        // Fallback: find first available power-up
-        chosenType = weightedPowerUps.find(p => p.weight > 0)?.type || POWER_UP_TYPES.SLOW_DOWN;
-    }
-
-    game.lastPowerUpType = chosenType.type; // Store last spawned type
-
-    let pos;
-    let tries = 0;
-    while (true) {
-        pos = { x: U.randInt(0, game.cols - 1), y: U.randInt(0, game.rows - 1) };
-        if (!game.inSnake(pos) && !inObstacle(game, pos) && !game.powerUps.some(p => U.posEq(p, pos))) {
-            break;
-        }
-        if (++tries > 500) {
-            console.warn("Could not find a valid position for a new power-up.");
-            if (game.powerUpSpawnTimer) clearTimeout(game.powerUpSpawnTimer);
-            game.powerUpSpawnTimer = setTimeout(() => spawnPowerUp(game), POWER_UP_CONFIG.spawnInterval);
-            return;
-        }
-    }
-
-    const newPowerUp = {
-        ...chosenType,
-        x: pos.x,
-        y: pos.y,
-        spawnTime: Date.now(), // Track spawn time
-    };
-
-    game.powerUps.push(newPowerUp);
-    console.log(`Spawned power-up: ${newPowerUp.type} at`, pos);
-
-    if (game.powerUpSpawnTimer) clearTimeout(game.powerUpSpawnTimer);
-    game.powerUpSpawnTimer = setTimeout(() => spawnPowerUp(game), POWER_UP_CONFIG.spawnInterval);
-}
-
-
-export function activatePowerUp(game, powerUp) {
-    if (game.activePowerUp.timeoutId) {
-        clearTimeout(game.activePowerUp.timeoutId);
-        deactivatePowerUp(game, game.activePowerUp.type);
-    }
-
-    game.activePowerUp.type = powerUp.type;
-    game.expression = getExpressionForPowerUp(powerUp.type);
-
-    switch (powerUp.type) {
-        case POWER_UP_TYPES.IMMUNITY.type:
-            playSoundWithDucking('immunity');
-            activateImmunity(game, powerUp.duration);
-            break;
-
-        case POWER_UP_TYPES.SLOW_DOWN.type:
-            playSoundWithDucking('slowDown');
-            if (game.originalTickMs === 0) {
-                game.originalTickMs = game.tickMs;
-                game.tickMs *= 1.5; // 50% slower
-                game.activePowerUp.timeoutId = setTimeout(() => {
-                    deactivatePowerUp(game, POWER_UP_TYPES.SLOW_DOWN.type);
-                }, powerUp.duration);
-            }
-            break;
-
-        case POWER_UP_TYPES.DOUBLE_POINTS.type:
-            playSoundWithDucking('doublePoints');
-            game.pointsMultiplier = 2;
-            game.activePowerUp.timeoutId = setTimeout(() => {
-                deactivatePowerUp(game, POWER_UP_TYPES.DOUBLE_POINTS.type);
-            }, powerUp.duration);
-            break;
-
-        case POWER_UP_TYPES.SHRINK.type:
-            playSoundWithDucking('shrink');
-            if (game.snake.length > 3) {
-                const segmentsToRemoveCount = Math.floor(game.snake.length / 3);
-                const removedSegments = game.snake.slice(-segmentsToRemoveCount);
-
-                // Create particles for each removed segment
-                removedSegments.forEach(seg => {
-                    createShrinkParticles(seg.x, seg.y, game.snakeBodyColor, game.cellSize);
-                });
-
-                game.snake.splice(game.snake.length - segmentsToRemoveCount);
-                triggerShrinkAnimation(removedSegments);
-            }
-            break;
-
-        case POWER_UP_TYPES.CLEAR_OBSTACLES.type:
-            playSoundWithDucking('clearObstacles');
-            if (settings.obstacles) {
-                createObstacleClearParticles(game.obstacles, game.obstacleColor, game.cellSize);
-                game.obstacles = [];
-            }
-            break;
-
-        case POWER_UP_TYPES.BOMB.type:
-            playSoundWithDucking('bomb');
-            triggerBombAnimation(game.snake);
-            game.score = Math.max(0, game.score - 5); // Subtract 5 points, min 0
-            game.updateScore();
-            placeFood(game);
-            // Optional: Add a small screen shake or visual effect
-            break;
-        
-        default:
-            playSoundWithDucking('bonus'); // Fallback for any other case
-            break;
-    }
-}
-
-export function deactivatePowerUp(game, powerUpType) {
-    if (!powerUpType) return;
-
-    console.log('Deactivating power-up:', powerUpType);
-    game.expression = 'normal'; // Reset expression
-
-    switch (powerUpType) {
-        case POWER_UP_TYPES.IMMUNITY.type:
-            // Logic is handled by the timeout in activateImmunity
-            break;
-        case POWER_UP_TYPES.DOUBLE_POINTS.type:
-            game.pointsMultiplier = 1;
-            break;
-        case POWER_UP_TYPES.SLOW_DOWN.type:
-            if (game.originalTickMs > 0) {
-                game.tickMs = game.originalTickMs;
-                game.originalTickMs = 0;
-            }
-            break;
-    }
-    // Clear active power-up state after deactivation
-    game.activePowerUp.type = null;
-    game.activePowerUp.timeoutId = null;
-}
-
-
-export function isSelfColliding(game) {
-    if (game.snake.length < 2) return false;
-    const head = game.snake[0];
-    return game.snake.slice(1).some(seg => U.posEq(head, seg));
-}
-
-export function activateImmunity(game, duration) {
-    if (game.activePowerUp.type === 'IMMUNITY' && game.activePowerUp.timeoutId) {
-        clearTimeout(game.activePowerUp.timeoutId);
-    }
-
-    game.isImmune = true;
-    game.expression = 'aggressive'; // Set expression for immunity
-    console.log(`Immunity activated for ${duration}ms`);
-
-    const endImmunity = () => {
-        if (inObstacle(game, game.snake[0]) || isSelfColliding(game)) {
-            game.activePowerUp.timeoutId = setTimeout(endImmunity, 100);
-        } else {
-            game.isImmune = false;
-            deactivatePowerUp(game, POWER_UP_TYPES.IMMUNITY.type);
-        }
-    };
-
-    game.activePowerUp.type = 'IMMUNITY';
-    game.activePowerUp.timeoutId = setTimeout(endImmunity, duration);
-}
+/* NOTE: spawn/activate/deactivate power-up functions moved to
+   js/core/gameLogic/powerups.js. This block was removed to keep
+   implementation modular. */
