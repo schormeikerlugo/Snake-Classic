@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
@@ -11,8 +12,11 @@
   <link rel="icon" href="assets/image/icon/icon-192x192.png">
   <link rel="apple-touch-icon" href="assets/image/icon/icon-192x192.png">
   <link rel="stylesheet" href="./styles/main.css">
+  <link rel="stylesheet" href="./styles/multiplayer.css">
+  <link rel="stylesheet" href="./styles/multiplayer-game.css">
 
 </head>
+
 <body>
 
   <div id="splash-screen" class="animated-grid-bg">
@@ -30,6 +34,7 @@
     <img src="assets/image/logo/logo.png" alt="Snake Game Logo" id="menu-logo">
     <div class="menu-buttons">
       <button id="menu-start" data-translate-key="play">Iniciar Juego</button>
+      <button id="menu-multiplayer" data-translate-key="multiplayer">🎮 Multijugador</button>
       <button id="menu-how-to-play" data-translate-key="howToPlay">Cómo Jugar</button>
       <button id="menu-settings" data-translate-key="settings">Configuración</button>
       <button id="menu-account" data-translate-key="account">Cuenta</button>
@@ -62,7 +67,8 @@
         <h2 class="column-title" data-translate-key="liveChat">Chat en Vivo</h2>
         <div id="chat-messages"></div>
         <form id="chat-form">
-          <input type="text" id="chat-input" placeholder="Escribe un mensaje..." data-translate-key="chatPlaceholder" required autocomplete="off">
+          <input type="text" id="chat-input" placeholder="Escribe un mensaje..." data-translate-key="chatPlaceholder"
+            required autocomplete="off">
           <button type="submit" data-translate-key="send">Enviar</button>
         </form>
       </div>
@@ -141,8 +147,10 @@
   <script type="module" src="./js/features/auth.js"></script>
   <script type="module" src="./js/features/ranking.js"></script>
   <script type="module" src="./js/features/chat.js"></script>
+  <script type="module" src="./js/features/multiplayer/multiplayerUI.js"></script>
   <script type="module" src="./js/ui/ui.js"></script>
   <script type="module" src="./js/fx/particles.js"></script>
   <script type="module" src="./js/main.js"></script>
 </body>
+
 </html>

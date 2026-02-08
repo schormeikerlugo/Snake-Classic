@@ -1,0 +1,133 @@
+/**
+ * Estilos adicionales para la vista del juego multiplayer
+ */
+
+/* ===== VISTA DEL JUEGO ===== */
+.mp-game-view {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #0d1020 0%, #1a1f3a 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.mp-game-view.hidden {
+    display: none;
+}
+
+.mp-game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+}
+
+.mp-game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 600px;
+    padding: 0 0.5rem;
+}
+
+#mp-round-info {
+    color: #00FFFF;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.875rem;
+}
+
+#mp-game-canvas {
+    border: 3px solid #00FFFF;
+    border-radius: 8px;
+    box-shadow:
+        0 0 30px rgba(0, 255, 255, 0.3),
+        inset 0 0 30px rgba(0, 255, 255, 0.05);
+}
+
+/* ===== COUNTDOWN ===== */
+.mp-countdown {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 6rem;
+    font-family: 'Press Start 2P', monospace;
+    color: #00FFFF;
+    text-shadow:
+        0 0 20px #00FFFF,
+        0 0 40px #00FFFF,
+        0 0 60px #00FFFF;
+    animation: countdownPulse 1s ease-in-out infinite;
+}
+
+.mp-countdown.hidden {
+    display: none;
+}
+
+@keyframes countdownPulse {
+
+    0%,
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+    }
+
+    50% {
+        transform: translate(-50%, -50%) scale(1.1);
+    }
+}
+
+/* ===== RESULTADO ===== */
+.mp-game-result {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.9);
+    border: 2px solid #00FFFF;
+    border-radius: 16px;
+    padding: 2rem;
+    text-align: center;
+    animation: resultAppear 0.3s ease-out;
+}
+
+.mp-game-result.hidden {
+    display: none;
+}
+
+@keyframes resultAppear {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+.mp-game-result h2 {
+    color: #00FFFF;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 1.5rem;
+    margin: 0 0 1rem 0;
+    text-shadow: 0 0 10px #00FFFF;
+}
+
+.mp-game-result p {
+    color: #FFFFFF;
+    margin: 0 0 1.5rem 0;
+}
+
+.mp-result-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}

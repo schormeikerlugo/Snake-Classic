@@ -2,7 +2,7 @@ import { supabase } from '../lib/supabaseClient.js';
 import * as C from '../config/constants.js';
 import * as U from '../utils/utils.js';
 import { settings } from '../features/settings.js';
-import { draw,drawCountdown } from './rendering.js';
+import { draw, drawCountdown } from './rendering.js';
 import { updateSnakeColor, updateObstacleColor } from '../config/colors.js';
 import { sfx } from '../sound/sfx.js';
 import { audioManager } from '../sound/audio.js';
@@ -180,7 +180,7 @@ export function gameLoop(game, currentTime) {
 
     // Actualizar el pulso de brillo del obstáculo
     game.obstacleGlowProgress = (Math.sin(currentTime / 1000) + 1) / 2; // Oscila entre 0 y 1 (más lento)
-    
+
     // Actualizar el pulso de brillo de los power-ups (más rápido)
     game.powerUpGlowProgress = (Math.sin(currentTime / 250) + 1) / 2;
 
@@ -208,7 +208,7 @@ export function setDirection(game, newDir) {
         console.log('setDirection returning early. Not running or turn locked.');
         return;
     }
-    
+
     const isOpposite = (d1, d2) => d1.x === -d2.x || d1.y === -d2.y;
     if (isOpposite(game.dir, newDir)) {
         console.log('setDirection returning early. Opposite direction.');
@@ -231,7 +231,7 @@ export function handleKeydown(game, e) {
     if (e.code === 'ArrowDown' || e.code === 'KeyS') newDir = { x: 0, y: 1 };
     if (e.code === 'ArrowLeft' || e.code === 'KeyA') newDir = { x: -1, y: 0 };
     if (e.code === 'ArrowRight' || e.code === 'KeyD') newDir = { x: 1, y: 0 };
-    
+
     if (newDir) game.setDirection(newDir);
 }
 
@@ -286,6 +286,7 @@ export async function gameOver(game) {
     if (game.activePowerUp.timeoutId) clearTimeout(game.activePowerUp.timeoutId);
     if (game.powerUpSpawnTimer) clearTimeout(game.powerUpSpawnTimer);
 
+    // Guardar puntuación en Supabase
     try {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) {
@@ -293,14 +294,47 @@ export async function gameOver(game) {
             return;
         }
 
-        const { error } = await supabase.functions.invoke('submit-score', {
-            body: { user_id: user.id, score: game.score },
-        });
+        // Buscar si ya existe un registro de puntuación para este usuario
+        const { data: existingScore, error: fetchError } = await supabase
+            .from('puntuaciones')
+            .select('id, best_score')
+            .eq('user_id', user.id)
+            .single();
 
-        if (error) throw error;
-        console.log('Puntaje enviado correctamente.');
+        if (fetchError && fetchError.code !== 'PGRST116') {
+            // PGRST116 = no rows found, lo cual es normal para nuevos usuarios
+            console.error('Error buscando puntuación:', fetchError);
+            return;
+        }
+
+        if (!existingScore) {
+            // Primera puntuación del usuario - insertar nuevo registro
+            const { error: insertError } = await supabase
+                .from('puntuaciones')
+                .insert({ user_id: user.id, best_score: game.score });
+
+            if (insertError) {
+                console.error('Error insertando puntuación:', insertError);
+            } else {
+                console.log('¡Nueva puntuación registrada!', game.score);
+            }
+        } else if (game.score > existingScore.best_score) {
+            // Nuevo récord - actualizar registro
+            const { error: updateError } = await supabase
+                .from('puntuaciones')
+                .update({ best_score: game.score, updated_at: new Date().toISOString() })
+                .eq('id', existingScore.id);
+
+            if (updateError) {
+                console.error('Error actualizando puntuación:', updateError);
+            } else {
+                console.log('¡Nuevo récord!', game.score);
+            }
+        } else {
+            console.log('Puntuación no supera el récord actual:', existingScore.best_score);
+        }
     } catch (error) {
-        console.error('Error al enviar el puntaje:', error.message);
+        console.error('Error al guardar puntuación:', error.message);
     }
 }
 

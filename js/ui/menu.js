@@ -7,6 +7,7 @@ import { initAuth } from '../features/auth.js';
 import { initModeSelection } from './mode-selection.js';
 import { initializePowerupDemos } from './powerupDemos.js';
 import { setLanguage, getTranslation, updateUI } from '../utils/language.js';
+import { initMultiplayerUI, showMultiplayer } from '../features/multiplayer/multiplayerUI.js';
 
 // Vistas principales
 const menuView = document.getElementById('menu-view');
@@ -18,6 +19,7 @@ const howToPlayBtn = document.getElementById('menu-how-to-play');
 const settingsBtn = document.getElementById('menu-settings');
 const creditsBtn = document.getElementById('menu-credits');
 const accountBtn = document.getElementById('menu-account');
+const multiplayerBtn = document.getElementById('menu-multiplayer');
 
 /**
  * Genera el contenido del DOM para la sección "Cómo Jugar".
@@ -54,7 +56,7 @@ function renderHowToPlayContent(modalBody) {
  * Genera el contenido HTML para la sección "Créditos".
  * @returns {string} - El HTML del contenido.
  */
-function getCreditsContent() { 
+function getCreditsContent() {
     return `
         <div style="text-align: center; margin-bottom: 20px;">
             <img src="assets/image/creditos/avatar.jpeg" alt="Schormeiker Lugo" style="max-width: 150px; border-radius: 50%; margin-bottom: 10px;">
@@ -169,6 +171,16 @@ export function initMenu(game) {
     startBtn.addEventListener('click', () => {
         showModeSelection(game);
     });
+
+    // Botón Multijugador
+    if (multiplayerBtn) {
+        multiplayerBtn.addEventListener('click', () => {
+            showMultiplayer();
+        });
+    }
+
+    // Inicializar UI de multijugador
+    initMultiplayerUI();
 
     howToPlayBtn.addEventListener('click', () => {
         showModal(getTranslation('howToPlay'), (modalBody) => {
