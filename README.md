@@ -89,7 +89,7 @@ Retro Snake Classic es una versión moderna del icónico juego **Snake** que muc
 
 ---
 
- ## 🎮 Cómo jugar 
+## 🎮 Cómo jugar 
 
 | 🕹️ Acción             | ⌨️ Control                                     |
 |------------------------|-----------------------------------------------|
@@ -97,6 +97,20 @@ Retro Snake Classic es una versión moderna del icónico juego **Snake** que muc
 | Pausar / Reanudar      | Barra espaciadora                             |
 | Reiniciar              | Boton de reinicio                             |
 | Volver al menú         | Boton de menu                                 |
+| **Multijugador**       | **Mismas teclas** + **ESC** para salir        |
+
+---
+
+## 🌐 **Multijugador (Beta)**
+
+¡Juega en tiempo real con amigos!
+
+- **Duelo 1v1**: Compite por ver quién sobrevive más tiempo.
+- **Salas Privadas**: Crea una sala y comparte el código.
+- **Sincronización Realtime**: Movimientos fluidos y estado compartido.
+- **Audio Integrado**: Disfruta de la banda sonora original mientras compites.
+
+> **Nota**: Requiere conexión a internet y una cuenta registrada.
 
 ## 📔 Nota
 ¡El juego es completamente responsive, así que el mismo teclado o pantalla táctil funciona en cualquier dispositivo! 
@@ -177,60 +191,11 @@ Cada idea está organizada por estado, tipo de mejora y detalles técnicos. Este
 
 | 🧩 Feature                  | 📌 Estado         | 🧪 Tipo de Mejora     | ⚙️ Detalles Técnicos                                                                 |
 |----------------------------|------------------|-----------------------|--------------------------------------------------------------------------------------|
-| Modo Obstáculos            | ✅ Implementado   | Jugabilidad           | Paredes internas que aumentan la dificultad progresivamente.                        |
+| Modo Obstáculos            | ✅ Propuesta      | Jugabilidad           | Paredes internas que aumentan la dificultad progresivamente.                        |
 | Power‑Ups                  | ✅ Implementado   | Mecánicas             | Ralentizar, duplicar puntos, invulnerabilidad temporal.                             |
-| Modo multijugador          | ✅ Implementado   | Jugabilidad avanzada  | Duelo 1v1 en tiempo real. Sistema de salas con Supabase Realtime.                   |
+| Modo multijugador          | 🔄 En prototipo   | Jugabilidad avanzada  | Dos serpientes compiten por la misma comida. Requiere sincronización de inputs.     |
 | Leaderboard online         | 🌐 En exploración | Backend / Persistencia| Integración con Firebase o backend modular para puntajes globales persistentes.     |
 
----
-
-## 🎮 Modo Multijugador (NUEVO)
-
-¡Ahora puedes enfrentarte a otros jugadores en tiempo real!
-
-### Características del Multijugador
-
-| 🎯 Característica | 📝 Descripción |
-|---|---|
-| **Duelo 1v1** | Compite contra otro jugador en el mismo tablero |
-| **Sistema de Salas** | Crea o únete a salas con código de 6 caracteres |
-| **Sincronización en Tiempo Real** | Usa Supabase Realtime para comunicación instantánea |
-| **Mismo Estilo Gráfico** | Usa el mismo sistema de rendering y animaciones del juego base |
-| **Audio Integrado** | Música del juego y efectos de sonido sincronizados |
-
-### Cómo Jugar Multijugador
-
-1. **Iniciar sesión**: Necesitas una cuenta para jugar multijugador
-2. **Crear o Unirse**: Desde el menú principal, selecciona "🎮 Multijugador"
-3. **Crear Sala**: Genera un código para compartir con tu oponente
-4. **Unirse a Sala**: Ingresa el código de una sala existente
-5. **Listo**: Ambos jugadores deben marcar "Listo"
-6. **¡Jugar!**: El host inicia la partida y comienza el duelo
-
-### Controles Multijugador
-
-| 🕹️ Acción | ⌨️ Control |
-|---|---|
-| Mover serpiente | Flechas ↔️ ↕️ o W, A, S, D |
-| Salir del juego | Tecla ESC |
-
-### Estructura Técnica del Multijugador
-
-| 📁 Archivo | 🧾 Descripción |
-|---|---|
-| `js/features/multiplayer/rooms.js` | Índice principal del sistema de salas |
-| `js/features/multiplayer/roomStore.js` | Estado global de la sala (sala, canal, suscripción) |
-| `js/features/multiplayer/roomSync.js` | Sincronización Realtime con Supabase Channels |
-| `js/features/multiplayer/roomActions.js` | Acciones: crear, unirse, salir de salas |
-| `js/features/multiplayer/roomState.js` | Estado del juego: listo, iniciar partida |
-| `js/features/multiplayer/multiplayerUI.js` | UI del menú y lobby multijugador |
-| `js/features/multiplayer/game/multiplayerGame.js` | Lógica principal del juego multijugador |
-| `js/features/multiplayer/game/gameView.js` | Vista y transiciones del juego |
-| `styles/multiplayer.css` | Estilos del menú y lobby |
-| `styles/multiplayer-game.css` | Estilos de la vista del juego |
-| `supabase/migrations/` | Migraciones SQL para tablas y RLS |
-
----
 
 ## 📔 Nota
 Estas ideas están abiertas para que los implementes o sugieras en Issues! 🎯

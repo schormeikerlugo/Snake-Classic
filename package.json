@@ -1,0 +1,32 @@
+{
+  "name": "snake-classic",
+  "version": "1.0.0",
+  "description": "> ¡Qué tal, amigo!   > Este proyecto es mi propio *Snake Classic*, un juego retro que he estado desarrollando con mucho cariño y una pizca de magia JavaScript.   > Si te gusta el estilo 8‑bits y el desafío sin fin de los serpientes comestibles, **¡este README está hecho para ti!**   > ¡Vamos a sumergirnos en la historia, las tecnologías, la jugabilidad y cómo puedes contribuir a la evolución de este clásico!",
+  "main": "sw.js",
+  "scripts": {
+    "start": "./scripts/start.sh",
+    "stop": "./scripts/stop.sh",
+    "tunnel": "./scripts/tunnel.sh",
+    "dev": "npx http-server -p 5500 -c-1",
+    "supabase:start": "npx supabase start",
+    "supabase:stop": "npx supabase stop",
+    "supabase:status": "npx supabase status",
+    "supabase:db:reset": "npx supabase db reset",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/schormeikerlugo/Snake-Classic.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/schormeikerlugo/Snake-Classic/issues"
+  },
+  "homepage": "https://github.com/schormeikerlugo/Snake-Classic#readme",
+  "devDependencies": {
+    "supabase": "^2.76.3"
+  }
+}
