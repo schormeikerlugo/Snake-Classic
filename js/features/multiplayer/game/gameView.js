@@ -30,8 +30,11 @@ export async function startGameFromLobby() {
     // Ocultar UI del multiplayer
     hideMultiplayer();
 
+    // Determinar modo de juego (duel -> duelo, points -> puntos)
+    const gameMode = room.modo_juego === 'points' ? 'puntos' : 'duelo';
+
     // Inicializar juego multiplayer (usa canvas principal)
-    await initMultiplayerGame(room, isHost);
+    await initMultiplayerGame(room, isHost, gameMode);
 
     // Iniciar countdown
     showCountdown(3, () => {

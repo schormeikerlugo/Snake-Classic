@@ -65,6 +65,27 @@ export async function subscribeToRoom(roomId) {
         .on('broadcast', { event: 'game_state' }, ({ payload }) => {
             roomCallbacks.onGameState?.(payload);
         })
+        .on('broadcast', { event: 'player_move' }, ({ payload }) => {
+            roomCallbacks.onPlayerMove?.(payload);
+        })
+        .on('broadcast', { event: 'timer_update' }, ({ payload }) => {
+            roomCallbacks.onTimerUpdate?.(payload);
+        })
+        .on('broadcast', { event: 'room_chat' }, ({ payload }) => {
+            roomCallbacks.onRoomChat?.(payload);
+        })
+        .on('broadcast', { event: 'rematch_request' }, ({ payload }) => {
+            console.log('📨 Solicitud de revancha:', payload);
+            roomCallbacks.onRematchRequest?.(payload);
+        })
+        .on('broadcast', { event: 'rematch_accept' }, ({ payload }) => {
+            console.log('✅ Aceptación de revancha:', payload);
+            roomCallbacks.onRematchAccept?.(payload);
+        })
+        .on('broadcast', { event: 'game_rematch' }, ({ payload }) => {
+            console.log('🔄 Revancha recibida:', payload);
+            roomCallbacks.onGameRematch?.(payload);
+        })
         .on('broadcast', { event: 'room_closed' }, () => {
             console.log('🚪 Sala cerrada');
             roomCallbacks.onRoomClosed?.();

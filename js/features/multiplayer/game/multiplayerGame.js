@@ -29,18 +29,34 @@ let gameState = {
     players: {},
     food: { x: 0, y: 0 },
     gridColor: '',
-    foodColor: '#FF0000'
+    foodColor: '#FF0000',
+    // Fase 4: Competencia por Puntos
+    gameMode: 'duelo', // 'duelo' | 'puntos'
+    timer: 120, // Segundos (2 minutos)
+    timerInterval: null,
+    // Seguimiento de victorias
+    matchHistory: [], // [{winner: playerId, score: X, mode: 'duelo'}]
+    victoryCount: {}, // {playerId: numberOfWins}
+    currentRound: 1,
+    gameOverAnimationId: null,
+    // Sistema de revancha
+    rematchPending: false,
+    rematchRequester: null,
+    rematchAccepted: {}
 };
 
 /**
  * Inicializar el juego multijugador
- * Usa el canvas principal del juego
+ * @param {Object} roomInfo - Información de la sala
+ * @param {boolean} hostFlag - Si es host
+ * @param {string} gameMode - Modo de juego: 'duelo' | 'puntos'
  */
-export async function initMultiplayerGame(roomInfo, hostFlag) {
+export async function initMultiplayerGame(roomInfo, hostFlag, gameMode = 'duelo') {
     // Obtener usuario actual  
     const { data: { user } } = await supabase.auth.getUser();
     gameState.localPlayerId = user?.id;
     gameState.isHost = hostFlag;
+    gameState.gameMode = gameMode;
 
     // Usar el canvas principal del juego
     resizeCanvas();
@@ -62,7 +78,11 @@ export async function initMultiplayerGame(roomInfo, hostFlag) {
     // Registrar callbacks para eventos de red
     onRoomEvents({
         onGameState: handleRemoteGameState,
-        onPlayerMove: handleRemotePlayerMove
+        onPlayerMove: handleRemotePlayerMove,
+        onTimerUpdate: handleTimerUpdate,
+        onGameRematch: handleRematch,
+        onRematchRequest: handleRematchRequest,
+        onRematchAccept: handleRematchAccept
     });
 
     // Ocultar menú, mostrar vista del juego
@@ -205,6 +225,21 @@ function initPlayers(jugadoresSala) {
  * Manejar teclas
  */
 function handleKeydown(e) {
+    // Manejar teclas cuando el juego ha terminado
+    if (!gameState.isRunning && gameState.gameOverAnimationId) {
+        if (e.key === 'Escape') {
+            e.preventDefault();
+            stopMultiplayerGame();
+            return;
+        }
+        if (e.key === ' ' || e.code === 'Space') {
+            e.preventDefault();
+            requestRematch();
+            return;
+        }
+        return;
+    }
+
     if (!gameState.isRunning) return;
 
     const player = gameState.players[gameState.localPlayerId];
@@ -249,6 +284,201 @@ function handleKeydown(e) {
 }
 
 /**
+ * Solicitar revancha - Cuando un jugador presiona ESPACIO
+ */
+function requestRematch() {
+    if (gameState.rematchPending) {
+        // Ya hay una solicitud pendiente, esto es una aceptación
+        acceptRematch();
+        return;
+    }
+
+    // Marcar como pendiente
+    gameState.rematchPending = true;
+    gameState.rematchRequester = gameState.localPlayerId;
+    gameState.rematchAccepted = {};
+    gameState.rematchAccepted[gameState.localPlayerId] = true;
+
+    // Broadcast solicitud
+    broadcastEvent('rematch_request', {
+        requester_id: gameState.localPlayerId,
+        requester_name: gameState.players[gameState.localPlayerId]?.name || 'Jugador'
+    });
+
+    // Actualizar UI para mostrar espera
+    drawRematchWaiting();
+
+    console.log('📨 Solicitud de revancha enviada');
+}
+
+/**
+ * Aceptar revancha
+ */
+function acceptRematch() {
+    gameState.rematchAccepted[gameState.localPlayerId] = true;
+
+    // Broadcast aceptación
+    broadcastEvent('rematch_accept', {
+        player_id: gameState.localPlayerId
+    });
+
+    console.log('✅ Revancha aceptada');
+
+    // Verificar si todos aceptaron
+    checkAllAccepted();
+}
+
+/**
+ * Verificar si todos los jugadores aceptaron
+ */
+function checkAllAccepted() {
+    const playerIds = Object.keys(gameState.players);
+    const allAccepted = playerIds.every(id => gameState.rematchAccepted[id]);
+
+    if (allAccepted) {
+        executeRematch();
+    }
+}
+
+/**
+ * Ejecutar revancha - cuando todos aceptaron
+ */
+function executeRematch() {
+    // Detener animación de game over
+    if (gameState.gameOverAnimationId) {
+        cancelAnimationFrame(gameState.gameOverAnimationId);
+        gameState.gameOverAnimationId = null;
+    }
+
+    // Reset estado de revancha
+    gameState.rematchPending = false;
+    gameState.rematchRequester = null;
+    gameState.rematchAccepted = {};
+
+    // Incrementar ronda
+    gameState.currentRound++;
+
+    // Reiniciar posiciones de jugadores
+    updateSpawnPositions();
+
+    for (const playerId in gameState.players) {
+        const player = gameState.players[playerId];
+        const spawnIndex = Object.keys(gameState.players).indexOf(playerId);
+        const spawnPos = getSpawnPosition(spawnIndex);
+
+        player.snake = [spawnPos];
+        player.prevSnake = [spawnPos];
+        player.dir = getInitialDirection(spawnIndex);
+        player.nextDir = null;
+        player.score = 0;
+        player.isAlive = true;
+        player.expression = 'normal';
+    }
+
+    // Nueva comida
+    placeFood();
+
+    // Reset timer si es modo puntos
+    if (gameState.gameMode === 'puntos') {
+        gameState.timer = 120;
+    }
+
+    // Iniciar juego
+    gameState.isRunning = true;
+    gameState.lastTickTime = performance.now();
+    gameState.gameLoopId = requestAnimationFrame(gameLoop);
+
+    // Reiniciar timer si es necesario
+    if (gameState.gameMode === 'puntos') {
+        startTimer();
+    }
+
+    console.log(`🔄 Revancha iniciada - Ronda ${gameState.currentRound}`);
+}
+
+/**
+ * Dibujar overlay de espera de revancha
+ */
+function drawRematchWaiting() {
+    const drawWaitingFrame = () => {
+        if (!gameState.rematchPending || gameState.isRunning) return;
+
+        C.ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
+        C.ctx.fillRect(0, 0, C.canvas.width, C.canvas.height);
+
+        const centerX = C.canvas.width / 2;
+        const centerY = C.canvas.height / 2;
+
+        // Título
+        C.ctx.fillStyle = '#00FFFF';
+        C.ctx.font = 'bold 32px "Pixelify Sans"';
+        C.ctx.textAlign = 'center';
+        C.ctx.fillText('¡REVANCHA!', centerX, centerY - 60);
+
+        // Mostrar quién aceptó
+        const acceptedCount = Object.keys(gameState.rematchAccepted).length;
+        const totalPlayers = Object.keys(gameState.players).length;
+
+        C.ctx.font = '24px "Pixelify Sans"';
+        C.ctx.fillStyle = '#FFFFFF';
+        C.ctx.fillText(`Jugadores listos: ${acceptedCount}/${totalPlayers}`, centerX, centerY);
+
+        // Lista de jugadores
+        let y = centerY + 40;
+        C.ctx.font = '18px "Pixelify Sans"';
+
+        for (const [playerId, player] of Object.entries(gameState.players)) {
+            const isAccepted = gameState.rematchAccepted[playerId];
+            const icon = isAccepted ? '✅' : '⏳';
+            C.ctx.fillStyle = player.color;
+            C.ctx.fillText(`${icon} ${player.name}`, centerX, y);
+            y += 25;
+        }
+
+        // Instrucción
+        C.ctx.font = '16px "Pixelify Sans"';
+        C.ctx.fillStyle = '#AAAAAA';
+        C.ctx.fillText('[ESPACIO] para aceptar  •  [ESC] para salir', centerX, centerY + 120);
+
+        gameState.gameOverAnimationId = requestAnimationFrame(drawWaitingFrame);
+    };
+
+    drawWaitingFrame();
+}
+
+/**
+ * Obtener posición de spawn según índice
+ */
+function getSpawnPosition(index) {
+    const cols = gameState.cols;
+    const rows = gameState.rows;
+    const margin = 3;
+
+    const positions = [
+        { x: margin, y: Math.floor(rows / 2) },
+        { x: cols - margin - 1, y: Math.floor(rows / 2) },
+        { x: Math.floor(cols / 2), y: margin },
+        { x: Math.floor(cols / 2), y: rows - margin - 1 }
+    ];
+
+    return positions[index % positions.length];
+}
+
+/**
+ * Obtener dirección inicial según índice de spawn
+ */
+function getInitialDirection(index) {
+    const directions = [
+        { x: 1, y: 0 },  // Derecha
+        { x: -1, y: 0 }, // Izquierda
+        { x: 0, y: 1 },  // Abajo
+        { x: 0, y: -1 }  // Arriba
+    ];
+
+    return directions[index % directions.length];
+}
+
+/**
  * Iniciar el juego
  */
 export function startMultiplayerGame() {
@@ -260,10 +490,49 @@ export function startMultiplayerGame() {
     // Iniciar música del juego (detiene música del menú automáticamente)
     audioManager.playGameMusic();
 
+    // Iniciar timer si es modo puntos
+    if (gameState.gameMode === 'puntos') {
+        gameState.timer = 120; // Reset a 2 minutos
+        startTimer();
+    }
+
     // Iniciar loop
     gameState.gameLoopId = requestAnimationFrame(gameLoop);
 
-    console.log('🚀 Juego multiplayer iniciado');
+    console.log('🚀 Juego multiplayer iniciado', { mode: gameState.gameMode });
+}
+
+/**
+ * Iniciar timer para modo puntos
+ */
+function startTimer() {
+    if (gameState.timerInterval) {
+        clearInterval(gameState.timerInterval);
+    }
+
+    gameState.timerInterval = setInterval(() => {
+        if (!gameState.isRunning) {
+            clearInterval(gameState.timerInterval);
+            return;
+        }
+
+        gameState.timer--;
+
+        // Broadcast tiempo restante a todos
+        if (gameState.isHost) {
+            broadcastEvent('timer_update', { timer: gameState.timer });
+        }
+
+        // Verificar fin del juego
+        if (gameState.timer <= 0) {
+            checkGameEnd();
+        }
+
+        // Alerta sonora cuando quedan 30 segundos
+        if (gameState.timer === 30) {
+            sfx.play('bonus');
+        }
+    }, 1000);
 }
 
 /**
@@ -339,6 +608,7 @@ function tick() {
 
 /**
  * Verificar colisión
+ * En modo 'puntos' (ghost mode), las serpientes no colisionan entre sí
  */
 function checkCollision(playerId, pos) {
     // Paredes
@@ -350,6 +620,11 @@ function checkCollision(playerId, pos) {
     for (const pid in gameState.players) {
         const player = gameState.players[pid];
         if (!player.isAlive) continue;
+
+        // En modo puntos (ghost), ignorar colisión con otras serpientes
+        if (gameState.gameMode === 'puntos' && pid !== playerId) {
+            continue;
+        }
 
         // Colisión con su propia cola (excepto la punta que se va a mover)
         const snakeToCheck = pid === playerId ? player.snake.slice(0, -1) : player.snake;
@@ -366,23 +641,49 @@ function checkCollision(playerId, pos) {
 
 /**
  * Verificar fin del juego
+ * - Modo 'duelo': Termina cuando queda 1 jugador vivo
+ * - Modo 'puntos': Termina cuando timer llega a 0
  */
 function checkGameEnd() {
     const totalPlayers = Object.values(gameState.players).length;
     const alive = Object.values(gameState.players).filter(p => p.isAlive);
 
-    // Solo terminar si había al menos 2 jugadores y queda 1 o 0
-    if (totalPlayers >= 2 && alive.length <= 1) {
-        gameState.isRunning = false;
-        const winner = alive[0];
-
-        console.log('🏁 Game Over!', winner ? `Ganador: ${winner.name}` : 'Empate');
-
-        // Dibujar pantalla de game over
-        setTimeout(() => {
-            drawGameOver(winner);
-        }, 100);
+    // Modo Duelo: termina cuando queda 1 o 0 jugadores vivos
+    if (gameState.gameMode === 'duelo') {
+        if (totalPlayers >= 2 && alive.length <= 1) {
+            endGame(alive[0]);
+        }
     }
+    // Modo Puntos: termina cuando timer llega a 0 o todos mueren
+    else if (gameState.gameMode === 'puntos') {
+        if (gameState.timer <= 0 || alive.length === 0) {
+            // Determinar ganador por puntuación
+            const sorted = Object.values(gameState.players)
+                .sort((a, b) => b.score - a.score);
+            const winner = sorted[0];
+            endGame(winner);
+        }
+    }
+}
+
+/**
+ * Finalizar el juego
+ */
+function endGame(winner) {
+    gameState.isRunning = false;
+
+    // Detener timer si está activo
+    if (gameState.timerInterval) {
+        clearInterval(gameState.timerInterval);
+        gameState.timerInterval = null;
+    }
+
+    console.log('🏁 Game Over!', winner ? `Ganador: ${winner.name} (${winner.score} pts)` : 'Empate');
+
+    // Dibujar pantalla de game over
+    setTimeout(() => {
+        drawGameOver(winner);
+    }, 100);
 }
 
 /**
@@ -506,31 +807,145 @@ function drawHUD() {
         C.ctx.fillStyle = player.color;
         C.ctx.fillText(`${player.name.slice(0, 8)}: ${player.score}${status}`, x, y);
     });
+
+    // Timer para modo puntos
+    if (gameState.gameMode === 'puntos') {
+        const mins = Math.floor(gameState.timer / 60);
+        const secs = gameState.timer % 60;
+        const timeStr = `${mins}:${secs.toString().padStart(2, '0')}`;
+
+        // Fondo del timer (centrado arriba)
+        const timerX = C.canvas.width / 2;
+        const timerY = 25;
+
+        C.ctx.textAlign = 'center';
+        C.ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+        C.ctx.fillRect(timerX - 40, timerY - 18, 80, 28);
+
+        // Color rojo si quedan menos de 30 segundos
+        C.ctx.fillStyle = gameState.timer <= 30 ? '#FF4444' : '#FFFFFF';
+        C.ctx.font = 'bold 20px "Pixelify Sans", monospace';
+        C.ctx.fillText(timeStr, timerX, timerY);
+    }
 }
 
 /**
- * Dibujar pantalla de Game Over
+ * Dibujar pantalla de Game Over con animación y ranking
  */
 function drawGameOver(winner) {
-    C.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-    C.ctx.fillRect(0, 0, C.canvas.width, C.canvas.height);
+    let animationAlpha = 0;
+    let animationFrame = 0;
 
-    C.ctx.fillStyle = '#FFFFFF';
-    C.ctx.font = 'bold 48px "Pixelify Sans"';
+    // Registrar victoria
+    if (winner) {
+        gameState.victoryCount[winner.id] = (gameState.victoryCount[winner.id] || 0) + 1;
+        gameState.matchHistory.push({
+            round: gameState.currentRound,
+            winnerId: winner.id,
+            winnerName: winner.name,
+            score: winner.score,
+            mode: gameState.gameMode,
+            timestamp: Date.now()
+        });
+    }
+
+    const drawFrame = () => {
+        animationFrame++;
+        animationAlpha = Math.min(1, animationAlpha + 0.05);
+
+        // Fondo con fade-in
+        C.ctx.fillStyle = `rgba(0, 0, 0, ${0.85 * animationAlpha})`;
+        C.ctx.fillRect(0, 0, C.canvas.width, C.canvas.height);
+
+        const centerX = C.canvas.width / 2;
+        const centerY = C.canvas.height / 2;
+
+        // Título con efecto de pulso
+        const pulse = 1 + Math.sin(animationFrame * 0.1) * 0.05;
+        C.ctx.save();
+        C.ctx.translate(centerX, centerY - 80);
+        C.ctx.scale(pulse, pulse);
+        C.ctx.fillStyle = winner ? winner.color : '#FF4444';
+        C.ctx.font = 'bold 56px "Pixelify Sans"';
+        C.ctx.textAlign = 'center';
+        C.ctx.fillText('GAME OVER', 0, 0);
+        C.ctx.restore();
+
+        // Ganador con animación
+        if (animationAlpha >= 0.5) {
+            C.ctx.font = 'bold 32px "Pixelify Sans"';
+            C.ctx.fillStyle = winner ? winner.color : '#FFFFFF';
+            C.ctx.textAlign = 'center';
+            C.ctx.fillText(
+                winner ? `¡${winner.name} GANA!` : '¡EMPATE!',
+                centerX,
+                centerY - 20
+            );
+
+            // Mostrar score del ganador
+            if (winner) {
+                C.ctx.font = '24px "Pixelify Sans"';
+                C.ctx.fillStyle = '#FFAA00';
+                C.ctx.fillText(`Puntuación: ${winner.score}`, centerX, centerY + 15);
+            }
+        }
+
+        // Ranking de victorias (si hay historial)
+        if (animationAlpha >= 0.7 && gameState.matchHistory.length > 0) {
+            drawVictoryRanking(centerX, centerY + 55);
+        }
+
+        // Botones de acción
+        if (animationAlpha >= 0.9) {
+            // Botón Revancha
+            C.ctx.font = 'bold 20px "Pixelify Sans"';
+            C.ctx.fillStyle = '#00FF88';
+            C.ctx.fillText('[ESPACIO] Revancha', centerX, centerY + 130);
+
+            // Botón Salir
+            C.ctx.fillStyle = '#AAAAAA';
+            C.ctx.font = '16px "Pixelify Sans"';
+            C.ctx.fillText('[ESC] Salir al menú', centerX, centerY + 160);
+        }
+
+        // Continuar animación si no ha terminado
+        if (animationAlpha < 1 || animationFrame < 60) {
+            gameState.gameOverAnimationId = requestAnimationFrame(drawFrame);
+        } else {
+            // Animación terminada, mantener último frame
+            gameState.gameOverAnimationId = requestAnimationFrame(drawFrame);
+        }
+    };
+
+    // Iniciar animación
+    drawFrame();
+}
+
+/**
+ * Dibujar ranking de victorias en pantalla de Game Over
+ */
+function drawVictoryRanking(centerX, startY) {
+    C.ctx.font = 'bold 18px "Pixelify Sans"';
+    C.ctx.fillStyle = '#FFD700';
     C.ctx.textAlign = 'center';
-    C.ctx.fillText('GAME OVER', C.canvas.width / 2, C.canvas.height / 2 - 30);
+    C.ctx.fillText(`--- Ronda ${gameState.currentRound} ---`, centerX, startY);
 
-    C.ctx.font = 'bold 24px "Pixelify Sans"';
-    C.ctx.fillStyle = winner ? winner.color : '#FFFFFF';
-    C.ctx.fillText(
-        winner ? `¡${winner.name} gana!` : '¡Empate!',
-        C.canvas.width / 2,
-        C.canvas.height / 2 + 20
-    );
+    // Ordenar jugadores por victorias
+    const sortedPlayers = Object.entries(gameState.victoryCount)
+        .sort(([, a], [, b]) => b - a);
 
+    let y = startY + 25;
     C.ctx.font = '16px "Pixelify Sans"';
-    C.ctx.fillStyle = '#AAAAAA';
-    C.ctx.fillText('Presiona ESC para salir', C.canvas.width / 2, C.canvas.height / 2 + 60);
+
+    sortedPlayers.forEach(([playerId, wins], index) => {
+        const player = gameState.players[playerId];
+        if (!player) return;
+
+        const medal = index === 0 ? ' ' : index === 1 ? '🥈' : '🥉';
+        C.ctx.fillStyle = player.color;
+        C.ctx.fillText(`${medal} ${player.name}: ${wins} victoria${wins > 1 ? 's' : ''}`, centerX, y);
+        y += 22;
+    });
 }
 
 /**
@@ -585,6 +1000,92 @@ function handleRemotePlayerMove(payload) {
     if (player && player.isAlive) {
         player.nextDir = { ...payload.dir };
     }
+}
+
+/**
+ * Manejar actualización del timer desde el host
+ */
+function handleTimerUpdate(payload) {
+    if (gameState.isHost) return; // Host tiene su propio timer
+
+    if (typeof payload?.timer === 'number') {
+        gameState.timer = payload.timer;
+    }
+}
+
+/**
+ * Manejar revancha iniciada por el host
+ */
+function handleRematch(payload) {
+    if (gameState.isHost) return; // Host ya maneja esto en startRematch()
+
+    console.log('🔄 Revancha recibida del host:', payload);
+
+    // Detener animación de game over si existe
+    if (gameState.gameOverAnimationId) {
+        cancelAnimationFrame(gameState.gameOverAnimationId);
+        gameState.gameOverAnimationId = null;
+    }
+
+    // Actualizar ronda
+    if (payload?.round) {
+        gameState.currentRound = payload.round;
+    }
+
+    // Reiniciar jugadores (el host enviará el estado actualizado)
+    for (const playerId in gameState.players) {
+        const player = gameState.players[playerId];
+        player.isAlive = true;
+        player.score = 0;
+        player.expression = 'normal';
+    }
+
+    // Reset timer
+    if (gameState.gameMode === 'puntos') {
+        gameState.timer = 120;
+    }
+
+    // Reiniciar juego
+    gameState.isRunning = true;
+    gameState.lastTickTime = performance.now();
+    gameState.gameLoopId = requestAnimationFrame(gameLoop);
+}
+
+/**
+ * Manejar solicitud de revancha de otro jugador
+ */
+function handleRematchRequest(payload) {
+    if (!payload) return;
+
+    console.log('📨 Solicitud de revancha recibida de:', payload.requester_name);
+
+    // Marcar como pendiente si no lo estaba
+    if (!gameState.rematchPending) {
+        gameState.rematchPending = true;
+        gameState.rematchRequester = payload.requester_id;
+        gameState.rematchAccepted = {};
+    }
+
+    // Marcar que el solicitante ya aceptó
+    gameState.rematchAccepted[payload.requester_id] = true;
+
+    // Mostrar UI de espera
+    drawRematchWaiting();
+}
+
+/**
+ * Manejar aceptación de revancha de otro jugador
+ */
+function handleRematchAccept(payload) {
+    if (!payload?.player_id || !gameState.rematchPending) return;
+
+    console.log('✅ Revancha aceptada por:', payload.player_id);
+
+    // Marcar jugador como aceptado
+    gameState.rematchAccepted[payload.player_id] = true;
+
+    // Verificar si todos aceptaron
+    checkAllAccepted();
 }
 
 /**

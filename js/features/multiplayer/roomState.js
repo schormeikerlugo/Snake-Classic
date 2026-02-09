@@ -141,3 +141,61 @@ export async function isHost() {
     const user = await getAuthenticatedUser();
     return user?.id === currentRoom.host_id;
 }
+
+/**
+ * Eliminar sala completamente (cuando todos salen)
+ * @param {string} roomId - ID de la sala a eliminar
+ */
+export async function deleteRoomOnExit(roomId) {
+    if (!roomId) return;
+
+    try {
+        // Primero eliminar jugadores de la sala
+        const { error: playersError } = await supabase
+            .from('jugadores_sala')
+            .delete()
+            .eq('sala_id', roomId);
+
+        if (playersError) {
+            console.error('Error eliminando jugadores:', playersError);
+        }
+
+        // Luego eliminar la sala
+        const { error: roomError } = await supabase
+            .from('salas')
+            .delete()
+            .eq('id', roomId);
+
+        if (roomError) {
+            console.error('Error eliminando sala:', roomError);
+        } else {
+            console.log('🗑️ Sala eliminada:', roomId);
+        }
+
+        // Notificar a otros que la sala fue cerrada
+        broadcastEvent('room_closed', { room_id: roomId });
+
+    } catch (error) {
+        console.error('Error en deleteRoomOnExit:', error);
+    }
+}
+
+/**
+ * Verificar si quedan jugadores en la sala
+ * @param {string} roomId - ID de la sala
+ */
+export async function getRemainingPlayers(roomId) {
+    if (!roomId) return 0;
+
+    const { data, error } = await supabase
+        .from('jugadores_sala')
+        .select('id')
+        .eq('sala_id', roomId);
+
+    if (error) {
+        console.error('Error contando jugadores:', error);
+        return 0;
+    }
+
+    return data?.length || 0;
+}

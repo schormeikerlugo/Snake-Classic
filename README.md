@@ -97,7 +97,7 @@ Retro Snake Classic es una versión moderna del icónico juego **Snake** que muc
 | Pausar / Reanudar      | Barra espaciadora                             |
 | Reiniciar              | Boton de reinicio                             |
 | Volver al menú         | Boton de menu                                 |
-| **Multijugador**       | **Mismas teclas** + **ESC** para salir        |
+| **Multijugador**       | **Mismas teclas** + **ESC** (salir) + **ESPACIO** (revancha)|
 
 ---
 
@@ -105,10 +105,23 @@ Retro Snake Classic es una versión moderna del icónico juego **Snake** que muc
 
 ¡Juega en tiempo real con amigos!
 
-- **Duelo 1v1**: Compite por ver quién sobrevive más tiempo.
+### Modos de Juego:
+1. **⚔️ Duelo 1v1**: 
+   - Objetivo: Sobrevivir más tiempo que el oponente.
+   - Colisiones activas entre serpientes.
+   
+2. **🏆 Competencia por Puntos**: 
+   - Objetivo: Obtener más puntos en 2 minutos.
+   - **Ghost Mode**: Las serpientes pueden atravesarse entre sí.
+   - **Comida Compartida**: Sincronizada en tiempo real.
+   - **Timer**: Cuenta regresiva con alerta sonora.
+
+### Características:
 - **Salas Privadas**: Crea una sala y comparte el código.
-- **Sincronización Realtime**: Movimientos fluidos y estado compartido.
-- **Audio Integrado**: Disfruta de la banda sonora original mientras compites.
+- **Chat de Sala**: Mensajes rápidos y efímeros (se borran al salir).
+- **Ranking en Vivo**: Visualiza quién va ganando en tiempo real.
+- **Sistema de Revancha**: ¡Pide la revancha con ESPACIO al terminar!
+- **Sincronización Total**: Movimientos, puntuación y eventos sincronizados.
 
 > **Nota**: Requiere conexión a internet y una cuenta registrada.
 
