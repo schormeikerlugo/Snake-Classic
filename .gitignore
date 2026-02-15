@@ -4,3 +4,5 @@ dist/
 .env
 .bg_commands/
 brain/
+.server.pid
+.vscode/

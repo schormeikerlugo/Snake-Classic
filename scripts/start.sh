@@ -13,8 +13,8 @@ YELLOW='\033[1;33m'
 CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
-# Directorio del proyecto
-PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# Directorio del proyecto (Raíz)
+PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$PROJECT_DIR"
 
 # Verificar Docker
@@ -33,17 +33,27 @@ else
     npx supabase start
 fi
 
+# Iniciar Servidor Web
+echo -e "${CYAN}🌐 Iniciando Servidor Web...${NC}"
+if [ -f .server.pid ]; then
+    kill $(cat .server.pid) 2>/dev/null
+    rm .server.pid
+fi
+
+# Usar el binario local instalado en node_modules
+./node_modules/.bin/http-server -p 5500 -c-1 -s &
+SERVER_PID=$!
+echo $SERVER_PID > .server.pid
+
 echo ""
 echo -e "${GREEN}════════════════════════════════════════════${NC}"
-echo -e "${GREEN}✅ Servicios Iniciados${NC}"
+echo -e "${GREEN}  ✅ Snake Classic - Servicios Activos${NC}"
 echo -e "${GREEN}════════════════════════════════════════════${NC}"
 echo ""
-echo -e "  ${CYAN}🎮 Juego:${NC}      Usar Live Server (puerto 5500)"
-echo -e "                 o: npx http-server -p 5500 -c-1"
-echo ""
+echo -e "  ${CYAN}🎮 Juego:${NC}      http://127.0.0.1:5500"
 echo -e "  ${CYAN}🗄️ Studio:${NC}     http://127.0.0.1:3002"
 echo -e "  ${CYAN}🔌 API:${NC}        http://127.0.0.1:54331"
 echo -e "  ${CYAN}📧 Email:${NC}      http://127.0.0.1:54324"
 echo ""
-echo -e "${YELLOW}💡 Tip: Para acceso externo, usa: ./scripts/tunnel.sh${NC}"
+echo -e "${YELLOW}💡 Tip: Para acceso externo, usa: npm run tunnel${NC}"
 echo ""

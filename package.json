@@ -27,6 +27,7 @@
   },
   "homepage": "https://github.com/schormeikerlugo/Snake-Classic#readme",
   "devDependencies": {
+    "http-server": "^14.1.1",
     "supabase": "^2.76.3"
   }
 }
