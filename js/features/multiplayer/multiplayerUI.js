@@ -3,7 +3,7 @@
  * @description UI para el modo multijugador (menú y lobby)
  */
 
-import { supabase } from '../../lib/supabaseClient.js';
+import { supabase, resolveStorageUrl } from '../../lib/supabaseClient.js';
 import * as roomsAPI from './rooms.js';
 import { sfx } from '../../sound/sfx.js';
 
@@ -304,7 +304,7 @@ async function updateLobbyUI(room = null) {
     return `
       <div class="mp-player-card ${player.is_ready ? 'ready' : ''}">
         <div class="mp-player-avatar" style="border-color: ${player.color}">
-          <img src="${profile.avatar_url || 'assets/image/avatarDefault.webp'}" alt="Avatar">
+          <img src="${resolveStorageUrl(profile.avatar_url)}" alt="Avatar">
         </div>
         <div class="mp-player-info">
           <span class="mp-player-name">${profile.username || 'Jugador ' + (idx + 1)}</span>
@@ -328,9 +328,13 @@ async function updateLobbyUI(room = null) {
   }
 
   // Mostrar botón de inicio solo para el host
-  const isHost = await roomsAPI.isHost();
+  const { data: { user: currentUser } } = await supabase.auth.getUser();
+  const isHost = currentUser?.id === room.host_id;
   const startBtn = document.getElementById('btn-start-game');
-  startBtn.classList.toggle('hidden', !isHost);
+  if (startBtn) {
+    startBtn.classList.toggle('hidden', !isHost);
+    console.log('🎮 Lobby update:', { isHost, userId: currentUser?.id, hostId: room.host_id, startBtnHidden: startBtn.classList.contains('hidden') });
+  }
 
   // Estado del lobby
   const allReady = players.length >= 2 && players.every(p => p.is_ready || p.user_id === room.host_id);
@@ -353,7 +357,7 @@ async function updateLobbyUI(room = null) {
  */
 function startLobbyRefresh() {
   clearLobbyRefresh();
-  lobbyRefreshInterval = setInterval(() => updateLobbyUI(), 3000);
+  lobbyRefreshInterval = setInterval(() => updateLobbyUI(), 10000);
 }
 
 /**
@@ -402,6 +406,10 @@ function handleGameStart(payload) {
 }
 
 function handleRoomClosed() {
-  showView('menu');
-  showError('La sala fue cerrada por el host');
+  // Si estamos en el lobby, volver al menú del multiplayer
+  if (currentView === 'lobby') {
+    showView('menu');
+    showError('La sala fue cerrada por el host');
+  }
+  // Si estamos en juego, el handler del juego (handleRoomClosedDuringGame) se encarga
 }

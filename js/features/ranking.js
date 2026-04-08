@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabaseClient.js';
+import { supabase, resolveStorageUrl } from '../lib/supabaseClient.js';
 
 let rankingChannel;
 
@@ -16,7 +16,7 @@ function renderRanking(container, scores) {
     const rankingHTML = scores.map((score, index) => `
         <div class="ranking-item">
             <span class="ranking-position">${index + 1}</span>
-            <img src="${score.perfiles?.avatar_url || 'assets/image/anonimo/anonimo.png'}" alt="Avatar" class="ranking-avatar">
+            <img src="${resolveStorageUrl(score.perfiles?.avatar_url)}" alt="Avatar" class="ranking-avatar">
             <span class="ranking-name">${score.perfiles?.username || 'Anónimo'}</span>
             <span class="ranking-score">${score.best_score} 🎖️</span>
         </div>

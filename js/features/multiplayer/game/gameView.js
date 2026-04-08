@@ -8,6 +8,7 @@ import { supabase } from '../../../lib/supabaseClient.js';
 import { initMultiplayerGame, startMultiplayerGame, stopMultiplayerGame } from './multiplayerGame.js';
 import { getCurrentRoom } from '../rooms.js';
 import { getRoomInfo } from '../roomState.js';
+import { haptics } from '../../../utils/haptics.js';
 import { hideMultiplayer } from '../multiplayerUI.js';
 
 let countdownInterval = null;
@@ -31,7 +32,7 @@ export async function startGameFromLobby() {
     hideMultiplayer();
 
     // Determinar modo de juego (duel -> duelo, points -> puntos)
-    const gameMode = room.modo_juego === 'points' ? 'puntos' : 'duelo';
+    const gameMode = room.mode === 'points' ? 'puntos' : 'duelo';
 
     // Inicializar juego multiplayer (usa canvas principal)
     await initMultiplayerGame(room, isHost, gameMode);
@@ -69,6 +70,7 @@ function showCountdown(seconds, onComplete) {
     };
 
     drawCountdownNumber();
+    haptics.countdown();
 
     countdownInterval = setInterval(() => {
         remaining--;
@@ -78,6 +80,7 @@ function showCountdown(seconds, onComplete) {
             countdownInterval = null;
             onComplete();
         } else {
+            haptics.countdown();
             drawCountdownNumber();
         }
     }, 1000);

@@ -9,7 +9,7 @@ import {
     setCurrentRoom,
     PLAYER_COLORS
 } from './roomStore.js';
-import { subscribeToRoom, unsubscribeFromRoom, broadcastEvent } from './roomSync.js';
+import { subscribeToRoom, unsubscribeFromRoom, broadcastEvent, setupBeforeUnloadCleanup, removeBeforeUnloadCleanup } from './roomSync.js';
 
 /**
  * Verificar si el usuario está autenticado
@@ -69,6 +69,7 @@ export async function createRoom(mode = 'duel', maxPlayers = 2) {
         // Guardar referencia y suscribirse
         setCurrentRoom(room);
         await subscribeToRoom(room.id);
+        setupBeforeUnloadCleanup(() => leaveRoom());
 
         console.log('🎮 Sala creada:', room.code);
         return { room, error: null };
@@ -130,6 +131,7 @@ export async function joinRoom(code) {
         // Guardar referencia y suscribirse
         setCurrentRoom(room);
         await subscribeToRoom(room.id);
+        setupBeforeUnloadCleanup(() => leaveRoom());
 
         // Notificar a otros jugadores
         broadcastEvent('player_joined', { user_id: user.id });
@@ -154,23 +156,26 @@ export async function leaveRoom() {
         const user = await getAuthenticatedUser();
         if (!user) return;
 
-        // Si soy el host, cerrar la sala
+        // Broadcast PRIMERO, luego borrar de DB
+        // (si borramos primero, el canal podría cerrarse antes de que llegue el mensaje)
         if (currentRoom.host_id === user.id) {
-            await supabase.from('salas').delete().eq('id', currentRoom.id);
             broadcastEvent('room_closed', {});
+            // Pequeña espera para que el broadcast llegue antes de borrar
+            await new Promise(r => setTimeout(r, 200));
+            await supabase.from('salas').delete().eq('id', currentRoom.id);
         } else {
-            // Solo salir
+            broadcastEvent('player_left', { user_id: user.id });
+            await new Promise(r => setTimeout(r, 200));
             await supabase
                 .from('jugadores_sala')
                 .delete()
                 .eq('sala_id', currentRoom.id)
                 .eq('user_id', user.id);
-
-            broadcastEvent('player_left', { user_id: user.id });
         }
 
-        // Limpiar suscripciones
+        // Limpiar suscripciones y cleanup handler
         await unsubscribeFromRoom();
+        removeBeforeUnloadCleanup();
         setCurrentRoom(null);
 
         console.log('👋 Saliste de la sala');

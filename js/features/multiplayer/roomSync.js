@@ -86,6 +86,10 @@ export async function subscribeToRoom(roomId) {
             console.log('🔄 Revancha recibida:', payload);
             roomCallbacks.onGameRematch?.(payload);
         })
+        .on('broadcast', { event: 'game_over' }, ({ payload }) => {
+            console.log('🏁 Game over recibido:', payload);
+            roomCallbacks.onGameOver?.(payload);
+        })
         .on('broadcast', { event: 'room_closed' }, () => {
             console.log('🚪 Sala cerrada');
             roomCallbacks.onRoomClosed?.();
@@ -102,7 +106,7 @@ export async function subscribeToRoom(roomId) {
             { event: '*', schema: 'public', table: 'jugadores_sala', filter: `sala_id=eq.${roomId}` },
             (payload) => {
                 console.log('DB cambio en jugadores:', payload);
-                getRoomInfo(); // Refrescar info
+                roomCallbacks.onPlayerJoined?.(payload);
             }
         )
         .on('postgres_changes',
@@ -153,6 +157,30 @@ export function broadcastEvent(event, data) {
         event,
         payload: data
     });
+}
+
+/**
+ * Registrar cleanup al cerrar/recargar pestaña
+ */
+let beforeUnloadHandler = null;
+
+export function setupBeforeUnloadCleanup(cleanupFn) {
+    if (beforeUnloadHandler) {
+        window.removeEventListener('beforeunload', beforeUnloadHandler);
+    }
+
+    beforeUnloadHandler = () => {
+        cleanupFn();
+    };
+
+    window.addEventListener('beforeunload', beforeUnloadHandler);
+}
+
+export function removeBeforeUnloadCleanup() {
+    if (beforeUnloadHandler) {
+        window.removeEventListener('beforeunload', beforeUnloadHandler);
+        beforeUnloadHandler = null;
+    }
 }
 
 /**

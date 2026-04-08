@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabaseClient.js';
+import { supabase, resolveStorageUrl } from '../lib/supabaseClient.js';
 import { toggleAuthMode, showAuthLoader, showAuthForm, showUserProfile } from '../ui/ui.js';
 import { hideModal, showModal } from '../ui/modal.js';
 
@@ -17,7 +17,7 @@ async function updateUserProfile(user) {
 
     if (data) {
         profileTitle.textContent = `Bienvenido, ${data.username}`;
-        profileAvatar.src = data.avatar_url || 'assets/image/anonimo/anonimo.png';
+        profileAvatar.src = resolveStorageUrl(data.avatar_url);
     } else {
         profileTitle.textContent = `Bienvenido`;
         profileAvatar.src = 'assets/image/anonimo/anonimo.png';

@@ -6,6 +6,7 @@ import { POWER_UP_TYPES, POWER_UP_CONFIG } from '../../config/powerups.js';
 import { createShrinkParticles, createObstacleClearParticles, createSlowDownTrail } from '../../fx/particles.js';
 import { triggerBombAnimation, triggerShrinkAnimation } from '../../fx/animationManager.js';
 import { playSoundWithDucking } from './audioHelpers.js';
+import { haptics } from '../../utils/haptics.js';
 import { inObstacle } from './obstacles.js';
 import { placeFood } from './food.js';
 
@@ -103,6 +104,8 @@ export function getExpressionForPowerUp(powerUpType) {
 }
 
 export function activatePowerUp(game, powerUp) {
+    haptics.powerUp();
+
     if (game.activePowerUp.timeoutId) {
         clearTimeout(game.activePowerUp.timeoutId);
     }

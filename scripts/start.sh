@@ -50,10 +50,22 @@ echo -e "${GREEN}═════════════════════
 echo -e "${GREEN}  ✅ Snake Classic - Servicios Activos${NC}"
 echo -e "${GREEN}════════════════════════════════════════════${NC}"
 echo ""
-echo -e "  ${CYAN}🎮 Juego:${NC}      http://127.0.0.1:5500"
-echo -e "  ${CYAN}🗄️ Studio:${NC}     http://127.0.0.1:3002"
-echo -e "  ${CYAN}🔌 API:${NC}        http://127.0.0.1:54331"
-echo -e "  ${CYAN}📧 Email:${NC}      http://127.0.0.1:54324"
+# Detectar IP de red local
+LOCAL_IP=$(hostname -I 2>/dev/null | awk '{print $1}')
+if [ -z "$LOCAL_IP" ]; then
+    LOCAL_IP=$(ip route get 1 2>/dev/null | awk '{print $7; exit}')
+fi
+
+echo -e "  ${CYAN}🎮 Juego (local):${NC}  http://127.0.0.1:5500"
+if [ -n "$LOCAL_IP" ]; then
+echo -e "  ${CYAN}🎮 Juego (red):${NC}    http://${LOCAL_IP}:5500"
+fi
+echo -e "  ${CYAN}🗄️ Studio:${NC}         http://127.0.0.1:3002"
+echo -e "  ${CYAN}🔌 API:${NC}            http://127.0.0.1:54331"
+echo -e "  ${CYAN}📧 Email:${NC}          http://127.0.0.1:54324"
 echo ""
-echo -e "${YELLOW}💡 Tip: Para acceso externo, usa: npm run tunnel${NC}"
+echo -e "${YELLOW}💡 Tip: Para acceso desde internet, usa: npm run tunnel${NC}"
+if [ -n "$LOCAL_IP" ]; then
+echo -e "${YELLOW}💡 Tip: Para jugar en red local, comparte: http://${LOCAL_IP}:5500${NC}"
+fi
 echo ""

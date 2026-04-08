@@ -1,4 +1,4 @@
-const CACHE_NAME = 'snake-game-v1.0';
+const CACHE_NAME = 'snake-game-v3.0';
 const urlsToCache = [
   // Core files
   './',
@@ -55,12 +55,45 @@ const urlsToCache = [
   'js/ui/ui.js',
   'js/ui/update.js',
   'js/utils/utils.js',
+  'js/utils/language.js',
+  'js/utils/haptics.js',
+
+  // Multiplayer
+  'js/features/multiplayer/rooms.js',
+  'js/features/multiplayer/roomActions.js',
+  'js/features/multiplayer/roomState.js',
+  'js/features/multiplayer/roomStore.js',
+  'js/features/multiplayer/roomSync.js',
+  'js/features/multiplayer/roomChat.js',
+  'js/features/multiplayer/multiplayerUI.js',
+  'js/features/multiplayer/game/multiplayerGame.js',
+  'js/features/multiplayer/game/gameState.js',
+  'js/features/multiplayer/game/canvas.js',
+  'js/features/multiplayer/game/collision.js',
+  'js/features/multiplayer/game/input.js',
+  'js/features/multiplayer/game/renderer.js',
+  'js/features/multiplayer/game/rematch.js',
+  'js/features/multiplayer/game/gameView.js',
+
+  // Multiplayer styles
+  'styles/multiplayer.css',
+  'styles/multiplayer-game.css',
 
   // Assets
   'assets/font/PixelifySans-VariableFont_wght.ttf',
   'assets/image/anonimo/anonimo.png',
   'assets/image/creditos/avatar.jpeg',
   'assets/image/icon/icon-192x192.png',
+  'assets/image/icon/icon-512x512.png',
+  'assets/image/icon/apple-touch-icon-120x120.png',
+  'assets/image/icon/apple-touch-icon-152x152.png',
+  'assets/image/icon/apple-touch-icon-167x167.png',
+  'assets/image/icon/apple-touch-icon-180x180.png',
+  'assets/image/icon/splash-750x1334.png',
+  'assets/image/icon/splash-828x1792.png',
+  'assets/image/icon/splash-1125x2436.png',
+  'assets/image/icon/splash-1170x2532.png',
+  'assets/image/icon/splash-1284x2778.png',
   'assets/image/logo/logo.png',
   
   // Audio - Menu
@@ -103,19 +136,49 @@ self.addEventListener('install', event => {
   );
 });
 
-// Evento de fetch: responde desde la caché si es posible.
+// Evento de fetch: estrategia según tipo de recurso.
 self.addEventListener('fetch', event => {
+  const url = new URL(event.request.url);
+
+  // NUNCA cachear: API calls de Supabase, WebSockets, realtime
+  if (
+    url.pathname.startsWith('/rest/') ||
+    url.pathname.startsWith('/auth/') ||
+    url.pathname.startsWith('/realtime/') ||
+    url.pathname.startsWith('/storage/') ||
+    url.hostname.includes('supabase') ||
+    url.protocol === 'ws:' ||
+    url.protocol === 'wss:'
+  ) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
+
+  // JS files: network-first (para que los cambios se reflejen rápido)
+  if (url.pathname.endsWith('.js')) {
+    event.respondWith(
+      fetch(event.request)
+        .then(response => {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+          return response;
+        })
+        .catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
+  // Assets estáticos (CSS, imágenes, audio, fonts): cache-first
   event.respondWith(
     caches.match(event.request)
       .then(response => {
-        // Si el recurso está en la caché, lo devuelve.
-        if (response) {
-          return response;
-        }
-        // Si no, intenta obtenerlo de la red.
-        return fetch(event.request);
-      }
-    )
+        if (response) return response;
+        return fetch(event.request).then(networkResponse => {
+          const clone = networkResponse.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+          return networkResponse;
+        });
+      })
   );
 });
 

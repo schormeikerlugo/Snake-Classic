@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabaseClient.js';
+import { supabase, resolveStorageUrl } from '../lib/supabaseClient.js';
 
 // DOM nodes will be looked up when initializing the chat to avoid null
 // errors if this module is imported before the DOM is ready.
@@ -32,7 +32,7 @@ function renderMessage(message, currentUserId) {
         messageElement.classList.add('own-message');
     }
 
-    const avatar = message.perfiles?.avatar_url || 'assets/image/anonimo/anonimo.png';
+    const avatar = resolveStorageUrl(message.perfiles?.avatar_url);
     const userName = message.perfiles?.username || 'Anónimo';
 
     messageElement.innerHTML = `

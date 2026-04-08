@@ -14,6 +14,7 @@ import { changeAndAnimateObstacles, generateObstacles, inObstacle } from './game
 import { placeFood } from './gameLogic/food.js';
 import { spawnPowerUp, activatePowerUp, deactivatePowerUp, activateImmunity, isSelfColliding, getExpressionForPowerUp } from './gameLogic/powerups.js';
 import { playSoundWithDucking } from './gameLogic/audioHelpers.js';
+import { haptics } from '../utils/haptics.js';
 
 // Re-export modularized functions so other modules can still import from this file
 export { changeAndAnimateObstacles, generateObstacles, inObstacle };
@@ -143,10 +144,12 @@ export function tick(game) {
         // MODIFIED: Sonido de comer o bonus y cambio de obstáculos
         if (game.score > 0 && game.score % 10 === 0) {
             playSoundWithDucking('bonus');
-            changeAndAnimateObstacles(game); // Call the new function
-            activateImmunity(game, 5000); // 5 seconds of immunity
+            haptics.powerUp();
+            changeAndAnimateObstacles(game);
+            activateImmunity(game, 5000);
         } else {
             sfx.play('eat');
+            haptics.eat();
         }
 
         if (game.tickMs > C.MIN_TICK) game.tickMs -= C.SPEED_STEP;
@@ -273,6 +276,7 @@ export function stop(game) {
 export async function gameOver(game) {
     console.log('--- GAME OVER --- La función ha sido llamada.');
     sfx.play('gameOver');
+    haptics.gameOver();
     audioManager.duckGameMusic();
     game.running = false;
     game.isGameOver = true;

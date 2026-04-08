@@ -22,7 +22,9 @@ export {
     onRoomEvents,
     broadcastEvent,
     sendMove,
-    sendGameState
+    sendGameState,
+    setupBeforeUnloadCleanup,
+    removeBeforeUnloadCleanup
 } from './roomSync.js';
 
 export { getCurrentRoom } from './roomStore.js';

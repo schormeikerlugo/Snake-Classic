@@ -17,7 +17,7 @@ if [ -f .server.pid ]; then
     echo "✅ Servidor web detenido"
 else
     echo "ℹ El servidor web no parece estar corriendo (no pid file)"
-if
+fi
 
 echo "🔻 Deteniendo Supabase..."
 npx supabase stop

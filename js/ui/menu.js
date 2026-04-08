@@ -9,6 +9,28 @@ import { initializePowerupDemos } from './powerupDemos.js';
 import { setLanguage, getTranslation, updateUI } from '../utils/language.js';
 import { initMultiplayerUI, showMultiplayer } from '../features/multiplayer/multiplayerUI.js';
 
+function copyToClipboard(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).catch(function() {
+            fallbackCopy(text);
+        });
+    } else {
+        fallbackCopy(text);
+    }
+}
+
+function fallbackCopy(text) {
+    var input = document.createElement('textarea');
+    input.value = text;
+    input.style.position = 'fixed';
+    input.style.opacity = '0';
+    document.body.appendChild(input);
+    input.focus();
+    input.select();
+    document.execCommand('copy');
+    document.body.removeChild(input);
+}
+
 // Vistas principales
 const menuView = document.getElementById('menu-view');
 const gameView = document.getElementById('game-view');
@@ -68,8 +90,7 @@ function getCreditsContent() {
         <p data-translate-key="creditsLine3"></p>
         <p data-translate-key="creditsLine4"></p>
         <p data-translate-key="creditsDonation"></p>
-        <p style="font-weight: bold; font-size: 1.2em;" data-translate-key="creditsBitcoin"></p>
-        <p style="font-weight: bold; font-size: 1.2em;" data-translate-key="creditsUsdt"></p>
+        <div id="wallet-buttons" style="margin-top:16px;"></div>
     `;
 }
 
@@ -193,6 +214,43 @@ export function initMenu(game) {
         showModal(getTranslation('credits'), (modalBody) => {
             modalBody.innerHTML = getCreditsContent();
             updateUI();
+
+            // Crear botones de wallet con DOM API
+            const wallets = [
+                { icon: '₿', name: 'Bitcoin', address: 'bc1qngxlgsz3tj6v9kkgumv0fnrf7fsfn9wjesjghr' },
+                { icon: '💲', name: 'USDT (TRON)', address: 'TL3Vwuyf1iA86nB6vzXiNbtgdYBrWLxEEi' }
+            ];
+            const container = modalBody.querySelector('#wallet-buttons');
+            if (container) {
+                wallets.forEach(w => {
+                    const btn = document.createElement('div');
+                    btn.style.cssText = 'display:flex;align-items:center;padding:12px 16px;margin-bottom:10px;background:rgba(255,255,255,0.08);border:1px solid #2e3568;border-radius:10px;cursor:pointer;';
+
+                    const icon = document.createElement('span');
+                    icon.textContent = w.icon;
+                    icon.style.cssText = 'font-size:1.4em;margin-right:10px;';
+
+                    const label = document.createElement('span');
+                    label.textContent = w.name;
+                    label.style.cssText = 'flex:1;font-weight:bold;color:#ffffff;';
+
+                    const action = document.createElement('span');
+                    action.textContent = '📋 Copiar';
+                    action.style.cssText = 'font-size:0.85em;color:#00FFFF;background:rgba(0,255,255,0.1);padding:4px 10px;border-radius:6px;';
+
+                    btn.appendChild(icon);
+                    btn.appendChild(label);
+                    btn.appendChild(action);
+
+                    btn.addEventListener('click', function() {
+                        copyToClipboard(w.address);
+                        action.textContent = '✅ Copiado!';
+                        setTimeout(function() { action.textContent = '📋 Copiar'; }, 2000);
+                    });
+
+                    container.appendChild(btn);
+                });
+            }
         });
     });
 

@@ -3,14 +3,35 @@
 
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>🐍Snake🐍</title>
 
   <!-- PWA -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#1a1f3a">
   <link rel="icon" href="assets/image/icon/icon-192x192.png">
-  <link rel="apple-touch-icon" href="assets/image/icon/icon-192x192.png">
+
+  <!-- iOS PWA -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Snake Classic">
+  <link rel="apple-touch-icon" href="assets/image/icon/apple-touch-icon-180x180.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="assets/image/icon/apple-touch-icon-152x152.png">
+  <link rel="apple-touch-icon" sizes="167x167" href="assets/image/icon/apple-touch-icon-167x167.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/image/icon/apple-touch-icon-180x180.png">
+
+  <!-- iOS Splash Screens -->
+  <!-- iPhone 13 Pro Max, 14 Plus -->
+  <link rel="apple-touch-startup-image" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3)" href="assets/image/icon/splash-1284x2778.png">
+  <!-- iPhone 13, 14, 15 -->
+  <link rel="apple-touch-startup-image" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)" href="assets/image/icon/splash-1170x2532.png">
+  <!-- iPhone X, XS, 11 Pro -->
+  <link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)" href="assets/image/icon/splash-1125x2436.png">
+  <!-- iPhone XR, 11 -->
+  <link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2)" href="assets/image/icon/splash-828x1792.png">
+  <!-- iPhone 8, SE -->
+  <link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)" href="assets/image/icon/splash-750x1334.png">
+
   <link rel="stylesheet" href="./styles/main.css">
   <link rel="stylesheet" href="./styles/multiplayer.css">
   <link rel="stylesheet" href="./styles/multiplayer-game.css">

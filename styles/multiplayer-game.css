@@ -131,3 +131,317 @@
     gap: 1rem;
     justify-content: center;
 }
+
+/* ===== GAME OVER OVERLAY ===== */
+.mp-game-over {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.88);
+    z-index: 50;
+    border-radius: 10px;
+    animation: goAppear 0.4s ease-out;
+}
+
+@keyframes goAppear {
+    from { opacity: 0; transform: scale(0.95); }
+    to   { opacity: 1; transform: scale(1); }
+}
+
+.mp-go__content {
+    text-align: center;
+    padding: 24px;
+    max-width: 90%;
+}
+
+.mp-go__title {
+    font-family: 'Pixelify Sans', monospace;
+    font-size: 40px;
+    color: #FF4444;
+    margin: 0 0 12px;
+    text-shadow: 0 0 20px rgba(255,68,68,0.5);
+    animation: goPulse 2s ease-in-out infinite;
+}
+
+@keyframes goPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+}
+
+.mp-go__winner {
+    font-family: 'Pixelify Sans', monospace;
+    font-size: 24px;
+    margin: 0 0 6px;
+}
+
+.mp-go__score {
+    font-family: 'Pixelify Sans', monospace;
+    font-size: 18px;
+    color: #FFAA00;
+    margin: 0 0 16px;
+}
+
+.mp-go__ranking {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 20px;
+    font-family: 'Pixelify Sans', monospace;
+    font-size: 14px;
+}
+
+.mp-go__ranking-title {
+    color: #FFD700;
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.mp-go__waiting {
+    font-family: 'Pixelify Sans', monospace;
+    font-size: 20px;
+    color: #fff;
+    margin: 0 0 16px;
+}
+
+.mp-go__rematch-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 20px;
+    font-family: 'Pixelify Sans', monospace;
+    font-size: 16px;
+}
+
+.mp-go__actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.mp-go__btn {
+    font-family: 'Pixelify Sans', monospace;
+    font-size: 16px;
+    padding: 10px 24px;
+    border: 2px solid;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-width: 130px;
+}
+
+.mp-go__btn--rematch {
+    background: rgba(0, 255, 136, 0.15);
+    border-color: #00FF88;
+    color: #00FF88;
+}
+
+.mp-go__btn--rematch:hover,
+.mp-go__btn--rematch:active {
+    background: rgba(0, 255, 136, 0.3);
+    box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+}
+
+.mp-go__btn--exit {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: #888;
+    color: #aaa;
+}
+
+.mp-go__btn--exit:hover,
+.mp-go__btn--exit:active {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: #bbb;
+    color: #fff;
+}
+
+@media (max-width: 768px) {
+    .mp-go__title { font-size: 28px; }
+    .mp-go__winner { font-size: 18px; }
+    .mp-go__score { font-size: 15px; }
+    .mp-go__btn { font-size: 14px; padding: 8px 18px; min-width: 110px; }
+    .mp-go__content { padding: 16px; }
+}
+
+/* ===== HUD MULTIPLAYER ===== */
+.mp-hud {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 16px;
+    background: linear-gradient(180deg, rgba(138,161,255,0.08), rgba(18,22,44,0.8));
+    border: 1px solid var(--border, rgba(255,255,255,0.1));
+    border-radius: 10px;
+    font-family: 'Pixelify Sans', monospace;
+    color: #fff;
+    gap: 8px;
+}
+
+.mp-hud__player {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.mp-hud__player--dead {
+    opacity: 0.4;
+}
+
+.mp-hud__dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    box-shadow: 0 0 6px currentColor;
+}
+
+.mp-hud__name {
+    font-size: 14px;
+    font-weight: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 80px;
+}
+
+.mp-hud__score {
+    font-size: 18px;
+    font-weight: bold;
+    color: #43d9ad;
+    text-shadow: 0 0 8px rgba(67,217,173,0.4);
+    min-width: 20px;
+    text-align: center;
+}
+
+.mp-hud__stars {
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.mp-hud__center {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.mp-hud__mode {
+    font-size: 11px;
+    color: #00FFFF;
+    background: rgba(0,255,255,0.1);
+    padding: 2px 8px;
+    border-radius: 6px;
+    border: 1px solid rgba(0,255,255,0.2);
+}
+
+.mp-hud__round {
+    font-size: 13px;
+    color: #b8c0ff;
+}
+
+.mp-hud__timer {
+    font-size: 18px;
+    font-weight: bold;
+    color: #fff;
+    min-width: 45px;
+    text-align: center;
+}
+
+.mp-hud__timer--urgent {
+    color: #FF4444;
+    animation: timerPulse 1s ease-in-out infinite;
+}
+
+.mp-hud__timer.hidden {
+    display: none;
+}
+
+@keyframes timerPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* HUD Mobile */
+@media (max-width: 768px) {
+    .mp-hud {
+        padding: 6px 10px;
+        gap: 4px;
+    }
+
+    .mp-hud__name {
+        font-size: 12px;
+        max-width: 55px;
+    }
+
+    .mp-hud__score {
+        font-size: 15px;
+    }
+
+    .mp-hud__center {
+        gap: 6px;
+    }
+
+    .mp-hud__mode {
+        font-size: 10px;
+        padding: 2px 5px;
+    }
+
+    .mp-hud__round {
+        font-size: 11px;
+    }
+
+    .mp-hud__timer {
+        font-size: 15px;
+    }
+
+    .mp-hud__stars {
+        font-size: 10px;
+    }
+}
+
+/* ===== TOASTS ===== */
+.mp-toast-container {
+    position: fixed;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    pointer-events: none;
+}
+
+.mp-toast {
+    background: rgba(13, 16, 32, 0.92);
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    border-radius: 8px;
+    padding: 8px 20px;
+    color: #fff;
+    font-family: 'Pixelify Sans', monospace;
+    font-size: 14px;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.3s, transform 0.3s;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.mp-toast--visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.mp-toast--out {
+    animation: toastOut 0.3s ease-in forwards;
+}
+
+@keyframes toastOut {
+    to {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+}

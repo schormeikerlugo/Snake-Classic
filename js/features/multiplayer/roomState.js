@@ -114,12 +114,12 @@ export async function getRoomInfo() {
     if (userIds.length > 0) {
         const { data: perfiles } = await supabase
             .from('perfiles')
-            .select('user_id, username, avatar_url')
-            .in('user_id', userIds);
+            .select('id, username, avatar_url')
+            .in('id', userIds);
 
         // Agregar perfiles a los jugadores
         room.jugadores_sala = room.jugadores_sala.map(jugador => {
-            const perfil = perfiles?.find(p => p.user_id === jugador.user_id);
+            const perfil = perfiles?.find(p => p.id === jugador.user_id);
             return {
                 ...jugador,
                 perfiles: perfil || { username: 'Jugador', avatar_url: null }
