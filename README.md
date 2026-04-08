@@ -29,22 +29,22 @@ Retro Snake Classic es una versión moderna del icónico juego **Snake** que muc
 
 | | | |
 |:---:|:---:|:---:|
-| ![Splash](assets/image/readme/1.png) | ![Menú](assets/image/readme/2.png) | ![Cómo Jugar](assets/image/readme/3.png) |
+| ![Splash Screen](assets/image/readme/1.Splash_Screen.png) | ![Menú Principal](assets/image/readme/2.Menú_Principal.png) | ![Cómo Jugar](assets/image/readme/3.Cómo_Jugar.png) |
 | Splash Screen | Menú Principal | Cómo Jugar |
-| ![Configuración](assets/image/readme/4.png) | ![Cuenta](assets/image/readme/5.png) | ![Perfil](assets/image/readme/6.png) |
-| Configuración | Registro / Login | Perfil de Usuario |
-| ![Créditos](assets/image/readme/7.png) | ![Chat](assets/image/readme/8.png) | ![Ranking](assets/image/readme/9.png) |
-| Créditos | Chat en Vivo | Ranking Global |
-| ![Multiplayer Lobby](assets/image/readme/10.png) | ![Sala](assets/image/readme/11.png) | ![Sala Llena](assets/image/readme/12.png) |
-| Lobby Multijugador | Crear Sala | Sala con Jugadores |
+| ![Modo de Juego](assets/image/readme/4.Modo_de_Juego.png) | ![Multiplayer](assets/image/readme/5.Multiplayer.png) | ![Lobby](assets/image/readme/6.Lobby.png) |
+| Modo de Juego | Multiplayer | Lobby |
+| ![Configuración](assets/image/readme/7.Configuración.png) | ![Login](assets/image/readme/8.Login.png) | ![Perfil](assets/image/readme/9.Perfil.png) |
+| Configuración | Login | Perfil |
+| ![Registro](assets/image/readme/10.Registo.png) | ![Créditos](assets/image/readme/11.Creditos.png) | |
+| Registro | Créditos | |
 
 ### Modos de Juego
 
 | | | |
 |:---:|:---:|:---:|
-| ![Single Player](assets/image/readme/13.png) | ![Power-Ups](assets/image/readme/14.png) | ![Multiplayer](assets/image/readme/15.png) |
-| Modo Single Player | Power-Ups en Acción | Duelo 1v1 |
-| ![Game Over](assets/image/readme/16.png) | | |
+| ![Single Player](assets/image/readme/12.Modo_Single_Player.png) | ![Duelo 1v1](assets/image/readme/13.Duelo_1v1.png) | ![Game Over](assets/image/readme/14.Game_Over.png) |
+| Modo Single Player | Duelo 1v1 | Game Over |
+| ![Game Over Multiplayer](assets/image/readme/15.Game_Over_Multiplayer.png) | | |
 | Game Over Multiplayer | | |
 
 ---
